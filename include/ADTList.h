@@ -2,16 +2,31 @@
 ///
 /// @file ADTList.h
 /// @author Constantinos Georgiou
-/// @brief Interface for List abastract data type.
+/// @brief Interface for List Abastract Data Type (ADT).
 ///        Operations included:
-///          insertion, removal, look up, serial traversal, accessing at given index.
-/// @version 0.1
+///          insertion, removal, look up, serial traversal, accessing at given index, appending.
+/// @version 1.0
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-#include "common_types.h"  // CompareFunc, DestroyFunc
+#ifndef COMMON_FUNCTIONS
+/// @brief Shorthand for types of comparison and destroy functions.
+///
+#define COMMON_FUNCTIONS
+
+/// @brief Pointer to function that compares elements a and b.
+///
+/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
+///
+typedef int (*CompareFunc)(const void* a, const void* b);
+
+/// @brief Pointer to function that destroys a value.
+///
+typedef void (*DestroyFunc)(void* value);
+
+#endif
 
 #define LIST_BOF (ListNode)0  // Defines the "virtual" beginning of the list.
 #define LIST_EOF (ListNode)0  // Defines the "virtual" end of the list.
@@ -30,12 +45,10 @@ List list_create(DestroyFunc destroy_value);
 
 /// @brief Frees all the allocated memory of the given list.
 ///
-///
 void list_destroy(List);
 
 /// @brief Changes the function called on each element removal/overwrite to given destroy.
 ///
-/// @param list Defines a list.
 /// @param destroy Defines a destroy function.
 ///
 /// @return Previous destroy function.
@@ -43,8 +56,6 @@ void list_destroy(List);
 DestroyFunc list_set_destroy_value(List list, DestroyFunc destroy);
 
 /// @brief Returns the number of elements in given list.
-///
-/// @return The number of elements in given list.
 ///
 int list_size(List);
 
@@ -70,15 +81,6 @@ ListNode list_insert_next(List list, ListNode node, void* value);
 ///
 ListNode list_remove_next(List list, ListNode node);
 
-/// @brief Removes given node from given list.
-///
-/// @param list Defines a list.
-/// @param node Defines a list node.
-///
-/// @return Pointer to next node of newly removed node, or NULL if an error occurred.
-///
-void list_remove(List list, ListNode node);
-
 /// @brief Appends to_append list, to given list. After operation to_append list can not be used.
 ///        list == to_append causes undefined behaviour.
 ///
@@ -87,7 +89,7 @@ void list_remove(List list, ListNode node);
 ///
 /// @return Pointer to the beginning of the appened list, or NULL if an error occured.
 ///
-void list_append(List list, List to_append);
+ListNode list_append(List list, List to_append);
 
 /// @brief Finds and returns the first list node with value equivalent to value, (based on compare
 ///        function).
