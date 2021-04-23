@@ -11,9 +11,9 @@
 
 #pragma once
 
-#ifndef COMMON_FUNCTIONS
 /// @brief Shorthand for types of comparison and destroy functions.
 ///
+#ifndef COMMON_FUNCTIONS
 #define COMMON_FUNCTIONS
 
 /// @brief Pointer to function that compares elements a and b.
@@ -25,7 +25,6 @@ typedef int (*CompareFunc)(const void* a, const void* b);
 /// @brief Pointer to function that destroys a value.
 ///
 typedef void (*DestroyFunc)(void* value);
-
 #endif
 
 #define LIST_BOF (ListNode)0  // Defines the "virtual" beginning of the list.
@@ -36,14 +35,16 @@ typedef struct list_node* ListNode;
 
 /// @brief Creates and returns a new list.
 ///
-/// @param destroy_value If destroy_value != NULL, then each time an item is removed,
+/// @param destroy If destroy != NULL, then each time an item is removed,
 ///                      destroy(value) is called.
 ///
 /// @return Newly created list.
 ///
-List list_create(DestroyFunc destroy_value);
+List list_create(DestroyFunc destroy);
 
 /// @brief Frees all the allocated memory of the given list.
+///
+/// Any operation on the list after its destruction, results in undefined behaviour.
 ///
 void list_destroy(List);
 
@@ -122,20 +123,18 @@ void* list_node_value(List, ListNode);
 
 /// @brief Returns first list node, or LIST_BOF if list is empty.
 ///
-///
 ListNode list_first(List);
 
 /// @brief Returns last list node, or LIST_EOF if list is empty.
-///
 ///
 ListNode list_last(List);
 
 /// @brief Returns the next node of given node, or LIST_EOF if given node is the last node.
 ///
-///
 ListNode list_next(List, ListNode);
 
 /// @brief Returns the value of given position in list.
+///        (position < 0 or position >= size) results in undefined behaviour.
 ///
 /// @param position Defines the position in the list.
 ///
