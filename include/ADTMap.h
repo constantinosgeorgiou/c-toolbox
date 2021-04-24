@@ -9,6 +9,7 @@
 #pragma once // #include το πολύ μία φορά
 
 #include "common_types.h"
+#include <stdbool.h>
 
 
 // Ενα map αναπαριστάται από τον τύπο Map

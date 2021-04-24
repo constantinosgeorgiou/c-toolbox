@@ -98,7 +98,7 @@ void test_remove_next(void) {
 }
 
 // Σύγκριση δύο int pointers
-int compare_ints(void* a, void* b) {
+int compare_ints(const void* a, const void* b) {
     return *(int*)a - *(int*)b;
 }
 

@@ -1,32 +1,69 @@
-# Inspired by:
-#  - Bash Strict Mode: http://redsymbol.net/articles/unofficial-bash-strict-mode/
-#  - Your Makefiles are wrong:  https://tech.davis-hansson.com/p/make/
+####################################################################################################
+#
+# Makefile
+#
+# For more information regarding the structure of this Makefile:
+# https://gist.github.com/constantinosgeorgiou/b3e3bad80aea92c8954eae9859ea300c#####################
+# 
+####################################################################################################
 
+
+####    Makefile configuration    ##################################################################
 SHELL := bash
-# Flags
-#   -e             Exit if any command has a non-zero exit status. 
-#   -u             Exit if a reference to any variable wasn't previously defined.
-#   -o pipefail    Prevents errors in a pipeline from being masked.
 .SHELLFLAGS := -eu -o pipefail -c
-.ONESHELL:         # Ran each Make recipe as one single shell session.
+.ONESHELL:
 .DELETE_ON_ERROR:
-MAKEFLAGS += --warn-undefined-variables
-MAKEFLAGS += --no-builtin-rules
-
-# Change the block character to '>' instead of tabs.
-# For readability purposes and portability purposes.
+MAKE += --silent
 ifeq ($(origin .RECIPEPREFIX), undefined)
 	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
 endif
 .RECIPEPREFIX = > 
+####################################################################################################
 
-test:
-> @echo "test"
+# +-----------+
+# |  Targets  |
+# +-----------+
 
-# Test a module
-# Test all modules
-# Check memory leaks of a module
-# Check memory leaks of all modules
+# Setup repository:
+# -----------------
+
+setup:
+> mkdir --parents tests/bin
+
+
+# Compile tests:
+# --------------
+
+all: tests
+
+tests:
+> $(MAKE) --directory=tests all
+
+
+# Execute tests:
+# --------------
+
+run: run-tests
+
+run-tests:
+> $(MAKE) --directory=tests run
+
+
+# Memory leaks checks:
+# --------------------
+
+valgrind: valgrind-tests
+
+valgrind-tests:
+> $(MAKE) --directory=tests valgrind
+
+
+# Clean up generated files:
+# -------------------------
+
+clean:
+> $(MAKE) --directory=tests clean
+
 
 # Targets that generate no files:
-.PHONY: test
+.PHONY: setup all tests run run-tests valgrind valgrind-tests clean
