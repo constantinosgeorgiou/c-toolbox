@@ -1,40 +1,79 @@
+####################################################################################################
+#
 # Makefile
 #
 # For more information regarding the structure of this Makefile:
-# https://gist.github.com/constantinosgeorgiou/b3e3bad80aea92c8954eae9859ea300c
+# https://gist.github.com/constantinosgeorgiou/b3e3bad80aea92c8954eae9859ea300c#####################
+# 
+####################################################################################################
 
-# Makefile configuration
+
+####    Makefile configuration    ##################################################################
 SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
 .DELETE_ON_ERROR:
 MAKEFLAGS += --warn-undefined-variables
-MAKEFLAGS += --no-builtin-rules
+# MAKEFLAGS += --no-builtin-rules
 ifeq ($(origin .RECIPEPREFIX), undefined)
 	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
 endif
 .RECIPEPREFIX = > 
+####################################################################################################
 
 # +-----------+
 # |  Targets  |
 # +-----------+
 
+# Setup repository:
+# -----------------
+
+setup: all
+> mkdir --parents tests/bin
+
+
+# Compile tests:
+# --------------
+
 all: tests
 
 tests:
-> $(MAKE) -C tests all
+> $(MAKE) --directory=tests all
+
+
+# Execute tests:
+# --------------
 
 run: run-tests
 
 run-tests:
-> $(MAKE) -C tests run
+> $(MAKE) --directory=tests run
 
-# Check for memory leaks:
+run-tests-%:
+> $(MAKE) --directory=tests/$* run
+
+
+# Memory leaks checks:
+# --------------------
+
+valgrind: valgrind-tests
+
 valgrind-tests:
-> $(MAKE) -C tests valgrind
+> $(MAKE) --directory=tests valgrind
+
+valgrind-tests-%:
+> $(MAKE) --directory=tests/$* valgrind
+
+
+# Clean up generated files:
+# -------------------------
+
+clean-tests-%:
+> $(MAKE) --directory=tests/$* clean
 
 clean:
-> $(MAKE) -C tests clean
+> $(MAKE) --directory=tests clean
+
 
 # Targets that generate no files:
-.PHONY: tests run run-tests valgrind-tests clean
+.PHONY: setup all tests run run-tests valgrind valgrind-tests clean
