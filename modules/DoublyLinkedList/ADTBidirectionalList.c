@@ -1,21 +1,22 @@
-///////////////////////////////////////////////////////////
-//
-// Υλοποίηση του ADT BList μέσω διπλά συνδεδεμένης λίστας.
-//
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+/// @file ADTBidirectionalList.c
+/// @author Constantinos Georgiou
+/// @brief Implementation of ADTBidirectionalList interface via Doubly Linked List.
+/// @version 1
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include "ADTBidirectionalList.h"
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 
-#include "ADTBList.h"
-
-// Ενα BList είναι pointer σε αυτό το struct
 struct blist {
-    BListNode dummy;
+    BListNode sentinel;
     BListNode last;
     int size;
-    DestroyFunc destroy_value;
+    DestroyFunc destroy;
 };
 
 struct blist_node {
@@ -24,31 +25,15 @@ struct blist_node {
     void* value;
 };
 
-// Δημιουργεί και επιστρέφει μια νέα λίστα.
-// Αν destroy_value != NULL, τότε καλείται destroy_value(value) κάθε φορά που αφαιρείται ένα στοιχείο.
-//
-BList blist_create(DestroyFunc destroy_value) {
-    BList blist = malloc(sizeof(*blist));
-    blist->size = 0;
-    blist->destroy_value = destroy_value;
-
-    blist->dummy = malloc(sizeof(*blist->dummy));
-    blist->dummy->next = NULL;
-    blist->dummy->previous = NULL;
-
-    blist->last = blist->dummy;
-
-    return blist;
-}
-
-// Επιστρέφει τον αριθμό στοιχείων που περιέχει η λίστα.
-//
-int blist_size(BList blist) { return blist->size; }
-
-// Creates a new node
-//
-BListNode blist_create_node(void* value) {
+/// @brief Creates a bidirectional list node with given value.
+///
+/// @return Newly created bidirectional list node, or NULL if an error occured.
+///
+static BListNode create_node(void* value) {
     BListNode node = malloc(sizeof(*node));
+    if (node == NULL) {
+        return NULL;
+    }
 
     node->value = value;
     node->next = NULL;
@@ -57,155 +42,176 @@ BListNode blist_create_node(void* value) {
     return node;
 }
 
-// Προσθέτει έναν νέο κόμβο __πριν__ τον node (δηλαδή αν ο node είχε θέση i στη λίστα, o νέος κόμβος
-// παίρνει τη θέση i και ο node πηγαίνει στην i+1), ή στo τέλος αν node == BLIST_EOF, με περιεχόμενο value.
-//
-void blist_insert(BList blist, BListNode node, void* value) {
-    // Δημιουργία του νέου κόμβου
-    BListNode new = blist_create_node(value);
+BList blist_create(DestroyFunc destroy) {
+    BList blist = malloc(sizeof(*blist));
 
-    // Αν το node είναι NULL απλά εισάγουμε στο τέλος!
-    if (node == NULL) {
-        node = blist->last;
-        node->next = new;
-        new->previous = node;
+    blist->size = 0;
+    blist->destroy = destroy;
 
-        // Ενημέρωση του last
-        blist->last = new;
-
-    } else {
-        // Σύνδεση του new ανάμεσα στο node και το node->next
-        new->previous = node->previous;
-        new->next = node->previous->next;
-        node->previous = new;
-        new->previous->next = new;
+    blist->sentinel = malloc(sizeof(*blist->sentinel));
+    if (blist->sentinel == NULL) {
+        return NULL;
     }
 
-    // Ενημέρωση του size
-    blist->size++;
+    blist->sentinel->next = NULL;
+    blist->sentinel->previous = NULL;
+
+    blist->last = blist->sentinel;
+
+    return blist;
 }
 
-// Αφαιρεί τον κόμβο node (πρέπει να υπάρχει στη λίστα).
-//
-void blist_remove(BList blist, BListNode node) {
-    // Αν το node είναι NULL απλά διαγράφουμε από το τέλος!
-    if (node == NULL || node == blist->last) {
-        node = blist->last->previous;  // Προτελευταίο
-
-        BListNode removed = node->next;
-
-        if (blist->destroy_value != NULL)
-            blist->destroy_value(removed->value);
-
-        free(removed);
-
-        // Ενημέρωση του last
-        blist->last = node;
-    } else {
-        node->previous->next = node->next;
-        node->next->previous = node->previous;
-
-        BListNode removed = node;
-
-        if (blist->destroy_value != NULL)
-            blist->destroy_value(removed->value);
-
-        free(removed);
-    }
-
-    // Ενημέρωση του size
-    blist->size--;
-}
-
-// Επιστρέφει την πρώτη τιμή που είναι ισοδύναμη με value
-// (με βάση τη συνάρτηση compare), ή NULL αν δεν υπάρχει
-//
-void* blist_find(BList blist, void* value, CompareFunc compare) {
-    BListNode node = blist_find_node(blist, value, compare);
-    return node == NULL ? NULL : node->value;
-}
-
-// Αλλάζει τη συνάρτηση που καλείται σε κάθε αφαίρεση/αντικατάσταση στοιχείου σε
-// destroy_value. Επιστρέφει την προηγούμενη τιμή της συνάρτησης.
-//
-DestroyFunc blist_set_destroy_value(BList blist, DestroyFunc destroy_value) {
-    DestroyFunc old = blist->destroy_value;
-    blist->destroy_value = destroy_value;
-    return old;
-}
-
-// Ελευθερώνει όλη τη μνήμη που δεσμεύει η λίστα blist.
-// Οποιαδήποτε λειτουργία πάνω στη λίστα μετά το destroy είναι μη ορισμένη.
-//
 void blist_destroy(BList blist) {
-    // Διασχίζουμε όλη τη λίστα και κάνουμε free όλους τους κόμβους,
-    // συμπεριλαμβανομένου και του dummy!
-    //
-    BListNode node = blist->dummy;
-    while (node != NULL) {            // while αντί για for, γιατί θέλουμε να διαβάσουμε
-        BListNode next = node->next;  // το node->next _πριν_ κάνουμε free!
+    BListNode node = blist->sentinel;
+    while (node != NULL) {
+        BListNode next = node->next;
 
-        // Καλούμε τη destroy_value, αν υπάρχει (προσοχή, όχι στον dummy!)
-        if (node != blist->dummy && blist->destroy_value != NULL)
-            blist->destroy_value(node->value);
+        if (node != blist->sentinel && blist->destroy != NULL) {
+            blist->destroy(node->value);
+        }
 
         free(node);
         node = next;
     }
 
-    // Τέλος free το ίδιο το struct
     free(blist);
 }
 
-// Διάσχιση της λίστας /////////////////////////////////////////////
-
-// Επιστρέφει τον πρώτο κόμβο της λίστας, ή BLIST_BOF αν η λίστα είναι κενή
-//
-BListNode blist_first(BList blist) { return blist->dummy->next; }
-
-// Επιστρέφει τον τελευταίο κόμβο της λίστας, ή BLIST_ΕOF αν η λίστα είναι κενή
-//
-BListNode blist_last(BList blist) {
-    // Προσοχή, αν η λίστα είναι κενή το last δείχνει στον dummy, εμείς όμως θέλουμε να επιστρέψουμε NULL, όχι τον dummy!
-    //
-    if (blist->last == blist->dummy)
-        return BLIST_EOF;  // κενή λίστα
-    else
-        return blist->last;
+DestroyFunc blist_set_destroy_value(BList blist, DestroyFunc destroy) {
+    DestroyFunc old = blist->destroy;
+    blist->destroy = destroy;
+    return old;
 }
 
-// Επιστρέφει τον επόμενο κομβο του node, ή BLIST_EOF
-// αν ο node δεν έχει επόμενο.
-//
-BListNode blist_next(BList blist, BListNode node) {
-    assert(node != NULL);  // LCOV_EXCL_LINE (αγνοούμε το branch από τα coverage reports, είναι δύσκολο να τεστάρουμε το false γιατί θα κρασάρει το test)
-    return node->next;
+int blist_size(BList blist) { return blist->size; }
+
+BListNode blist_insert(BList blist, BListNode node, void* value) {
+    if (node == BLIST_BOF) {
+        node = blist->sentinel;
+    }
+
+    BListNode new = create_node(value);
+    if (new == NULL) {
+        return NULL;
+    }
+
+    // Insert new node after given node:
+    new->next = node->next;
+    new->previous = node;
+    node->next = new;
+    if (new->next != BLIST_EOF) {
+        new->next->previous = new;
+    }
+
+    if (blist->last == node) {
+        blist->last = new;
+    }
+
+    blist->size++;
+
+    return new;
 }
 
-// Επιστρέφει τον προηγούμενο κομβο του node, ή BLIST_BOF
-// αν ο node δεν έχει προηγούμενο.
-//
-BListNode blist_previous(BList blist, BListNode node) {
-    assert(node != NULL);  // LCOV_EXCL_LINE (αγνοούμε το branch από τα coverage reports, είναι δύσκολο να τεστάρουμε το false γιατί θα κρασάρει το test)
-    return node->previous;
+void blist_remove(BList blist, BListNode node) {
+    if (node == BLIST_EOF) {
+        node = blist->last;
+    }
+
+    BListNode remove = node;
+
+    if (node->next != BLIST_EOF) {
+        node->next->previous = node->previous;
+    }
+    if (node->previous != BLIST_BOF) {
+        node->previous->next = node->next;
+    }
+
+    if (blist->destroy != NULL) {
+        blist->destroy(remove->value);
+    }
+
+    if (remove == blist->last) {
+        blist->last = remove->previous;
+    }
+
+    blist->size--;
+
+    free(remove);
 }
 
-// Επιστρέφει το περιεχόμενο του κόμβου node
-//
+BListNode blist_concatenate(BList a, BList b) {
+    assert(a != b);
+
+    // Connect last node of a to first node of b:
+    a->last->next = b->sentinel->next;
+
+    // Update last pointer and size:
+    a->last = b->last;
+    a->size += b->size;
+
+    // Isolate sentinel node and destroy bidirectional list b:
+    b->sentinel->next = NULL;
+    list_destroy(b);
+
+    return a->sentinel->next;
+}
+
+BListNode blist_find_node(BList blist, void* value, CompareFunc compare) {
+    for (BListNode node = blist->sentinel->next; node != NULL; node = node->next) {
+        if (compare(value, node->value) == 0) {
+            return node;  // FOUND
+        }
+    }
+
+    return BLIST_EOF;  // NOT FOUND
+}
+
+void* blist_find(BList blist, void* value, CompareFunc compare) {
+    BListNode node = blist_find_node(blist, value, compare);
+    return node == NULL ? NULL : node->value;
+}
+
 void* blist_node_value(BList blist, BListNode node) {
-    assert(node != NULL);  // LCOV_EXCL_LINE
+    assert(node != NULL);
     return node->value;
 }
 
-// Βρίσκει τo πρώτo στοιχείο που είναι ισοδύναμο με value (με βάση τη συνάρτηση compare).
-// Επιστρέφει τον κόμβο του στοιχείου, ή BLIST_EOF αν δεν βρεθεί.
-//
-BListNode blist_find_node(BList blist, void* value, CompareFunc compare) {
-    // διάσχιση όλης της λίστας, καλούμε την compare μέχρι να επιστρέψει 0
-    //
-    for (BListNode node = blist->dummy->next; node != NULL; node = node->next)
-        if (compare(value, node->value) == 0)
-            return node;  // βρέθηκε
+////////////    TRAVERSAL    ///////////////////////////////////////////////////////////////////////
 
-    return NULL;  // δεν υπάρχει
+BListNode blist_first(BList blist) { return blist->sentinel->next; }
+
+BListNode blist_last(BList blist) {
+    if (blist->last == blist->sentinel) {
+        return BLIST_EOF;  // Bidirectional list is empty.
+    } else {
+        return blist->last;
+    }
+}
+
+BListNode blist_next(BList blist, BListNode node) {
+    assert(node != NULL);
+    return node->next;
+}
+
+BListNode blist_previous(BList blist, BListNode node) {
+    assert(node != NULL);
+    return node->previous;
+}
+
+void* blist_get_at(BList blist, int position) {
+    if (position < 0 || position > blist->size) {
+        return NULL;  // Out of bounds
+    }
+
+    BListNode node = blist->sentinel->next;
+
+    // Traverse list:
+    for (int index = 0; index < blist->size; index++) {
+        if (index == position) {
+            return node->value;
+        }
+        node = node->next;
+    }
+
+    return NULL;
 }
