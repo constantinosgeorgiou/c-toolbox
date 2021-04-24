@@ -9,7 +9,7 @@ SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
 .DELETE_ON_ERROR:
-MAKEFLAGS += --warn-undefined-variables
+# MAKEFLAGS += --warn-undefined-variables
 # MAKEFLAGS += --no-builtin-rules
 ifeq ($(origin .RECIPEPREFIX), undefined)
 	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
@@ -86,7 +86,7 @@ $(PROGRAMS): $$($$@_OBJECTS)
 -include $(ALL_DEPENDENCIES)
 
 clean:
-> $(RM) $(ALL_OBJECTS) $(ALL_DEPENDENCIES) $(BIN)/$(PROGRAMS)
+> $(RM) $(ALL_OBJECTS) $(ALL_DEPENDENCIES) $(BIN)/*
 
 run-%: %
 > $(BIN)/$* $($*_ARGUMENTS)
