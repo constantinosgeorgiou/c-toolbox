@@ -13,8 +13,7 @@ SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
 .DELETE_ON_ERROR:
-MAKEFLAGS += --warn-undefined-variables
-# MAKEFLAGS += --no-builtin-rules
+MAKE += --silent
 ifeq ($(origin .RECIPEPREFIX), undefined)
 	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
 endif
@@ -28,7 +27,7 @@ endif
 # Setup repository:
 # -----------------
 
-setup: all
+setup:
 > mkdir --parents tests/bin
 
 
@@ -49,9 +48,6 @@ run: run-tests
 run-tests:
 > $(MAKE) --directory=tests run
 
-run-tests-%:
-> $(MAKE) --directory=tests/$* run
-
 
 # Memory leaks checks:
 # --------------------
@@ -61,15 +57,9 @@ valgrind: valgrind-tests
 valgrind-tests:
 > $(MAKE) --directory=tests valgrind
 
-valgrind-tests-%:
-> $(MAKE) --directory=tests/$* valgrind
-
 
 # Clean up generated files:
 # -------------------------
-
-clean-tests-%:
-> $(MAKE) --directory=tests/$* clean
 
 clean:
 > $(MAKE) --directory=tests clean
