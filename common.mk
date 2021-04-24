@@ -1,20 +1,41 @@
+####################################################################################################
+#
 # common.mk
 #
+# For each test we generate two targets:
+#
+#   make <test>             Compiles the <test>.
+#
+#   make run-<test>         Executes the <test>.
+#
+#   make valgrind-<test>    Checks <test> for memory leaks.
 #
 #
+# General targets:
+#
+#   make all         Compiles all tests.
+#
+#   make run         Executes all tests.
+#
+#   make valgrind    Checks all tests for memory leaks.
+#
+#   clean            Removes all the generated files.
+#
+####################################################################################################
 
 
-# Makefile configuration:
+
+####        Makefile configuration        ##########################################################
 SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
 .DELETE_ON_ERROR:
-# MAKEFLAGS += --warn-undefined-variables
-# MAKEFLAGS += --no-builtin-rules
 ifeq ($(origin .RECIPEPREFIX), undefined)
 	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
 endif
 .RECIPEPREFIX = > 
+####################################################################################################
+
 
 # Directories:
 ROOT_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
@@ -42,11 +63,6 @@ override CFLAGS += -g -Wall -Werror -MMD -I$(INCLUDE)
 LDFLAGS += -lm
 
 # Valgrind options:
-#   --error-exitcode=1
-#   --leak-check=full
-#   --show-error-list=yes
-#   --read-var-info=yes
-#   --show-leak-kinds=all
 # 
 VGFLAGS += --error-exitcode=1 --leak-check=full  --read-var-info=yes --show-leak-kinds=all
 
@@ -63,16 +79,6 @@ VALGRIND_TARGETS ?= $(addprefix valgrind-, $(ALL_EXECUTABLES))
 # Add --time argument for each test:
 $(foreach test, $(ALL_EXECUTABLES), $(eval $(test)_ARGUMENTS ?= --time))
 
-test:
-> @echo "dirs: $(ROOT_DIR) $(MODULES) $(INCLUDE) $(BIN)"
-> @echo "All variables: $(ALL_VARIABLES)"
-> @echo "All exectuables: $(ALL_EXECUTABLES)"
-> @echo "Objects: $(ALL_OBJECTS)"
-> @echo "programs: $(PROGRAMS)"
-> @echo "deps: $(ALL_DEPENDENCIES)"
-> @echo "targets:"
-> @echo " - run: $(RUN_TARGETS)"
-> @echo " - valgrind: $(VALGRIND_TARGETS)"
 
 # Targets
 
@@ -98,7 +104,8 @@ valgrind-%: %
 
 valgrind: $(VALGRIND_TARGETS)
 
+# Enable bash to auto-complete the following targets:
 $(RUN_TARGETS):
 $(VALGRIND_TARGETS):
 
-.PHONY: clean run valgrind
+.PHONY: all clean run valgrind
