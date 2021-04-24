@@ -1,8 +1,11 @@
-///////////////////////////////////////////////////////////
-//
-// Υλοποίηση του ADT List μέσω συνδεδεμένης λίστας.
-//
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+/// @file ADTList.c
+/// @author Constantinos Georgiou
+/// @brief Implementation of ADTList interface via Linked List.
+/// @version 1
+///
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "ADTList.h"
 
@@ -65,8 +68,7 @@ int list_size(List list) {
 }
 
 ListNode list_insert_next(List list, ListNode node, void* value) {
-    // node == LIST_BOF(NULL), insert node next to sentinel node:
-    if (node == LIST_BOF) {
+    if (node == LIST_BOF) {  // Insert node next to sentinel node.
         node = list->sentinel;
     }
 
@@ -89,8 +91,7 @@ ListNode list_insert_next(List list, ListNode node, void* value) {
 }
 
 ListNode list_remove_next(List list, ListNode node) {
-    // node == LIST_BOF(NULL), remove node next to sentinel node:
-    if (node == LIST_BOF) {
+    if (node == LIST_BOF) {  // Remove node next to sentinel node.
         node = list->sentinel;
     }
 
@@ -112,59 +113,19 @@ ListNode list_remove_next(List list, ListNode node) {
     }
 
     list->size -= 1;
+
+    return node;
 }
 
-void list_remove(List list, ListNode node) {
-    ListNode previous = NULL;
-    ListNode current = NULL;
-
-    // Traverse list to find previous list node of given node:
-    for (current = list->sentinel->next; current != node; current = current->next) {
-        previous = current;
-    }
-
-    if (previous == NULL) {
-        // Remove first node:
-        list->sentinel->next = node->next;
-    } else {
-        // Remove given node:
-        previous->next = node->next;
-    }
-
-    // Remove node value:
-    if (list->destroy != NULL) {
-        list->destroy(node->value);
-    }
-
-    // Update last:
-    if (list->last == node) {
-        list->last = previous;
-    }
-
-    // Remove node:
-    free(node);
-
-    // Update list size:
-    list->size -= 1;
-}
-
-/// @brief Appends to_append list, to given list. After operation to_append list can not be used.
-///        list == to_append causes undefined behaviour.
-///
-/// @param list Defines a list.
-/// @param to_append Defines a list to be appended.
-///
-/// @return Pointer to the beginning of the appened list, or NULL if an error occured.
-///
 ListNode list_append(List list, List to_append) {
     if (list == to_append) {
-        return list;
+        return list->sentinel->next;
     }
 
     list->last->next = to_append->sentinel->next;
 
     // Update last pointer and size:
-    list->last == to_append->last;
+    list->last = to_append->last;
     list->size += to_append->size;
 
     // Isolate sentinel node and destroy to_append list:
@@ -190,11 +151,8 @@ void* list_find(List list, void* value, CompareFunc compare) {
 }
 
 void* list_node_value(List list, ListNode node) {
-    if (node == NULL) {
-        return NULL;
-    } else {
-        return node->value;
-    }
+    assert(node != NULL);
+    return node->value;
 }
 
 ////////////    TRAVERSAL    ///////////////////////////////////////////////////////////////////////
@@ -212,11 +170,8 @@ ListNode list_last(List list) {
 }
 
 ListNode list_next(List list, ListNode node) {
-    if (node == NULL) {
-        return NULL;
-    } else {
-        return node->next;
-    }
+    assert(node != NULL);
+    return node->next;
 }
 
 void* list_get_at(List list, int position) {
@@ -227,10 +182,12 @@ void* list_get_at(List list, int position) {
     ListNode node = list->sentinel->next;
 
     // Traverse list:
-    for (int index = 0; index < list->size; index += 1) {
+    for (int index = 0; index < list->size; index++) {
         if (index == position) {
             return node->value;
         }
         node = node->next;
     }
+
+    return NULL;
 }
