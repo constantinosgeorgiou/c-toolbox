@@ -1,7 +1,8 @@
-# Makefile
+# common.mk
 #
-# For more information regarding the structure of this Makefile:
-# https://gist.github.com/constantinosgeorgiou/b3e3bad80aea92c8954eae9859ea300c
+#
+#
+
 
 # Makefile configuration:
 SHELL := bash
@@ -15,6 +16,7 @@ ifeq ($(origin .RECIPEPREFIX), undefined)
 endif
 .RECIPEPREFIX = > 
 
+# Directories:
 ROOT_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 INCLUDE := $(ROOT_DIR)include
 MODULES := $(ROOT_DIR)modules
@@ -48,6 +50,7 @@ LDFLAGS += -lm
 # 
 VGFLAGS += --error-exitcode=1 --leak-check=full  --read-var-info=yes --show-leak-kinds=all
 
+# Variables:
 ALL_VARIABLES := $(filter %_OBJECTS,$(.VARIABLES))
 ALL_EXECUTABLES := $(subst _OBJECTS,,$(ALL_VARIABLES))
 PROGRAMS := $(filter-out %.a,$(ALL_EXECUTABLES))
