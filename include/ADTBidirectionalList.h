@@ -38,7 +38,7 @@ typedef struct blist_node* BListNode;
 /// @param destroy If destroy != NULL, then each time an item is removed,
 ///                      destroy(value) is called.
 ///
-/// @return Newly created bidirectional list.
+/// @return Newly created bidirectional list, or NULL if an error occured.
 ///
 BList blist_create(DestroyFunc destroy);
 
@@ -60,8 +60,8 @@ DestroyFunc blist_set_destroy_value(BList blist, DestroyFunc destroy);
 ///
 int blist_size(BList);
 
-/// @brief Inserts a new node with given value __before__ given node, or at the end
-///        if node == BLIST_BOF.
+/// @brief Inserts a new node with given value __after__ given node, or at the beginning
+///        if node equals BLIST_BOF. (node == BLIST_EOF) causes undefined behaviour.
 ///
 /// @param blist Defines a bidirectional list.
 /// @param node Defines a bidirectional list node.
@@ -71,27 +71,20 @@ int blist_size(BList);
 ///
 BListNode blist_insert(BList blist, BListNode node, void* value);
 
-// Αφαιρεί τον κόμβο node (πρέπει να υπάρχει στη λίστα).
-
-/// @brief Removes the given node, or last node if node == BLIST_EOF.
+/// @brief Removes the given node, or last node if node equals BLIST_EOF. node must be part of the
+///        bidirectional list. (node == BLIST_BOF) causes undefined behaviour.
 ///
 /// @param blist Defines a list.
 /// @param node Defines a list node.
 ///
-/// @return Pointer to the beginning of the bidirectional list, or NULL if an error occurred.
-///
 void blist_remove(BList blist, BListNode node);
 
-/// @brief Appends to_append bidirectional list, to given bidirectional list. After operation
-///        to_append bidirectional list can NOT be used.
-///        list == to_append causes undefined behaviour.
+/// @brief Concatenates bidirectional list b, to bidirectional list a. After operation
+///        bidirectional list b can NOT be used. (a == b) causes undefined behaviour.
 ///
-/// @param blist Defines a bidirectional list.
-/// @param to_append Defines a bidirectional list to be appended.
+/// @return Pointer to the beginning of the concatenated bidirectional list.
 ///
-/// @return Pointer to the beginning of the appened bidirectional list, or NULL if an error occured.
-///
-BListNode blist_append(BList blist, BList to_append);
+BListNode blist_concatenate(BList a, BList b);
 
 /// @brief Finds and returns the first bidirectional list node with value equivalent to value,
 ///        (based on compare function).
@@ -142,7 +135,7 @@ BListNode blist_next(BList blist, BListNode node);
 BListNode blist_previous(BList blist, BListNode node);
 
 /// @brief Returns the value of given position in bidirectional list.
-///        (position < 0 or position >= size) results in undefined behaviour.
+///        (position < 0 or position >= size) results in error.
 ///
 /// @param position Defines the position in the bidirectional list.
 ///
