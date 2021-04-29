@@ -139,11 +139,12 @@ void blist_remove(BList blist, BListNode node) {
     free(remove);
 }
 
-BListNode blist_concatenate(BList a, BList b) {
+BList blist_concatenate(BList a, BList b) {
     assert(a != b);
 
     // Connect last node of a to first node of b:
     a->last->next = b->sentinel->next;
+    a->last->next->previous = a->last;
 
     // Update last pointer and size:
     a->last = b->last;
@@ -151,9 +152,9 @@ BListNode blist_concatenate(BList a, BList b) {
 
     // Isolate sentinel node and destroy bidirectional list b:
     b->sentinel->next = NULL;
-    list_destroy(b);
+    blist_destroy(b);
 
-    return a->sentinel->next;
+    return a;
 }
 
 BListNode blist_find_node(BList blist, void* value, CompareFunc compare) {

@@ -84,7 +84,7 @@ void blist_remove(BList blist, BListNode node);
 ///
 /// @return Pointer to the beginning of the concatenated bidirectional list.
 ///
-BListNode blist_concatenate(BList a, BList b);
+BList blist_concatenate(BList a, BList b);
 
 /// @brief Finds and returns the first bidirectional list node with value equivalent to value,
 ///        (based on compare function).
