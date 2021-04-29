@@ -198,6 +198,7 @@ void test_concatenate(void) {
 
     TEST_CHECK(concatenated != NULL);
 
+    // Traverse bidirectional list:
     BListNode node = blist_first(concatenated);
     for (int i = 0; i < N; i++) {
         int* value = blist_node_value(concatenated, node);
@@ -206,6 +207,17 @@ void test_concatenate(void) {
         TEST_CHECK(*value == array[i]);
 
         node = blist_next(concatenated, node);
+    }
+
+    // Traverse bidirectional list in REVERSE:
+    node = blist_last(concatenated);
+    for (int i = N - 1; i >= 0; i--) {
+        int* value = blist_node_value(concatenated, node);
+
+        TEST_CHECK(value == &array[i]);
+        TEST_CHECK(*value == array[i]);
+
+        node = blist_previous(concatenated, node);
     }
 
     blist_destroy(concatenated);
