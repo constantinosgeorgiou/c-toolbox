@@ -247,6 +247,27 @@ void test_traverse(void) {
     blist_destroy(blist);
 }
 
+void test_get_at(void) {
+    int N = 10;
+    int array[N];
+
+    BList blist = blist_create(NULL);
+
+    for (int i = 0; i < N; i++) {
+        array[i] = i;
+        blist_insert(blist, blist_last(blist), &array[i]);
+    }
+
+    for (int i = 0; i < N; i++) {
+        int* value = blist_get_at(blist, i);
+
+        TEST_CHECK(value == &array[i]);
+        TEST_CHECK(*value == array[i]);
+    }
+
+    blist_destroy(blist);
+}
+
 TEST_LIST = {
     {"create", test_create},
     {"insert", test_insert},
@@ -255,5 +276,6 @@ TEST_LIST = {
     {"find_node", test_find_node},
     {"concatenate", test_concatenate},
     {"traverse", test_traverse},
+    {"get_at", test_get_at},
     {NULL, NULL}  // End of tests.
 };
