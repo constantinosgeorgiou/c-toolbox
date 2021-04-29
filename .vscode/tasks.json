@@ -1,0 +1,43 @@
+{
+    "tasks": [
+        {
+            "label": "Build <test> with make",
+            "type": "shell",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}/${config:tests.dir}"
+            },
+            "args": ["${config:tests.test}"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "clear": true
+            },
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": ["relative", "${workspaceRoot}/${config:tests.dir}"]
+            }
+        },
+        {
+            "label": "Execute <test> (after building it)",
+            "type": "shell",
+            "command": "./${config:tests.test}",
+            "args": [],
+            "options": {
+                "cwd": "${workspaceRoot}/${config:tests.dir}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "clear": true
+            },
+            "dependsOn": "Build <test> with make",
+            "problemMatcher": []
+        }
+    ],
+    "version": "2.0.0"
+}

@@ -1,0 +1,6 @@
+{
+    "tests": {
+        "dir": "tests",
+        "test": "DoublyLinkedList_ADTBidirectionalList_test"
+    }
+}
