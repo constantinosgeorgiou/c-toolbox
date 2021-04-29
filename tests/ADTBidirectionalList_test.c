@@ -211,6 +211,42 @@ void test_concatenate(void) {
     blist_destroy(concatenated);
 }
 
+void test_traverse(void) {
+    int N = 10;
+    int array[N];
+
+    BList blist = blist_create(NULL);
+
+    for (int i = 0; i < N; i++) {
+        array[i] = i;
+        blist_insert(blist, blist_last(blist), &array[i]);
+    }
+
+    // Traverse bidirectional list:
+    BListNode node = blist_first(blist);
+    for (int i = 0; i < N; i++) {
+        int* value = blist_node_value(blist, node);
+
+        TEST_CHECK(value == &array[i]);
+        TEST_CHECK(*value == array[i]);
+
+        node = blist_next(blist, node);
+    }
+
+    // Traverse bidirectional list in REVERSE:
+    node = blist_last(blist);
+    for (int i = N - 1; i >= 0; i--) {
+        int* value = blist_node_value(blist, node);
+
+        TEST_CHECK(value == &array[i]);
+        TEST_CHECK(*value == array[i]);
+
+        node = blist_previous(blist, node);
+    }
+
+    blist_destroy(blist);
+}
+
 TEST_LIST = {
     {"create", test_create},
     {"insert", test_insert},
@@ -218,6 +254,6 @@ TEST_LIST = {
     {"find", test_find},
     {"find_node", test_find_node},
     {"concatenate", test_concatenate},
-
+    {"traverse", test_traverse},
     {NULL, NULL}  // End of tests.
 };
