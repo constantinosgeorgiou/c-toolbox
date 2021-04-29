@@ -1,2 +1,1 @@
-# coolbox
-:toolbox: C Tool Box
+# :toolbox: C Tool Box
