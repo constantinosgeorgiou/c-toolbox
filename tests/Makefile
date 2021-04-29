@@ -11,6 +11,10 @@
 # Implementation:  LinkedList
 LinkedList_ADTList_test_OBJECTS = ADTList_test.o $(MODULES)/LinkedList/ADTList.o
 
+# Interface:       ADTBidirectionalList
+# Implementation:  DoublyLinkedList
+DoublyLinkedList_ADTBidirectionalList_test_OBJECTS = ADTBidirectionalList_test.o $(MODULES)/DoublyLinkedList/ADTBidirectionalList.o
+
 # Interface:       ADTMap
 # Implementation:  HashTable
 HashTable_ADTMap_test_OBJECTS = ADTMap_test.o $(MODULES)/HashTable/ADTMap.o $(MODULES)/LinkedList/ADTList.o
