@@ -178,12 +178,46 @@ void test_find_node() {
     blist_destroy(blist);
 }
 
+void test_concatenate(void) {
+    int N = 10;
+    int array[N];
+
+    BList a = blist_create(NULL);
+    BList b = blist_create(NULL);
+
+    for (int i = 0; i < N / 2; i++) {
+        array[i] = i;
+        blist_insert(a, blist_last(a), &array[i]);
+    }
+    for (int i = N / 2; i < N; i++) {
+        array[i] = i;
+        blist_insert(b, blist_last(b), &array[i]);
+    }
+
+    BList concatenated = blist_concatenate(a, b);
+
+    TEST_CHECK(concatenated != NULL);
+
+    BListNode node = blist_first(concatenated);
+    for (int i = 0; i < N; i++) {
+        int* value = blist_node_value(concatenated, node);
+
+        TEST_CHECK(value == &array[i]);
+        TEST_CHECK(*value == array[i]);
+
+        node = blist_next(concatenated, node);
+    }
+
+    blist_destroy(concatenated);
+}
+
 TEST_LIST = {
     {"create", test_create},
     {"insert", test_insert},
     {"remove", test_remove},
     {"find", test_find},
     {"find_node", test_find_node},
+    {"concatenate", test_concatenate},
 
     {NULL, NULL}  // End of tests.
 };
