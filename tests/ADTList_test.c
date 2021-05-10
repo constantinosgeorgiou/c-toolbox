@@ -11,6 +11,12 @@
 
 #include "acutest.h"
 
+/// @brief Compares two int*.
+///
+/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
+///
+static int compare_ints(const void* a, const void* b) { return *(int*)a - *(int*)b; }
+
 /// @brief Allocates memory for an integer with given value.
 ///
 /// @return Newly created pointer to integer.
@@ -138,30 +144,24 @@ void test_remove_next(void) {
     list_destroy(list);
 }
 
-// Σύγκριση δύο int pointers
-int compare_ints(const void* a, const void* b) {
-    return *(int*)a - *(int*)b;
-}
-
 void test_find() {
-    List list = list_create(NULL);
     int N = 1000;
     int array[N];
 
-    // Εισάγουμε δοκιμαστικές τιμές στον πίνακα, για να ελέγξουμε την test_find
+    List list = list_create(NULL);
+
     for (int i = 0; i < N; i++) {
         array[i] = i;
         list_insert_next(list, LIST_BOF, &array[i]);
     }
 
-    // Εύρεση όλων των στοιχείων
+    // Find all elements:
     for (int i = 0; i < N; i++) {
         int* value = list_find(list, &i, compare_ints);
         TEST_CHECK(value == &array[i]);
     }
 
-    // Δοκιμάζουμε, για μια τυχαία τιμή που δεν μπορεί πιθανώς να υπάρχει στην λίστα,
-    // αν η list_find γυρνάει σωστά NULL pointer
+    // Find a value that is not part of the list:
     int not_exists = -1;
     TEST_CHECK(list_find(list, &not_exists, compare_ints) == NULL);
 
@@ -169,29 +169,24 @@ void test_find() {
 }
 
 void test_find_node() {
-    List list = list_create(NULL);
-
-    // Εισαγωγή τιμών στον πίνακα
     int N = 1000;
     int array[N];
+
+    List list = list_create(NULL);
 
     for (int i = 0; i < N; i++) {
         array[i] = i;
         list_insert_next(list, LIST_BOF, &array[i]);
     }
 
-    // Ξεκινάμε από την αρχή της λίστας
     ListNode node = list_first(list);
 
     for (int i = N - 1; i >= 0; i--) {
-        // Ελέγχουμε ότι η list_find_node βρίσκει σωστά τον πρώτο κόμβο με value τον δείκτη &array[i].
-        // Σε αυτή την λίστα, δοκιμάζουμε ότι ο πρώτος κόμβος περιέχει τον δείκτη &array[N - 1],
-        // o δεύτερος τον &array[998] κοκ
         ListNode found_node = list_find_node(list, &i, compare_ints);
+
         TEST_CHECK(found_node == node);
         TEST_CHECK(list_node_value(list, found_node) == &array[i]);
 
-        // Προχωράμε στον επόμενο κόμβο για να προσπελάσουμε όλη την λίστα
         node = list_next(list, node);
     }
 
