@@ -100,39 +100,39 @@ void test_insert(void) {
 }
 
 void test_remove_next(void) {
-    // Δημιουργία λίστας που καλεί αυτόματα τη free σε κάθε στοιχείο που αφαιρείται
     List list = list_create(free);
 
-    int N = 1000;
-    int* array[N];
+    int N = 10;
 
-    // Χρησιμοποιούμε την insert για να γεμίσουμε την λίστα, αφού την έχουμε δοκιμάσει ήδη στην test_insert()
+    // Insert at the beginning. Remove from the beginning.
     for (int i = 0; i < N; i++) {
-        // Δημιουργούμε δυναμικά δεσμευμένα αντικείμενα για να δοκιμάσουμε την destroy_function
-        array[i] = malloc(sizeof(int));
-        *array[i] = i;
-        list_insert_next(list, LIST_BOF, array[i]);
+        list_insert_next(list, LIST_BOF, create_int(i));
     }
-
     for (int i = N - 1; i >= 0; i--) {
-        // Διαγράφουμε απο την αρχή και ελέγχουμε εάν η τιμή του πρώτου κόμβου
-        // ήταν η ίδια με αυτή που κάναμε insert παραπάνω
-        TEST_CHECK(list_node_value(list, list_first(list)) == array[i]);
+        TEST_CHECK(*(int*)list_node_value(list, list_first(list)) == i);
         list_remove_next(list, LIST_BOF);
-
-        // Ελέγχουμε ότι ενημερώνεται (μειώνεται) το size/μέγεθος της λίστας
-        TEST_CHECK(list_size(list) == i);
     }
+    TEST_CHECK(list_size(list) == 0);
 
-    // Ξαναγεμίζουμε την λίστα για να δοκιμάσουμε την διαγραφή απο ενδιάμεσο κόμβο
+    // Insert at the end. Remove from the beginning.
     for (int i = 0; i < N; i++) {
-        array[i] = malloc(sizeof(int));
-        *array[i] = i;
-        list_insert_next(list, LIST_BOF, array[i]);
+        list_insert_next(list, list_last(list), create_int(i));
     }
+    for (int i = 0; i < N; i++) {
+        TEST_CHECK(*(int*)list_node_value(list, list_first(list)) == i);
+        list_remove_next(list, LIST_BOF);
+    }
+    TEST_CHECK(list_size(list) == 0);
 
-    // Δοκιμάζουμε την διαγραφή κόμβων ενδιάμεσα της λίστας, και συγκεκριμένα του δεύτερου κόμβου απο την αρχή
-    list_remove_next(list, list_first(list));
+    // Remove from the middle.
+    for (int i = 0; i < N; i++) {
+        list_insert_next(list, list_last(list), create_int(i));
+    }
+    ListNode middle = list_first(list);
+    for (int i = 0; i < N / 2; i++) {
+        middle = list_next(list, middle);
+    }
+    list_remove_next(list, middle);
     TEST_CHECK(list_size(list) == N - 1);
 
     list_destroy(list);
