@@ -193,7 +193,40 @@ void test_find_node() {
     list_destroy(list);
 }
 
-void test_concatenate(void) {}
+void test_concatenate(void) {
+    int N = 10;
+    int array[N];
+
+    List a = list_create(NULL);
+    List b = list_create(NULL);
+
+    for (int i = 0; i < N / 2; i++) {
+        array[i] = i;
+        list_insert_next(a, list_last(a), &array[i]);
+    }
+    for (int i = N / 2; i < N; i++) {
+        array[i] = i;
+        list_insert_next(b, list_last(b), &array[i]);
+    }
+
+    List concatenated = list_concatenate(a, b);
+
+    TEST_CHECK(concatenated != NULL);
+
+    // Traverse list:
+    ListNode node = list_first(concatenated);
+    for (int i = 0; i < N; i++) {
+        int* value = list_node_value(concatenated, node);
+
+        TEST_CHECK(value == &array[i]);
+        TEST_CHECK(*value == array[i]);
+
+        node = list_next(concatenated, node);
+    }
+
+    list_destroy(concatenated);
+}
+
 void test_traverse(void) {}
 void test_get_at(void) {}
 
