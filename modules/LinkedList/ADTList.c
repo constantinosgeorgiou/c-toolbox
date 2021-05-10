@@ -117,22 +117,20 @@ ListNode list_remove_next(List list, ListNode node) {
     return node;
 }
 
-ListNode list_append(List list, List to_append) {
-    if (list == to_append) {
-        return list->sentinel->next;
-    }
+List list_concatenate(List a, List b) {
+    assert(a != b);
 
-    list->last->next = to_append->sentinel->next;
+    a->last->next = b->sentinel->next;
 
     // Update last pointer and size:
-    list->last = to_append->last;
-    list->size += to_append->size;
+    a->last = b->last;
+    a->size += b->size;
 
-    // Isolate sentinel node and destroy to_append list:
-    to_append->sentinel->next = NULL;
-    list_destroy(to_append);
+    // Isolate sentinel node and destroy b list:
+    b->sentinel->next = NULL;
+    list_destroy(b);
 
-    return list->sentinel->next;
+    return a;
 }
 
 ListNode list_find_node(List list, void* value, CompareFunc compare) {

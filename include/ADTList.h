@@ -85,7 +85,7 @@ ListNode list_remove_next(List list, ListNode node);
 ///
 /// @return Pointer to the beginning of the concatenated list.
 ///
-ListNode list_concatenate(List list, List to_append);
+List list_concatenate(List a, List b);
 
 /// @brief Finds and returns the first list node with value equivalent to value, (based on compare
 ///        function).
