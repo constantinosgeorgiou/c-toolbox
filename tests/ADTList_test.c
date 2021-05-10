@@ -9,51 +9,92 @@
 
 #include "ADTList.h"
 
-#include "acutest.h"  // Απλή βιβλιοθήκη για unit testing
+#include "acutest.h"
+
+/// @brief Allocates memory for an integer with given value.
+///
+/// @return Newly created pointer to integer.
+///
+static int* create_int(int value) {
+    int* pointer = malloc(sizeof(int));
+    if (pointer == NULL) {
+        return NULL;
+    }
+    *pointer = value;
+    return pointer;
+}
 
 void test_create(void) {
-    // Δημιουργούμε μια κενή λίστα με NULL δείκτη συνάρτησης delete_value
     List list = list_create(NULL);
-    list_set_destroy_value(list, NULL);
+    DestroyFunc destroy = list_set_destroy_value(list, NULL);
 
-    // Ελέγχουμε ότι δεν απέτυχε η malloc στην λίστα, και ότι
-    // αρχικοποιείται με μέγεθος 0 (δηλαδή χωρίς κόμβους)
-    TEST_ASSERT(list != NULL);
-    TEST_ASSERT(list_size(list) == 0);
+    TEST_CHECK(list != NULL);
+    TEST_CHECK(list_size(list) == 0);
+    TEST_CHECK(destroy == NULL);
 
     list_destroy(list);
 }
 
 void test_insert(void) {
-    List list = list_create(NULL);
+    int N = 10;
 
-    // Θα προσθέτουμε, μέσω της insert, δείκτες ως προς τα στοιχεία του π΄ίνακα
-    int N = 1000;
-    int array[N];
-
+    // Insert at the beginning.
+    List list = list_create(free);
     for (int i = 0; i < N; i++) {
-        // LIST_BOF για εισαγωγή στην αρχή
-        list_insert_next(list, LIST_BOF, &array[i]);
+        ListNode inserted = list_insert_next(list, LIST_BOF, create_int(i));
 
-        // Ελέγχουμε εάν ενημερώθηκε (αυξήθηκε) το μέγεθος της λίστας.
-        TEST_ASSERT(list_size(list) == (i + 1));
-
-        // Ελέγχουμε εάν ο πρώτος κόμβος περιέχει σαν τιμή τον δείκτη που μόλις κάναμε insert
-        TEST_ASSERT(list_node_value(list, list_first(list)) == &array[i]);
+        if (TEST_CHECK(inserted != NULL)) {
+            ListNode first = list_first(list);
+            int* value = list_node_value(list, inserted);
+            TEST_CHECK(inserted == first);
+            TEST_CHECK(*value == i);
+            TEST_CHECK(list_size(list) == (i + 1));
+        }
     }
 
-    // Ελέγχουμε εάν τα στοιχεία έχουν μπει με την αντίστροφη σειρά
+    // Check if elements were inserted in descending order:
     ListNode node = list_first(list);
-
     for (int i = N - 1; i >= 0; i--) {
-        TEST_ASSERT(list_node_value(list, node) == &array[i]);
+        int* value = list_node_value(list, node);
+        TEST_CHECK(*value == i);
         node = list_next(list, node);
     }
 
-    // Εισαγωγή σε ενδιάμεσο κόμβο: προσθέτουμε το NULL σαν δεύτερο κόμβο
+    // Check last element:
+    TEST_CHECK(*(int*)list_node_value(list, list_last(list)) == 0);
+
+    // Destroy to test insertion at the end:
+    list_destroy(list);
+
+    // Insert at the end.
+    list = list_create(free);
+    for (int i = 0; i < N; i++) {
+        ListNode inserted = list_insert_next(list, list_last(list), create_int(i));
+
+        if (TEST_CHECK(inserted != NULL)) {
+            ListNode last = list_last(list);
+            int* value = list_node_value(list, inserted);
+
+            TEST_CHECK(inserted == last);
+            TEST_CHECK(*value == i);
+            TEST_CHECK(list_size(list) == (i + 1));
+        }
+    }
+
+    // Check if elements were inserted in ascending order:
+    node = list_first(list);
+    for (int i = 0; i < N; i++) {
+        TEST_CHECK(*(int*)list_node_value(list, node) == i);
+        node = list_next(list, node);
+    }
+
+    // Check last element:
+    TEST_CHECK(*(int*)list_node_value(list, list_last(list)) == (N - 1));
+
+    // Check in-between insertion by inserting a NULL node after the first node.
     ListNode first_node = list_first(list);
     list_insert_next(list, first_node, NULL);
-    TEST_ASSERT(list_node_value(list, list_next(list, first_node)) == NULL);
+    TEST_CHECK(list_node_value(list, list_next(list, first_node)) == NULL);
 
     list_destroy(list);
 }
@@ -76,11 +117,11 @@ void test_remove_next(void) {
     for (int i = N - 1; i >= 0; i--) {
         // Διαγράφουμε απο την αρχή και ελέγχουμε εάν η τιμή του πρώτου κόμβου
         // ήταν η ίδια με αυτή που κάναμε insert παραπάνω
-        TEST_ASSERT(list_node_value(list, list_first(list)) == array[i]);
+        TEST_CHECK(list_node_value(list, list_first(list)) == array[i]);
         list_remove_next(list, LIST_BOF);
 
         // Ελέγχουμε ότι ενημερώνεται (μειώνεται) το size/μέγεθος της λίστας
-        TEST_ASSERT(list_size(list) == i);
+        TEST_CHECK(list_size(list) == i);
     }
 
     // Ξαναγεμίζουμε την λίστα για να δοκιμάσουμε την διαγραφή απο ενδιάμεσο κόμβο
@@ -92,7 +133,7 @@ void test_remove_next(void) {
 
     // Δοκιμάζουμε την διαγραφή κόμβων ενδιάμεσα της λίστας, και συγκεκριμένα του δεύτερου κόμβου απο την αρχή
     list_remove_next(list, list_first(list));
-    TEST_ASSERT(list_size(list) == N - 1);
+    TEST_CHECK(list_size(list) == N - 1);
 
     list_destroy(list);
 }
@@ -116,13 +157,13 @@ void test_find() {
     // Εύρεση όλων των στοιχείων
     for (int i = 0; i < N; i++) {
         int* value = list_find(list, &i, compare_ints);
-        TEST_ASSERT(value == &array[i]);
+        TEST_CHECK(value == &array[i]);
     }
 
     // Δοκιμάζουμε, για μια τυχαία τιμή που δεν μπορεί πιθανώς να υπάρχει στην λίστα,
     // αν η list_find γυρνάει σωστά NULL pointer
     int not_exists = -1;
-    TEST_ASSERT(list_find(list, &not_exists, compare_ints) == NULL);
+    TEST_CHECK(list_find(list, &not_exists, compare_ints) == NULL);
 
     list_destroy(list);
 }
@@ -147,8 +188,8 @@ void test_find_node() {
         // Σε αυτή την λίστα, δοκιμάζουμε ότι ο πρώτος κόμβος περιέχει τον δείκτη &array[N - 1],
         // o δεύτερος τον &array[998] κοκ
         ListNode found_node = list_find_node(list, &i, compare_ints);
-        TEST_ASSERT(found_node == node);
-        TEST_ASSERT(list_node_value(list, found_node) == &array[i]);
+        TEST_CHECK(found_node == node);
+        TEST_CHECK(list_node_value(list, found_node) == &array[i]);
 
         // Προχωράμε στον επόμενο κόμβο για να προσπελάσουμε όλη την λίστα
         node = list_next(list, node);
@@ -157,17 +198,18 @@ void test_find_node() {
     list_destroy(list);
 }
 
-// destroy
-//
-// Η destroy καλείται σε όλα τα tests, για να βρούμε αν δουλεύει σωστά τρέχουμε
-//   make valgrind
+void test_concatenate(void) {}
+void test_traverse(void) {}
+void test_get_at(void) {}
 
-// Λίστα με όλα τα tests προς εκτέλεση
 TEST_LIST = {
     {"create", test_create},
     {"insert", test_insert},
     {"remove", test_remove_next},
     {"find", test_find},
     {"find_node", test_find_node},
-    {NULL, NULL}  // τερματίζουμε τη λίστα με NULL
+    {"concatenate", test_concatenate},
+    {"traverse", test_traverse},
+    {"get_at", test_get_at},
+    {NULL, NULL}  // End of tests.
 };
