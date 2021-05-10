@@ -61,7 +61,7 @@ DestroyFunc list_set_destroy_value(List list, DestroyFunc destroy);
 int list_size(List);
 
 /// @brief Inserts a new node with given value after given node, or at the beginning
-///        if node == LIST_BOF.
+///        if node == LIST_BOF. (node == LIST_EOF) causes undefined behaviour.
 ///
 /// @param list Defines a list.
 /// @param node Defines a list node.
