@@ -30,9 +30,11 @@ static int* create_int(int value) {
 
 void test_create(void) {
     BList blist = blist_create(NULL);
+    DestroyFunc destroy = blist_set_destroy_value(blist, NULL);
 
     TEST_CHECK(blist != NULL);
     TEST_CHECK(blist_size(blist) == 0);
+    TEST_CHECK(destroy == NULL);
 
     blist_destroy(blist);
 }

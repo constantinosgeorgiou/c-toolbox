@@ -36,7 +36,7 @@ typedef struct list_node* ListNode;
 /// @brief Creates and returns a new list.
 ///
 /// @param destroy If destroy != NULL, then each time an item is removed,
-///                      destroy(value) is called.
+///                destroy(value) is called.
 ///
 /// @return Newly created list.
 ///
@@ -61,7 +61,7 @@ DestroyFunc list_set_destroy_value(List list, DestroyFunc destroy);
 int list_size(List);
 
 /// @brief Inserts a new node with given value after given node, or at the beginning
-///        if node == LIST_BOF.
+///        if node == LIST_BOF. (node == LIST_EOF) causes undefined behaviour.
 ///
 /// @param list Defines a list.
 /// @param node Defines a list node.
@@ -70,8 +70,6 @@ int list_size(List);
 /// @return Pointer to newly inserted node, or NULL if an error occurred.
 ///
 ListNode list_insert_next(List list, ListNode node, void* value);
-
-// Αφαιρεί τον __επόμενο__ κόμβο από τον node, ή τον πρώτο κόμβο αν node == LIST_BOF.
 
 /// @brief Removes the next node after given node, or first node if node == LIST_BOF.
 ///
@@ -82,15 +80,12 @@ ListNode list_insert_next(List list, ListNode node, void* value);
 ///
 ListNode list_remove_next(List list, ListNode node);
 
-/// @brief Appends to_append list, to given list. After operation to_append list can not be used.
-///        list == to_append causes undefined behaviour.
+/// @brief Concatenates list b, to list a. After operation list b can NOT be used.
+///        (a == b) causes undefined behaviour.
 ///
-/// @param list Defines a list.
-/// @param to_append Defines a list to be appended.
+/// @return Pointer to the beginning of the concatenated list.
 ///
-/// @return Pointer to the beginning of the appened list, or NULL if an error occured.
-///
-ListNode list_append(List list, List to_append);
+List list_concatenate(List a, List b);
 
 /// @brief Finds and returns the first list node with value equivalent to value, (based on compare
 ///        function).
