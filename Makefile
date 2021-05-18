@@ -3,7 +3,7 @@
 # Makefile
 #
 # For more information regarding the structure of this Makefile:
-# https://gist.github.com/constantinosgeorgiou/b3e3bad80aea92c8954eae9859ea300c#####################
+# https://gist.github.com/constantinosgeorgiou/b3e3bad80aea92c8954eae9859ea300c
 # 
 ####################################################################################################
 
@@ -34,8 +34,6 @@ setup:
 # Compile tests:
 # --------------
 
-all: tests
-
 tests:
 > $(MAKE) --directory=tests all
 
@@ -43,16 +41,12 @@ tests:
 # Execute tests:
 # --------------
 
-run: run-tests
-
 run-tests:
 > $(MAKE) --directory=tests run
 
 
 # Memory leaks checks:
 # --------------------
-
-valgrind: valgrind-tests
 
 valgrind-tests:
 > $(MAKE) --directory=tests valgrind
