@@ -17,6 +17,10 @@ DoublyLinkedList_ADTBidirectionalList_test_OBJECTS = ADTBidirectionalList_test.o
 
 # Interface:       ADTMap
 # Implementation:  HashTable
+# Dependencies:
+#     | Interface | Implementation |
+#     | --------- | -------------- |
+#     | ADTList   | LinkedList     |
 HashTable_ADTMap_test_OBJECTS = ADTMap_test.o $(MODULES)/HashTable/ADTMap.o $(MODULES)/LinkedList/ADTList.o
 
 
