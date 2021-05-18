@@ -7,7 +7,15 @@ on:
     branches: [ main ]
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up tests
+        run: make setup
+
   run-tests:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,6 +23,7 @@ jobs:
         run: make run-tests
 
   memory-checks:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
