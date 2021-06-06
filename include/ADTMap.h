@@ -6,104 +6,147 @@
 //
 ///////////////////////////////////////////////////////////
 
-#pragma once // #include το πολύ μία φορά
+#pragma once
 
-#include "common_types.h"
+/// @brief Shorthand for types of comparison and destroy functions.
+///
+#ifndef COMMON_FUNCTIONS
+#define COMMON_FUNCTIONS
+
+/// @brief Pointer to function that compares elements a and b.
+///
+/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
+///
+typedef int (*CompareFunc)(const void* a, const void* b);
+
+/// @brief Pointer to function that destroys a value.
+///
+typedef void (*DestroyFunc)(void* value);
+#endif
+
 #include <stdbool.h>
-
-
-// Ενα map αναπαριστάται από τον τύπο Map
 
 typedef struct map* Map;
 
-
-// Δημιουργεί και επιστρέφει ένα map, στο οποίο τα στοιχεία συγκρίνονται με βάση
-// τη συνάρτηση compare.
-// Αν destroy_key ή/και destroy_value != NULL, τότε καλείται destroy_key(key)
-// ή/και destroy_value(value) κάθε φορά που αφαιρείται ένα στοιχείο.
-
+/// @brief Creates and returns a new map, in which the elements are compared based on given
+///        compare function.
+///
+/// @param compare Used to compare the elements.
+/// @param destroy_key If destroy_key != NULL, then each time a key is removed,
+///                    destroy_key(key) is called.
+/// @param destroy_value If destroy_value != NULL, then each time a value is removed,
+///                      destroy_value(value) is called.
+///
+/// @return Newly created map.
+///
 Map map_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value);
 
-// Επιστρέφει τον αριθμό στοιχείων που περιέχει το map.
+/// @brief Frees all the memory allocated by given map.
+///
+/// Any operation on the map after its destruction, results in undefined behaviour.
+///
+void map_destroy(Map);
 
-int map_size(Map map);
+/// @brief Changes the destroy function called on each key's removal/overwrite to given destroy
+///        function.
+///
+/// @return Previous destroy function.
+///
+DestroyFunc map_set_destroy_key(Map map, DestroyFunc destroy_key);
 
-// Προσθέτει το κλειδί key με τιμή value. Αν υπάρχει κλειδί ισοδύναμο με key, τα παλιά key & value αντικαθίσταται από τα νέα.
-//
-// ΠΡΟΣΟΧΗ:
-// Όσο το key είναι μέλος του map, οποιαδήποτε μεταβολή στο περιεχόμενό του (στη μνήμη που δείχνει) έχει μη ορισμένη συμπεριφορά.
-
-void map_insert(Map map, void* key, void* value);
-
-// Αφαιρεί το κλειδί που είναι ισοδύναμο με key από το map, αν υπάρχει.
-// Επιστρέφει true αν βρέθηκε τέτοιο κλειδί, διαφορετικά false.
-
-bool map_remove(Map map, void* key);
-
-// Επιστρέφει την τιμή που έχει αντιστοιχιστεί στο συγκεκριμένο key, ή NULL αν το key δεν υπάρχει στο map.
-//
-// Προσοχή: η συνάρτηση επιστρέφει NULL είτε όταν το key δεν υπάρχει, είτε όταν υπάρχει και έχει τιμή NULL.
-//          Αν χρειάζεται να διαχωρίσουμε τις δύο περιπτώσεις μπορούμε να χρησιμοποιήσουμε την map_find_node.
-
-void* map_find(Map map, void* key);
-
-// Αλλάζει τη συνάρτηση που καλείται σε κάθε αφαίρεση/αντικατάσταση key/value.
-// Επιστρέφει την προηγούμενη τιμή της συνάρτησης.
-
-DestroyFunc map_set_destroy_key  (Map map, DestroyFunc destroy_key  );
+/// @brief Changes the destroy function called on each value's removal/overwrite to given destroy
+///        function.
+///
+/// @return Previous destroy function.
+///
 DestroyFunc map_set_destroy_value(Map map, DestroyFunc destroy_value);
 
-// Ελευθερώνει όλη τη μνήμη που δεσμεύει το map.
-// Οποιαδήποτε λειτουργία πάνω στο map μετά το destroy είναι μη ορισμένη.
+/// @brief Returns the number of elements in given map.
+///
+int map_size(Map map);
 
-void map_destroy(Map map);
+/// @brief Inserts key with value to map. If an equivalent key is already part of the map,
+///        overwrite the old key and value with the new ones.
+///
+/// NOTE:
+/// While the key is part of the map, any change to its content results in undefined behaviour.
+///
+void map_insert(Map map, void* key, void* value);
 
+/// @brief Removes the key equivalent to given key from the map, if it exists.
+///
+/// @return true if key was found and removed, or false, if key was not found.
+///
+bool map_remove(Map map, void* key);
 
+/// @brief Finds the value of given key.
+///
+/// NOTE:
+/// NULL is returned either when given key does not exist, or when given key exists and its value
+/// is NULL. If there's a need to differentiate the two circumstances use map_find_node.
+///
+/// @return Value of given key, or NULL if key does not exist.
+///
+void* map_find(Map map, void* key);
 
-// Διάσχιση του map μέσω κόμβων ////////////////////////////////////////////////////////////
-//
-// Η σειρά διάσχισης είναι αυθαίρετη.
-
-// Η σταθερά αυτή συμβολίζει έναν εικονικό κόμβου _μετά_ τον τελευταίο κόμβο του map
-#define MAP_EOF (MapNode)0
+#define MAP_EOF (MapNode)0  // Defines the "virtual" end of the map.
 
 typedef struct map_node* MapNode;
 
-// Επιστρέφει τον πρώτο κομβο του map, ή MAP_EOF αν το map είναι κενό
-
-MapNode map_first(Map map);
-
-// Επιστρέφει τον επόμενο κόμβο του node, ή MAP_EOF αν ο node δεν έχει επόμενο
-
-MapNode map_next(Map map, MapNode node);
-
-// Επιστρέφει το κλειδί του κόμβου node
-
-void* map_node_key(Map map, MapNode node);
-
-// Επιστρέφει το περιεχόμενο του κόμβου node
-
-void* map_node_value(Map map, MapNode node);
-
-// Βρίσκει και επιστρέφεο τον κόμβο που έχει αντιστοιχιστεί στο κλειδί key,
-// ή MAP_EOF αν το κλειδί δεν υπάρχει στο map.
-
+/// @brief Finds node with key equivalent to given key.
+///
+/// @return Node with key equivalent to given key, or MAP_EOF if key is not part of given map.
+///
 MapNode map_find_node(Map map, void* key);
 
+/// @brief Returns value of given node.
+///
+/// @return Value of given node.
+///
+void* map_node_value(Map map, MapNode node);
 
-//// Επιπλέον συναρτήσεις για υλοποιήσεις βασισμένες σε hashing ////////////////////////////
+/// @brief Returns key of given node.
+///
+/// @return Key of given node.
+///
+void* map_node_key(Map map, MapNode node);
 
-// Τύπος συνάρτησης κατακερματισμού
+////////////    TRAVERSAL    ///////////////////////////////////////////////////////////////////////
 
+/// NOTE: Map traversal is arbitrary.
+
+/// @brief Returns the first node, or MAP_EOF if map is empty.
+///
+MapNode map_first(Map);
+
+/// @brief Returns the next node of given node, or MAP_EOF if there is no succeeding node.
+///
+MapNode map_next(Map, MapNode);
+
+////////////    END OF TRAVERSAL    ////////////////////////////////////////////////////////////////
+
+////////////    HASHING    /////////////////////////////////////////////////////////////////////////
+
+/// @brief Pointer to function that hashes an element…
+///
+/// @return Hash of element.
+///
 typedef unsigned int (*HashFunc)(void*);
 
-// Υλοποιημένες συναρτήσεις κατακερματισμού για συχνούς τύπους δεδομένων
+/// @brief Hashes values of type char*.
+///
+unsigned int hash_string(void* value);
 
-unsigned int hash_string(void* value);		// Χρήση όταν το key είναι char*
-unsigned int hash_int(void* value);			// Χρήση όταν το key είναι int*
-unsigned int hash_pointer(void* value);		// Χρήση όταν το key είναι pointer που θεωρείται διαφορετικός από οποιονδήποτε άλλο pointer
+/// @brief Hashes values of type int.
+///
+unsigned int hash_int(void* value);
 
-// Ορίζει τη συνάρτηση κατακερματισμού hash για το συγκεκριμένο map
-// Πρέπει να κληθεί μετά την map_create και πριν από οποιαδήποτε άλλη συνάρτηση.
-
+/// @brief Sets the hash function of given map.
+///
+/// NOTE:
+/// Needs to be called right AFTER map_create and before any other map function. Failing to
+/// do so results in undefined behaviour.
+///
 void map_set_hash_function(Map map, HashFunc hash_func);
+
+////////////    END OF HASHING    //////////////////////////////////////////////////////////////////
