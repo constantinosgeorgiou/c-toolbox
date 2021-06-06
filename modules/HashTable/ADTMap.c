@@ -44,15 +44,23 @@ struct map {
 Map map_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value) {
     // Δεσμεύουμε κατάλληλα τον χώρο που χρειαζόμαστε για το hash table
     Map map = malloc(sizeof(*map));
+    if (map == NULL) {
+        return NULL;
+    }
+
     map->capacity = prime_sizes[0];
-    map->array = malloc(map->capacity * sizeof(*map->array));
 
     // Αρχικοποιούμε τους κόμβους που έχουμε σαν διαθέσιμους.
+    map->array = malloc(map->capacity * sizeof(*map->array));
+    if (map->array == NULL) {
+        return NULL;
+    }
     for (int i = 0; i < map->capacity; i++) {
         map->array[i] = list_create(NULL);
     }
 
     map->size = 0;
+
     map->compare = compare;
     map->destroy_key = destroy_key;
     map->destroy_value = destroy_value;
