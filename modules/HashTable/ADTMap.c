@@ -31,13 +31,9 @@ struct map_node {
     void* value;  // Η τιμή που αντισοιχίζεται στο παραπάνω κλειδί
 };
 
-// For readability purposes, the only thing that changes is the name
-typedef ListNode BucketEntry;
-typedef List Bucket;
-
 // Δομή του Map (περιέχει όλες τις πληροφορίες που χρεαζόμαστε για το HashTable)
 struct map {
-    Bucket* array;            // Array of lists (buckets)
+    List* array;              // Array of lists (buckets)
     int capacity;             // Πόσο χώρο έχουμε δεσμεύσει.
     int size;                 // Πόσα στοιχεία έχουμε προσθέσει
     CompareFunc compare;      // Συνάρτηση για σύγκρηση δεικτών, που πρέπει να δίνεται απο τον χρήστη
@@ -50,11 +46,12 @@ Map map_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy
     // Δεσμεύουμε κατάλληλα τον χώρο που χρειαζόμαστε για το hash table
     Map map = malloc(sizeof(*map));
     map->capacity = prime_sizes[0];
-    map->array = malloc(map->capacity * sizeof(Bucket));
+    map->array = malloc(map->capacity * sizeof(*map->array));
 
     // Αρχικοποιούμε τους κόμβους που έχουμε σαν διαθέσιμους.
-    for (int i = 0; i < map->capacity; i++)
+    for (int i = 0; i < map->capacity; i++) {
         map->array[i] = list_create(NULL);
+    }
 
     map->size = 0;
     map->compare = compare;
@@ -73,7 +70,7 @@ int map_size(Map map) {
 static void rehash(Map map) {
     // Αποθήκευση των παλιών δεδομένων
     int old_capacity = map->capacity;
-    Bucket* old_array = map->array;
+    List* old_array = map->array;
 
     // Βρίσκουμε τη νέα χωρητικότητα, διασχίζοντας τη λίστα των πρώτων ώστε να βρούμε τον επόμενο.
     int prime_no = sizeof(prime_sizes) / sizeof(int);  // το μέγεθος του πίνακα
@@ -89,7 +86,7 @@ static void rehash(Map map) {
         map->capacity *= 2;             // LCOV_EXCL_LINE
 
     // Δημιουργούμε ένα μεγαλύτερο hash table
-    map->array = malloc(map->capacity * sizeof(Bucket));
+    map->array = malloc(map->capacity * sizeof(List));
 
     // Αρχικοποιούμε τους κόμβους που έχουμε σαν διαθέσιμους.
     for (int i = 0; i < map->capacity; i++)
@@ -99,7 +96,7 @@ static void rehash(Map map) {
     map->size = 0;
     for (int i = 0; i < old_capacity; i++) {
         if (list_size(old_array[i]) != 0) {
-            for (BucketEntry entry = list_first(old_array[i]); entry != LIST_EOF; entry = list_next(old_array[i], entry)) {
+            for (ListNode entry = list_first(old_array[i]); entry != LIST_EOF; entry = list_next(old_array[i], entry)) {
                 MapNode node = (MapNode)list_node_value(old_array[i], entry);
                 // printf("REHASH: node(%p) key(%p) value(%p)\n", node, node->key, node->value);
                 map_insert(map, node->key, node->value);
@@ -173,9 +170,9 @@ bool map_remove(Map map, void* key) {
     unsigned int pos = map->hash_function(key) % map->capacity;
 
     // Store previous bucket entry of entry
-    BucketEntry previous = LIST_BOF;
+    ListNode previous = LIST_BOF;
 
-    for (BucketEntry entry = list_first(map->array[pos]); entry != LIST_EOF; entry = list_next(map->array[pos], entry)) {
+    for (ListNode entry = list_first(map->array[pos]); entry != LIST_EOF; entry = list_next(map->array[pos], entry)) {
         MapNode node = (MapNode)list_node_value(map->array[pos], entry);
 
         if (map->compare(node->key, key) == 0) {
@@ -230,7 +227,7 @@ void map_destroy(Map map) {
         // Traverse only the buckets that contain entries
         if (list_size(map->array[i]) != 0) {
             // Traverse each entry in a bucket
-            for (BucketEntry entry = list_first(map->array[i]); entry != LIST_EOF; entry = list_next(map->array[i], entry)) {
+            for (ListNode entry = list_first(map->array[i]); entry != LIST_EOF; entry = list_next(map->array[i], entry)) {
                 MapNode node = (MapNode)list_node_value(map->array[i], entry);
 
                 // Destroy MapNode key, value pairs
@@ -267,7 +264,7 @@ MapNode map_next(Map map, MapNode node) {
     // Hash key to find the position of insertion
     unsigned int pos = map->hash_function(node->key) % map->capacity;
 
-    for (BucketEntry entry = list_first(map->array[pos]); entry != LIST_EOF; entry = list_next(map->array[pos], entry)) {
+    for (ListNode entry = list_first(map->array[pos]); entry != LIST_EOF; entry = list_next(map->array[pos], entry)) {
         MapNode current = (MapNode)list_node_value(map->array[pos], entry);
 
         if (map->compare(current->key, node->key) == 0) {
@@ -305,7 +302,7 @@ MapNode map_find_node(Map map, void* key) {
 
     unsigned int pos = map->hash_function(key) % map->capacity;
 
-    for (BucketEntry entry = list_first(map->array[pos]); entry != LIST_EOF; entry = list_next(map->array[pos], entry)) {
+    for (ListNode entry = list_first(map->array[pos]); entry != LIST_EOF; entry = list_next(map->array[pos], entry)) {
         MapNode node = (MapNode)list_node_value(map->array[pos], entry);
 
         if (map->compare(node->key, key) == 0) {
