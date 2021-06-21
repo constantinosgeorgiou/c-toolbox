@@ -40,7 +40,7 @@ typedef struct map* Map;
 /// @param destroy_value If destroy_value != NULL, then each time a value is removed,
 ///                      destroy_value(value) is called.
 ///
-/// @return Newly created map.
+/// @return Newly created map, or NULL if error.
 ///
 Map map_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value);
 
