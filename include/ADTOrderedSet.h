@@ -1,87 +1,141 @@
-////////////////////////////////////////////////////////////////////////
-//
-// ADT Set
-//
-// Abstract διατεταγμένο σύνολο. Τα στοιχεία είναι διατεταγμένα με βάση
-// τη συνάρτηση compare, και καθένα εμφανίζεται το πολύ μία φορά.
-// Παρέχεται γρήγορη αναζήτηση με ισότητα αλλά και με ανισότητα.
-//
-////////////////////////////////////////////////////////////////////////
+#pragma once
 
-#pragma once // #include το πολύ μία φορά
+#ifndef COMMON_FUNCTIONS
+#define COMMON_FUNCTIONS
 
-#include "common_types.h"
+/// @brief Pointer to function that compares elements a and b.
+///
+/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
+///
+typedef int (*CompareFunc)(const void* a, const void* b);
 
+/// @brief Pointer to function that destroys a value.
+///
+typedef void (*DestroyFunc)(void* value);
 
-// Ενα σύνολο αναπαριστάται από τον τύπο Set
+#endif
 
-typedef struct set* Set;
+#define OSET_ERROR (OrderedSet)0
 
+typedef struct ordered_set* OrderedSet;
+typedef struct ordered_set_node* OrderedSetNode;
 
-// Δημιουργεί και επιστρέφει ένα σύνολο, στο οποίο τα στοιχεία συγκρίνονται με βάση
-// τη συνάρτηση compare.
-// Αν destroy_value != NULL, τότε καλείται destroy_value(value) κάθε φορά που αφαιρείται ένα στοιχείο.
+/// @brief Creates and returns an Ordered Set.
+///
+/// @param compare Compares two elements.
+/// @param destroy_key If destroy_key != NULL, call destroy_key(key) each time a key is removed.
+/// @param destroy_value If destroy_value != NULL, call destroy_value(value) each time a value is
+///                      removed.
+///
+/// @return Newly created Ordered Set, or OSET_ERROR, if failed to allocate enough memory.
+///
+OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value);
 
-Set set_create(CompareFunc compare, DestroyFunc destroy_value);
+/// @brief Frees all the memory allocated by given Ordered Set.
+///
+/// Any operation on the Ordered Set after its destruction, results in undefined behaviour.
+///
+void oset_destroy(OrderedSet oset);
 
-// Επιστρέφει τον αριθμό στοιχείων που περιέχει το σύνολο set.
+/// @brief Changes function called each time a key is removed to destroy_key.
+///
+/// @return Previous destroy_key function.
+///
+DestroyFunc oset_set_destroy_key(OrderedSet oset, DestroyFunc destroy_key);
 
-int set_size(Set set);
+/// @brief Changes function called each time a value is removed to destroy_value.
+///
+/// @return Previous destroy_value function.
+///
+DestroyFunc oset_set_destroy_value(OrderedSet oset, DestroyFunc destroy_value);
 
-// Προσθέτει την τιμή value στο σύνολο, αντικαθιστώντας τυχόν προηγούμενη τιμή ισοδύναμη της value.
-//
-// ΠΡΟΣΟΧΗ:
-// Όσο το value είναι μέλος του set, οποιαδήποτε μεταβολή στο περιεχόμενό του (στη μνήμη που δείχνει) δεν πρέπει
-// να αλλάζει τη σχέση διάταξης (compare) με οποιοδήποτε άλλο στοιχείο, διαφορετικά έχει μη ορισμένη συμπεριφορά.
+/// @brief Returns the number of elements in the Ordered Set.
+///
+/// @return The number of elements in the Ordered Set.
+///
+int oset_size(OrderedSet oset);
 
-void set_insert(Set set, void* value);
+/// @brief Associates a key with a value (inserting the key if not already present).
+///        Duplicate keys are treated like a stack, Last In First Out.
+///
+void oset_insert(OrderedSet oset, void* key, void* value);
 
-// Αφαιρεί τη μοναδική τιμή ισοδύναμη της value από το σύνολο, αν υπάρχει.
-// Επιστρέφει true αν βρέθηκε η τιμή αυτή, false διαφορετικά.
+/// @brief Removes specified key.
+///        Duplicate keys are treated like a stack, Last In First Out.
+///
+void oset_remove(OrderedSet oset, void* key);
 
-bool set_remove(Set set, void* value);
+/// @brief Finds and returns the value associated with specified key.
+///        Duplicate keys are treated like a stack, Last In First Out.
+///
+/// @return Value associated with specified key, or NULL, if key not found.
+///
+void* oset_find(OrderedSet oset, void* key);
 
-// Επιστρέφει την μοναδική τιμή του set που είναι ισοδύναμη με value, ή NULL αν δεν υπάρχει
+/// @brief Gets the value at specified position.
+///
+/// pos >= size returns last value. pos < 0 returns first value.
+///
+/// @return Value at specified position.
+///
+void* oset_get_at(OrderedSet oset, int pos);
 
-void* set_find(Set set, void* value);
+/// @brief Removes element at specified position.
+///
+/// pos >= size removes last value. pos < 0 removes first value.
+///
+void oset_remove_at(OrderedSet oset, int pos);
 
-// Αλλάζει τη συνάρτηση που καλείται σε κάθε αφαίρεση/αντικατάσταση στοιχείου σε
-// destroy_value. Επιστρέφει την προηγούμενη τιμή της συνάρτησης.
+/// @brief Removes all elements with keys >= split_key and returns them in a new
+///        Ordered Set.
+///
+/// @return Newly created Ordered Set with keys >= split_key, or OSET_ERROR, if an error occurred.
+///
+OrderedSet oset_split(OrderedSet oset, void* split_key);
 
-DestroyFunc set_set_destroy_value(Set set, DestroyFunc destroy_value);
+/// @brief Merges two Ordered Sets.
+///
+/// Any operation on  b  after it is merged with  a  results in undefined behaviour.
+/// a == b, results in undefined behaviour.
+///
+void oset_merge(OrderedSet a, OrderedSet b);
 
-// Ελευθερώνει όλη τη μνήμη που δεσμεύει το σύνολο.
-// Οποιαδήποτε λειτουργία πάνω στο set μετά το destroy είναι μη ορισμένη.
+/// @brief Concatenates two Ordered Sets.
+///
+/// last key in a > first key in b, results in undefined behaviour.
+///
+void oset_concat(OrderedSet a, OrderedSet b);
 
-void set_destroy(Set set);
+#define OSET_BOF (OrderedSetNode)0  // Defines the virtual beginning of the Ordered Set.
+#define OSET_EOF (OrderedSetNode)0  // Defines the virtual end of the Ordered Set.
 
+/// @brief Finds and returns the node of the value associated with specified key.
+///        Duplicate keys are treated like a stack, Last In First Out.
+///
+/// @return Node of the value associated with specified key, or OSET_EOF, if key not found.
+///
+OrderedSetNode oset_find_node(OrderedSet oset, void* key);
 
-// Διάσχιση του set ////////////////////////////////////////////////////////////
-//
-// Η διάσχιση γίνεται με τη σειρά διάταξης.
+/// @brief Gets the node at specified position.
+///
+/// pos >= size returns last value. pos < 0 returns first value.
+///
+/// @return Node at specified position.
+///
+OrderedSetNode oset_get_at_node(OrderedSet oset, int pos);
 
-// Οι σταθερές αυτές συμβολίζουν εικονικούς κόμβους _πριν_ τον πρώτο και _μετά_ τον τελευταίο κόμβο του set
-#define SET_BOF (SetNode)0
-#define SET_EOF (SetNode)0
+/// @brief Returns the first node of the Ordered Set, or SET_EOF, if Ordered set is empty.
+///
+OrderedSetNode oset_first(OrderedSet oset);
 
-typedef struct set_node* SetNode;
+/// @brief Returns the last node of the Ordered Set, or SET_EOF, if Ordered set is empty.
+///
+OrderedSetNode oset_last(OrderedSet oset);
 
-// Επιστρέφουν τον πρώτο και τον τελευταίο κομβο του set, ή SET_BOF / SET_EOF αντίστοιχα αν το set είναι κενό
+/// @brief Returns the next node of node, or OSET_EOF, if node is last.
+///
+OrderedSetNode oset_next(OrderedSet oset, OrderedSetNode node);
 
-SetNode set_first(Set set);
-SetNode set_last(Set set);
-
-// Επιστρέφουν τον επόμενο και τον προηγούμενο κομβο του node, ή SET_EOF / SET_BOF
-// αντίστοιχα αν ο node δεν έχει επόμενο / προηγούμενο.
-
-SetNode set_next(Set set, SetNode node);
-SetNode set_previous(Set set, SetNode node);
-
-// Επιστρέφει το περιεχόμενο του κόμβου node
-
-void* set_node_value(Set set, SetNode node);
-
-// Βρίσκει το μοναδικό στοιχείο στο set που να είναι ίσο με value.
-// Επιστρέφει τον κόμβο του στοιχείου, ή SET_EOF αν δεν βρεθεί.
-
-SetNode set_find_node(Set set, void* value);
+/// @brief Returns the previous node of node, or OSET_BOF, if node is first.
+///
+OrderedSetNode oset_previous(OrderedSet oset, OrderedSetNode node);
