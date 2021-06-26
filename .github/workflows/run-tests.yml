@@ -1,4 +1,4 @@
-name: Run Unit Tests.
+name: Unit Tests
 
 # Triggers the workflow on push or pull request events
 on: [push, pull_request]
