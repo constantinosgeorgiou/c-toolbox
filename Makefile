@@ -24,7 +24,8 @@ MAKE += --silent
 # -----------------
 
 setup:
-	mkdir --parents tests/bin
+	@# -p   Make parent directories
+	mkdir -p tests/bin
 
 
 # Compile tests:
