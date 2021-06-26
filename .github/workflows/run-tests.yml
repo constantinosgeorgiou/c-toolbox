@@ -17,16 +17,8 @@ jobs:
       # Checks-out repository under $GITHUB_WORKSPACE, so job can access it.
       - uses: actions/checkout@v2
 
-      - name: Update GNU Make  on MacOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install make
-          PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
-
       - name: Set up repository.
-        run: |
-          make -v
-          make setup
+        run: make setup
 
       - name: Compile tests.
         run: make tests CFLAGS=-fPIC
