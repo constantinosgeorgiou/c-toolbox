@@ -58,15 +58,21 @@ int oset_size(OrderedSet oset);
 /// @brief Associates a key with a value (inserting the key if not already present).
 ///        Duplicate keys are treated like a stack, Last In First Out.
 ///
+/// Keys can not be NULL.
+///
 void oset_insert(OrderedSet oset, void* key, void* value);
 
 /// @brief Removes specified key.
 ///        Duplicate keys are treated like a stack, Last In First Out.
 ///
+/// Keys can not be NULL.
+///
 void oset_remove(OrderedSet oset, void* key);
 
 /// @brief Finds and returns the value associated with specified key.
 ///        Duplicate keys are treated like a stack, Last In First Out.
+///
+/// Keys can not be NULL.
 ///
 /// @return Value associated with specified key, or NULL, if key not found.
 ///
@@ -88,6 +94,8 @@ void oset_remove_at(OrderedSet oset, int pos);
 
 /// @brief Removes all elements with keys >= split_key and returns them in a new
 ///        Ordered Set.
+///
+/// split_key can not be NULL.
 ///
 /// @return Newly created Ordered Set with keys >= split_key, or OSET_ERROR, if an error occurred.
 ///
@@ -111,6 +119,8 @@ void oset_concat(OrderedSet a, OrderedSet b);
 
 /// @brief Finds and returns the node of the value associated with specified key.
 ///        Duplicate keys are treated like a stack, Last In First Out.
+///
+/// Keys can not be NULL.
 ///
 /// @return Node of the value associated with specified key, or OSET_EOF, if key not found.
 ///
