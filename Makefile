@@ -24,7 +24,7 @@ MAKE += --silent
 # -----------------
 
 setup:
-	@# -p   Make parent directories
+	@# -p  Make parent directories
 	mkdir -p tests/bin
 
 
@@ -38,14 +38,14 @@ tests:
 # Execute tests:
 # --------------
 
-run-tests:
+run-tests: setup
 	$(MAKE) --directory=tests run
 
 
 # Memory leaks checks:
 # --------------------
 
-valgrind-tests:
+valgrind-tests: setup
 	$(MAKE) --directory=tests valgrind
 
 
