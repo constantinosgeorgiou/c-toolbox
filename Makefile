@@ -14,10 +14,6 @@ SHELL := bash
 .ONESHELL:
 .DELETE_ON_ERROR:
 MAKE += --silent
-ifeq ($(origin .RECIPEPREFIX), undefined)
-	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
-endif
-.RECIPEPREFIX = > 
 ####################################################################################################
 
 # +-----------+
@@ -28,35 +24,35 @@ endif
 # -----------------
 
 setup:
-> mkdir --parents tests/bin
+	mkdir --parents tests/bin
 
 
 # Compile tests:
 # --------------
 
 tests:
-> $(MAKE) --directory=tests all
+	$(MAKE) --directory=tests all
 
 
 # Execute tests:
 # --------------
 
 run-tests:
-> $(MAKE) --directory=tests run
+	$(MAKE) --directory=tests run
 
 
 # Memory leaks checks:
 # --------------------
 
 valgrind-tests:
-> $(MAKE) --directory=tests valgrind
+	$(MAKE) --directory=tests valgrind
 
 
 # Clean up generated files:
 # -------------------------
 
 clean:
-> $(MAKE) --directory=tests clean
+	$(MAKE) --directory=tests clean
 
 
 # Targets that generate no files:
