@@ -31,7 +31,7 @@ setup:
 # Compile tests:
 # --------------
 
-tests:
+tests: setup
 	$(MAKE) --directory=tests all
 
 
@@ -52,7 +52,7 @@ valgrind-tests: setup
 # Clean up generated files:
 # -------------------------
 
-clean:
+clean: setup
 	$(MAKE) --directory=tests clean
 
 
