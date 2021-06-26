@@ -1,5 +1,10 @@
 # :toolbox: C Tool Box
+
+![Unit Tests](https://github.com/constantinosgeorgiou/c-toolbox/actions/workflows/run-tests.yml/badge.svg)
+
 Various modules to bootstrap a C project.
+
+
 
 Modules inspired by the document "[*Modular C: How to Write Reusable and Maintainable Code using the C Language*](http://metamodular.com/Computing/modular-c.pdf)" by Robert Strandh.
 
