@@ -19,7 +19,7 @@ jobs:
 
       - name: Update GNU Make  on MacOS
         if: matrix.os == 'macos-latest'
-        run: brew install --with-default-names make
+        run: brew install make
 
       - name: Set up repository.
         run: |
