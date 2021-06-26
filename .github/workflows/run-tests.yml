@@ -18,7 +18,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Set up repository.
-        run: make setup
+        run: |
+          make -v
+          make setup
 
       - name: Compile tests.
         run: make tests CFLAGS=-fPIC
