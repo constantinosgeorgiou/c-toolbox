@@ -17,6 +17,10 @@ jobs:
       # Checks-out repository under $GITHUB_WORKSPACE, so job can access it.
       - uses: actions/checkout@v2
 
+      - name: Update GNU Make  on MacOS
+        if: matrix.os == 'maxos-latest'
+        run: brew install --with-default-names make
+
       - name: Set up repository.
         run: |
           make -v
