@@ -30,10 +30,6 @@ SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
 .DELETE_ON_ERROR:
-ifeq ($(origin .RECIPEPREFIX), undefined)
-	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
-endif
-.RECIPEPREFIX = > 
 ####################################################################################################
 
 
@@ -87,20 +83,20 @@ all: $(PROGRAMS)
 .SECONDEXPANSION:
 
 $(PROGRAMS): $$($$@_OBJECTS)
-> $(CC) $^ -o $(BIN)/$@ $(LDFLAGS)
+	$(CC) $^ -o $(BIN)/$@ $(LDFLAGS)
 
 -include $(ALL_DEPENDENCIES)
 
 clean:
-> $(RM) $(ALL_OBJECTS) $(ALL_DEPENDENCIES) $(BIN)/*
+	$(RM) $(ALL_OBJECTS) $(ALL_DEPENDENCIES) $(BIN)/*
 
 run-%: %
-> $(BIN)/$* $($*_ARGUMENTS)
+	$(BIN)/$* $($*_ARGUMENTS)
 
 run: $(RUN_TARGETS)
 
 valgrind-%: %
-> valgrind $(VGFLAGS) $(BIN)/$* $($*_ARGUMENTS)
+	valgrind $(VGFLAGS) $(BIN)/$* $($*_ARGUMENTS)
 
 valgrind: $(VALGRIND_TARGETS)
 
