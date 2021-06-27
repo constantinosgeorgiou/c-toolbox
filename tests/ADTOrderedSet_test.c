@@ -38,6 +38,18 @@ void shuffle(int* array[], int size) {
     }
 }
 
+/// @brief Creates and returns an array containing (int*)
+/// 
+int** create_array(int size) {
+    int** array = malloc(size * sizeof(*array));
+
+    for (int i = 0; i < size; i++) {
+        array[i] = create_int(i);
+    }
+
+    return array;
+}
+
 /// @brief Inserts (key, value) pair to oset and test for correct insertion.
 ///
 void insert_and_test(OrderedSet oset, void* key, void* value) {
@@ -50,19 +62,14 @@ void test_insert(void) {
 
     int N = 1000;
 
-    // Create, initialize, and suffle key array.
-    int** key_array = malloc(N * sizeof(*key_array));
-    for (int i = 0; i < N; i++) {
-        key_array[i] = create_int(i);
-    }
+    // Create and suffle key array.
+    int** key_array = create_array(N);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Create value array.
-    int** value_array = malloc(N * sizeof(*value_array));
+    int** value_array = create_array(N);
 
     for (int i = 0; i < N; i++) {
-        value_array[i] = create_int(i);
-
         insert_and_test(oset, key_array[i], value_array[i]);
 
         TEST_CHECK(oset_size(oset) == (i + 1));
@@ -95,6 +102,9 @@ void test_insert(void) {
     }
 
     oset_destroy(oset);
+
+    free(key_array);
+    free(value_array);
 }
 
 void test_remove(void) {
@@ -102,19 +112,15 @@ void test_remove(void) {
 
     int N = 1000;
 
-    // Create, initialize, and suffle key array.
-    int** key_array = malloc(N * sizeof(*key_array));
-    for (int i = 0; i < N; i++) {
-        key_array[i] = create_int(i);
-    }
+    // Create and suffle key array.
+    int** key_array = create_array(N);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Create value array.
-    int** value_array = malloc(N * sizeof(*value_array));
+    int** value_array = create_array(N);
 
     // Insert (key, value) pairs.
     for (int i = 0; i < N; i++) {
-        value_array[i] = create_int(i);
         oset_insert(oset, key_array[i], value_array[i]);
     }
 
