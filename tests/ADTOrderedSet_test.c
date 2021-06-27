@@ -396,6 +396,62 @@ void test_split(void) {
     free(value_array);
 }
 
+void test_merge(void) {
+    OrderedSet alpha = oset_create(compare_ints, free, free);
+    OrderedSet beta = oset_create(compare_ints, free, free);
+
+    int N = 1000;
+
+    // Create key and value arrays for odd number Ordered Set.
+    int** odd_key_array = malloc(N * sizeof(*odd_key_array));
+    int** odd_value_array = malloc(N * sizeof(*odd_value_array));
+    int number = 1;
+    for (int i = 0; i < N; i++) {
+        odd_key_array[i] = create_int(number);
+        odd_value_array[i] = create_int(number);
+        number += 2;
+    }
+    shuffle(odd_key_array, N);  // Shuffle key array for uniform value insertion.
+
+    // Create key and value arrays for even number Ordered Set.
+    int** even_key_array = malloc(N * sizeof(*even_key_array));
+    int** even_value_array = malloc(N * sizeof(*even_value_array));
+    number = 0;
+    for (int i = 0; i < N; i++) {
+        even_key_array[i] = create_int(number);
+        even_value_array[i] = create_int(number);
+        number += 2;
+    }
+    shuffle(even_key_array, N);  // Shuffle key array for uniform value insertion.
+
+    // Insert (key, value) pairs into Ordered Sets.
+    for (int i = 0; i < N; i++) {
+        oset_insert(alpha, odd_key_array[i], odd_value_array[i]);
+        oset_insert(beta, even_key_array[i], even_value_array[i]);
+    }
+
+    oset_merge(alpha, beta);
+
+    OrderedSetNode node = oset_first(alpha);
+    for (int i = 0; i < (2 * N); i++) {
+        int* key = oset_node_key(alpha, node);
+        int* value = oset_node_value(alpha, node);
+
+        TEST_CHECK(*key == i);
+        TEST_CHECK(*value == i);
+
+        node = oset_next(alpha, node);
+    }
+
+    oset_destroy(alpha);
+    oset_destroy(beta);
+
+    free(odd_key_array);
+    free(odd_value_array);
+    free(even_key_array);
+    free(even_value_array);
+}
+
 void test_concat(void) {
     OrderedSet a = oset_create(compare_ints, free, free);
 
@@ -439,6 +495,7 @@ TEST_LIST = {
     {"oset_get_at", test_get_at},
     {"oset_remove_at", test_remove_at},
     {"oset_split", test_split},
+    {"oset_merge", test_merge},
     {"oset_concat", test_concat},
     {NULL, NULL}  // End of tests
 }
