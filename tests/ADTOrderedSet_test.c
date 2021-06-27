@@ -40,11 +40,13 @@ void shuffle(int* array[], int size) {
 
 /// @brief Creates and returns an array containing (int*)
 ///
-int** create_array(int size) {
+/// @param multiplier Multiplies the values of the array. (i * multiplier)
+///
+int** create_array(int size, int multiplier) {
     int** array = malloc(size * sizeof(*array));
 
     for (int i = 0; i < size; i++) {
-        array[i] = create_int(i);
+        array[i] = create_int(multiplier * i);
     }
 
     return array;
@@ -63,11 +65,11 @@ void test_insert(void) {
     int N = 1000;
 
     // Create and suffle key array.
-    int** key_array = create_array(N);
+    int** key_array = create_array(N, 0);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Create value array.
-    int** value_array = create_array(N);
+    int** value_array = create_array(N, 0);
 
     for (int i = 0; i < N; i++) {
         insert_and_test(oset, key_array[i], value_array[i]);
@@ -113,11 +115,11 @@ void test_remove(void) {
     int N = 1000;
 
     // Create and suffle key array.
-    int** key_array = create_array(N);
+    int** key_array = create_array(N, 0);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Create value array.
-    int** value_array = create_array(N);
+    int** value_array = create_array(N, 0);
 
     // Insert (key, value) pairs.
     for (int i = 0; i < N; i++) {
@@ -187,11 +189,11 @@ void test_traversal(void) {
     int N = 1000;
 
     // Create and suffle key array.
-    int** key_array = create_array(N);
+    int** key_array = create_array(N, 0);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Create value array.
-    int** value_array = create_array(N);
+    int** value_array = create_array(N, 2);
 
     // Insert (key, value) pairs.
     for (int i = 0; i < N; i++) {
@@ -202,7 +204,9 @@ void test_traversal(void) {
     int i = 0;
     for (OrderedSetNode node = oset_first(oset); node != OSET_EOF; node = oset_next(oset, node)) {
         int* key = oset_node_key(oset, node);
+        int* value = oset_node_value(oset, node);
         TEST_CHECK(*key == i);
+        TEST_CHECK(*value == 2 * i);
         i++;
     }
 
@@ -210,7 +214,9 @@ void test_traversal(void) {
     int i = N - 1;
     for (OrderedSetNode node = oset_last(oset); node != OSET_BOF; node = oset_previous(oset, node)) {
         int* key = oset_node_key(oset, node);
+        int* value = oset_node_value(oset, node);
         TEST_CHECK(*key == i);
+        TEST_CHECK(*value == 2 * i);
         i--;
     }
 
@@ -226,8 +232,8 @@ void test_find(void) {
     int N = 1000;
 
     // Create key and value arrays.
-    int** key_array = create_array(N);
-    int** value_array = create_array(N);
+    int** key_array = create_array(N, 0);
+    int** value_array = create_array(N, 0);
 
     // Insert (key, value) pairs.
     for (int i = 0; i < N; i++) {
