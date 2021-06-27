@@ -175,6 +175,8 @@ void test_remove(void) {
         TEST_CHECK(oset_find(oset, key_array[i]) == NULL);
     }
 
+    oset_destroy(oset);
+
     free(key_array);
     free(value_array);
 }
