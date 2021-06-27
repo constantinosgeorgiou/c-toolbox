@@ -39,7 +39,7 @@ void shuffle(int* array[], int size) {
 }
 
 /// @brief Creates and returns an array containing (int*)
-/// 
+///
 int** create_array(int size) {
     int** array = malloc(size * sizeof(*array));
 
@@ -179,9 +179,49 @@ void test_remove(void) {
     free(value_array);
 }
 
+void test_traversal(void) {
+    OrderedSet oset = oset_create(compare_ints, NULL, NULL);
+
+    int N = 1000;
+
+    // Create and suffle key array.
+    int** key_array = create_array(N);
+    shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
+
+    // Create value array.
+    int** value_array = create_array(N);
+
+    // Insert (key, value) pairs.
+    for (int i = 0; i < N; i++) {
+        oset_insert(oset, key_array[i], value_array[i]);
+    }
+
+    // Traverse in ascending order.
+    int i = 0;
+    for (OrderedSetNode node = oset_first(oset); node != OSET_EOF; node = oset_next(oset, node)) {
+        int* key = oset_node_key(oset, node);
+        TEST_CHECK(*key == i);
+        i++;
+    }
+
+    // Traverse in descending order.
+    int i = N - 1;
+    for (OrderedSetNode node = oset_last(oset); node != OSET_BOF; node = oset_previous(oset, node)) {
+        int* key = oset_node_key(oset, node);
+        TEST_CHECK(*key == i);
+        i--;
+    }
+
+    oset_destroy(oset);
+
+    free(key_array);
+    free(value_array);
+}
+
 TEST_LIST = {
     {"oset_create", test_create},
     {"oset_insert", test_insert},
     {"oset_remove", test_remove},
+    {"oset_traversal", test_traversal},
     {NULL, NULL}  // End of tests
 }
