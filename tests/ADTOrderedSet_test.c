@@ -220,10 +220,46 @@ void test_traversal(void) {
     free(value_array);
 }
 
+void test_find(void) {
+    OrderedSet oset = oset_create(compare_ints, free, free);
+
+    int N = 1000;
+
+    // Create key and value arrays.
+    int** key_array = create_array(N);
+    int** value_array = create_array(N);
+
+    // Insert (key, value) pairs.
+    for (int i = 0; i < N; i++) {
+        oset_insert(oset, key_array[i], value_array[i]);
+
+        OrderedSetNode found_node = oset_find_node(oset, value_array[i]);
+        void* found_value = oset_node_value(oset, found_node);
+
+        TEST_ASSERT(found_node != OSET_EOF);
+        TEST_ASSERT(found_value == value_array[i]);
+    }
+
+    // Search non-existent key.
+    int* key = create_int(N * 2);
+    TEST_CHECK(oset_find_node(oset, key) == OSET_EOF);
+    TEST_CHECK(oset_find(oset, key) == NULL);
+
+    // Find key in the middle.
+    *key = N / 2;
+    TEST_CHECK(*((int*)oset_find(oset, key)) == (N / 2));
+
+    oset_destroy(oset);
+
+    free(key_array);
+    free(value_array);
+}
+
 TEST_LIST = {
     {"oset_create", test_create},
     {"oset_insert", test_insert},
     {"oset_remove", test_remove},
     {"oset_traversal", test_traversal},
+    {"oset_find", test_find},
     {NULL, NULL}  // End of tests
 }
