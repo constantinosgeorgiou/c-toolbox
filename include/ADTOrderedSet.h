@@ -17,8 +17,6 @@ typedef void (*DestroyFunc)(void* value);
 
 #define OSET_ERROR (OrderedSet)0
 
-#include <stdbool.h>  // bool
-
 typedef struct ordered_set* OrderedSet;
 typedef struct ordered_set_node* OrderedSetNode;
 
@@ -69,9 +67,7 @@ void oset_insert(OrderedSet oset, void* key, void* value);
 ///
 /// Keys can not be NULL.
 ///
-/// @return true, if key was removed successfully, otherwise false.
-///
-bool oset_remove(OrderedSet oset, void* key);
+void oset_remove(OrderedSet oset, void* key);
 
 /// @brief Finds and returns the value associated with specified key.
 ///        Duplicate keys are treated like a stack, Last In First Out.
@@ -94,9 +90,7 @@ void* oset_get_at(OrderedSet oset, int pos);
 ///
 /// pos >= size removes last value. pos < 0 removes first value.
 ///
-/// @return true, if removed successfully, otherwise false.
-///
-bool oset_remove_at(OrderedSet oset, int pos);
+void oset_remove_at(OrderedSet oset, int pos);
 
 /// @brief Removes all elements with keys >= split_key and returns them in a new
 ///        Ordered Set.
