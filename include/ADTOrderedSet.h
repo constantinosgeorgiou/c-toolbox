@@ -116,7 +116,7 @@ void oset_merge(OrderedSet a, OrderedSet b);
 
 /// @brief Concatenates two Ordered Sets.
 ///
-/// last key in a > first key in b, results in undefined behaviour.
+/// last_key in a > first_key in b, results in undefined behaviour.
 ///
 void oset_concat(OrderedSet a, OrderedSet b);
 
