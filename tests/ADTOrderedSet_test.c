@@ -396,6 +396,40 @@ void test_split(void) {
     free(value_array);
 }
 
+void test_merge(void) {
+    OrderedSet a = oset_create(compare_ints, free, free);
+
+    int N = 1000;
+
+    // Create key and value arrays.
+    int** key_array = create_array(N, 0);
+    shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
+    int** value_array = create_array(N, 0);
+
+    // Insert (key, value) pairs.
+    for (int i = 0; i < N; i++) {
+        oset_insert(a, key_array[i], value_array[i]);
+    }
+
+    // Split in the middle.
+    int split_key = N / 2;
+    OrderedSet b = oset_split(a, &split_key);
+
+    oset_merge(a, b);
+
+    OrderedSetNode node = oset_first(a);
+    for (int i = 0; i < N; i++) {
+        int* key = oset_node_key(a, node);
+        TEST_CHECK(*key == i);
+        node = oset_next(a, node);
+    }
+
+    oset_destroy(a);
+
+    free(key_array);
+    free(value_array);
+}
+
 TEST_LIST = {
     {"oset_create", test_create},
     {"oset_insert", test_insert},
@@ -405,5 +439,6 @@ TEST_LIST = {
     {"oset_get_at", test_get_at},
     {"oset_remove_at", test_remove_at},
     {"oset_split", test_split},
+    {"oset_merge", test_merge},
     {NULL, NULL}  // End of tests
 }
