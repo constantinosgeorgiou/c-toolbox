@@ -396,7 +396,7 @@ void test_split(void) {
     free(value_array);
 }
 
-void test_merge(void) {
+void test_concat(void) {
     OrderedSet a = oset_create(compare_ints, free, free);
 
     int N = 1000;
@@ -415,7 +415,7 @@ void test_merge(void) {
     int split_key = N / 2;
     OrderedSet b = oset_split(a, &split_key);
 
-    oset_merge(a, b);
+    oset_concat(a, b);
 
     OrderedSetNode node = oset_first(a);
     for (int i = 0; i < N; i++) {
@@ -439,6 +439,6 @@ TEST_LIST = {
     {"oset_get_at", test_get_at},
     {"oset_remove_at", test_remove_at},
     {"oset_split", test_split},
-    {"oset_merge", test_merge},
+    {"oset_concat", test_concat},
     {NULL, NULL}  // End of tests
 }
