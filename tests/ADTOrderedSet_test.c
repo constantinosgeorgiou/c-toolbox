@@ -93,12 +93,12 @@ void test_insert(void) {
     TEST_CHECK(next_key != duplicate_key);                   // Check if addresses are different.
     TEST_CHECK(compare_ints(next_value, value) != 0);        // Check if values are different.
 
-    // Check if values are sorted.
+    // Check if keys are sorted.
     OrderedSetNode node = oset_first(oset);
     for (int i = 0; i < N; i++) {
-        int* value = oset_node_value(oset, node);
+        int* key = oset_node_key(oset, node);
 
-        TEST_CHECK(*value == i);
+        TEST_CHECK(*key == i);
 
         node = oset_next(oset, node);
     }
