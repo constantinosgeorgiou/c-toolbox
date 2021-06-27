@@ -304,6 +304,42 @@ void test_get_at(void) {
     free(value_array);
 }
 
+void test_remove_at(void) {
+    OrderedSet oset = oset_create(compare_ints, free, free);
+
+    int N = 1000;
+
+    // Create key and value arrays.
+    int** key_array = create_array(N, 0);
+    int** value_array = create_array(N, 0);
+
+    // Insert (key, value) pairs.
+    for (int i = 0; i < N; i++) {
+        oset_insert(oset, key_array[i], value_array[i]);
+    }
+
+    // Remove position < 0.
+    OrderedSetNode node = oset_get_at_node(oset, -1);
+    TEST_CHECK(oset_remove_at(oset, -1));
+    TEST_CHECK(oset_find(oset, oset_node_key(oset, node)) == NULL);
+
+    // Remove position > N.
+    node = oset_get_at_node(oset, N + 1);
+    TEST_CHECK(oset_remove_at(oset, N + 1));
+    TEST_CHECK(oset_find(oset, oset_node_key(oset, node)) == NULL);
+
+    for (int i = 0; i < N; i++) {
+        node = oset_get_at_node(oset, i);
+        TEST_CHECK(oset_remove_at(oset, i));
+        TEST_CHECK(oset_find(oset, oset_node_key(oset, node)) == NULL);
+    }
+
+    oset_destroy(oset);
+
+    free(key_array);
+    free(value_array);
+}
+
 TEST_LIST = {
     {"oset_create", test_create},
     {"oset_insert", test_insert},
@@ -311,5 +347,6 @@ TEST_LIST = {
     {"oset_traversal", test_traversal},
     {"oset_find", test_find},
     {"oset_get_at", test_get_at},
+    {"oset_remove_at", test_remove_at},
     {NULL, NULL}  // End of tests
 }
