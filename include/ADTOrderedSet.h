@@ -140,6 +140,14 @@ OrderedSetNode oset_find_node(OrderedSet oset, void* key);
 ///
 OrderedSetNode oset_get_at_node(OrderedSet oset, int pos);
 
+/// @brief Returns key of specified node.
+///
+void* oset_node_key(OrderedSet oset, OrderedSetNode node);
+
+/// @brief Returns value of specified node.
+///
+void* oset_node_value(OrderedSet oset, OrderedSetNode node);
+
 /// @brief Returns the first node of the Ordered Set, or SET_EOF, if Ordered set is empty.
 ///
 OrderedSetNode oset_first(OrderedSet oset);
