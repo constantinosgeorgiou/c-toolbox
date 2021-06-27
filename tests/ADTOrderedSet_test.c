@@ -340,6 +340,62 @@ void test_remove_at(void) {
     free(value_array);
 }
 
+void test_split(void) {
+    OrderedSet oset = oset_create(compare_ints, free, free);
+
+    int N = 1000;
+
+    // Create key and value arrays.
+    int** key_array = create_array(N, 0);
+    shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
+    int** value_array = create_array(N, 0);
+
+    // Insert (key, value) pairs.
+    for (int i = 0; i < N; i++) {
+        oset_insert(oset, key_array[i], value_array[i]);
+    }
+
+    // Split in the middle.
+    int split_key = N / 2;
+    OrderedSet split = oset_split(oset, split_key);
+
+    // Check values of Ordered Sets.
+    OrderedSetNode node = oset_first(oset);
+    for (int i = 0; i < N / 2; i++) {
+        int* key = oset_node_key(oset, node);
+        TEST_CHECK(*key == i);
+        node = oset_next(oset, node);
+    }
+    node = oset_first(split);
+    for (int i = N / 2; i < N; i++) {
+        int* key = oset_node_key(split, node);
+        TEST_CHECK(*key == i);
+        node = oset_next(split, node);
+    }
+    oset_destroy(split);
+
+    // Split with split_key < 0 (first key)
+    split_key = -1;
+    OrderedSet empty = oset_split(oset, split_key);
+    TEST_CHECK(oset_size(empty) == 0);
+    oset_destroy(empty);
+
+    // Split with split_key > N (last key)
+    split_key = N + 1;
+    OrderedSet empty = oset_split(oset, split_key);
+    TEST_CHECK(oset_size(empty) == 0);
+
+    // Split empty Ordered Set.
+    OrderedSet error = oset_split(empty, split_key);
+    TEST_CHECK(error == OSET_ERROR);
+    oset_destroy(empty);
+
+    oset_destroy(oset);
+
+    free(key_array);
+    free(value_array);
+}
+
 TEST_LIST = {
     {"oset_create", test_create},
     {"oset_insert", test_insert},
@@ -348,5 +404,6 @@ TEST_LIST = {
     {"oset_find", test_find},
     {"oset_get_at", test_get_at},
     {"oset_remove_at", test_remove_at},
+    {"oset_split", test_split},
     {NULL, NULL}  // End of tests
 }
