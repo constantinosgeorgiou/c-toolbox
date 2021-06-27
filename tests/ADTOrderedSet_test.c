@@ -357,7 +357,7 @@ void test_split(void) {
 
     // Split in the middle.
     int split_key = N / 2;
-    OrderedSet split = oset_split(oset, split_key);
+    OrderedSet split = oset_split(oset, &split_key);
 
     // Check values of Ordered Sets.
     OrderedSetNode node = oset_first(oset);
@@ -376,17 +376,17 @@ void test_split(void) {
 
     // Split with split_key < 0 (first key)
     split_key = -1;
-    OrderedSet empty = oset_split(oset, split_key);
+    OrderedSet empty = oset_split(oset, &split_key);
     TEST_CHECK(oset_size(empty) == 0);
     oset_destroy(empty);
 
     // Split with split_key > N (last key)
     split_key = N + 1;
-    OrderedSet empty = oset_split(oset, split_key);
+    OrderedSet empty = oset_split(oset, &split_key);
     TEST_CHECK(oset_size(empty) == 0);
 
     // Split empty Ordered Set.
-    OrderedSet error = oset_split(empty, split_key);
+    OrderedSet error = oset_split(empty, &split_key);
     TEST_CHECK(error == OSET_ERROR);
     oset_destroy(empty);
 
