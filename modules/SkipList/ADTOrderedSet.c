@@ -67,9 +67,17 @@ OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc
 
 void oset_destroy(OrderedSet oset) {}
 
-DestroyFunc oset_set_destroy_key(OrderedSet oset, DestroyFunc destroy_key) { return NULL; }
+DestroyFunc oset_set_destroy_key(OrderedSet oset, DestroyFunc destroy_key) {
+    DestroyFunc old = oset->destroy_key;
+    oset->destroy_key = destroy_key;
+    return old;
+}
 
-DestroyFunc oset_set_destroy_value(OrderedSet oset, DestroyFunc destroy_value) { return NULL; }
+DestroyFunc oset_set_destroy_value(OrderedSet oset, DestroyFunc destroy_value) {
+    DestroyFunc old = oset->destroy_value;
+    oset->destroy_value = destroy_value;
+    return old;
+}
 
 int oset_size(OrderedSet oset) { return oset->size; }
 
