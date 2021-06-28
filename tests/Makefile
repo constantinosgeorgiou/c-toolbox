@@ -26,6 +26,7 @@ HashTable_ADTMap_test_OBJECTS = ADTMap_test.o $(MODULES)/HashTable/ADTMap.o $(MO
 # Interface:       ADTOrderedSet
 # Implementation:  SkipList
 SkipList_ADTOrderedSet_test_OBJECTS = ADTOrderedSet_test.o $(MODULES)/SkipList/ADTOrderedSet.o
+SkipList_ADTOrderedSet_test_ARGUMENTS = create
 
 # All the tests share the following common makefile to keep this file as DRY (Don't Repeat Yourself)
 # as possible.
