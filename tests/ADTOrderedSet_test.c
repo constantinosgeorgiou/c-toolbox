@@ -42,6 +42,19 @@ void shuffle(int* array[], int size) {
     }
 }
 
+/// @brief Allocates memory for an integer with given value.
+///
+/// @return Newly created pointer to integer.
+///
+static int* create_int(int value) {
+    int* pointer = malloc(sizeof(int));
+    if (pointer == NULL) {
+        return NULL;
+    }
+    *pointer = value;
+    return pointer;
+}
+
 /// @brief Creates and returns an array containing (int*)
 ///
 /// @param multiplier Multiplies the values of the array. (i * multiplier)
@@ -170,7 +183,7 @@ void test_remove(void) {
     }
 
     // Remove keys.
-    int size = oset_size(oset);
+    size = oset_size(oset);
     for (int i = 0; i < N; i++) {
         TEST_CHECK(oset_remove(oset, key_array[i]));
         TEST_CHECK(oset_size(oset) == (size--));
@@ -209,7 +222,7 @@ void test_traversal(void) {
     }
 
     // Traverse in descending order.
-    int i = N - 1;
+    i = N - 1;
     for (OrderedSetNode node = oset_last(oset); node != OSET_BOF; node = oset_previous(oset, node)) {
         int* key = oset_node_key(oset, node);
         int* value = oset_node_value(oset, node);
@@ -386,7 +399,7 @@ void test_split(void) {
 
     // Split with split_key > N (last key)
     split_key = N + 1;
-    OrderedSet empty = oset_split(alpha, &split_key);
+    empty = oset_split(alpha, &split_key);
     TEST_CHECK(oset_size(empty) == 0);
 
     // Split empty Ordered Set.
@@ -502,4 +515,4 @@ TEST_LIST = {
     {"oset_concat", test_concat},
 
     {NULL, NULL}  // End of tests
-}
+};
