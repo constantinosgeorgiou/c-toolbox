@@ -22,12 +22,19 @@ struct ordered_set_node {
     OrderedSetNode next;
     OrderedSetNode previous;
 
+    bool is_header;
+    int level;
+
+    void* key;
     void* value;
 };
 
-/// @brief Creates and returns an Ordered Set node with given value.
+/// @brief Creates and returns an Ordered Set node.
 ///
-static OrderedSetNode oset_create_node(void* value) {
+/// @param level The height of the node.
+/// @param is_header true if node is header node, else false.
+///
+static OrderedSetNode oset_create_node(void* key, void* value, int level, bool is_header) {
     OrderedSetNode node = malloc(sizeof(*node));
     if (node == NULL) {
         return NULL;
@@ -38,9 +45,30 @@ static OrderedSetNode oset_create_node(void* value) {
     node->next = OSET_EOF;
     node->previous = OSET_EOF;
 
+    node->is_header = is_header;
+    node->level = level;
+
+    node->key = key;
     node->value = value;
 
     return node;
+}
+
+/// @brief Frees all the memory allocated by given Ordered Set node.
+///
+/// Any operation on the Ordered Set node after its destruction, results in undefined behaviour.
+///
+static void oset_destroy_node(OrderedSetNode node, DestroyFunc destroy_key, DestroyFunc destroy_value) {
+    if (!node->is_header) {
+        if (destroy_key != NULL) {
+            destroy_key(node->key);
+        }
+        if (destroy_value != NULL) {
+            destroy_value(node->value);
+        }
+    }
+
+    free(node);
 }
 
 OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value) {
@@ -57,7 +85,8 @@ OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc
     oset->last = OSET_EOF;
     oset->size = 0;
 
-    oset->header = oset_create_node(strdup("H"));
+    // Header nodes don't need to have neither keys nor values.
+    oset->header = oset_create_node(OSET_BOF, OSET_BOF, 0, true);
     if (oset->header == NULL) {
         return OSET_ERROR;
     }
@@ -65,7 +94,23 @@ OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc
     return oset;
 }
 
-void oset_destroy(OrderedSet oset) {}
+void oset_destroy(OrderedSet oset) {
+    OrderedSetNode node = oset->header;
+    while (node != OSET_EOF) {
+        OrderedSetNode bottom = node->bottom;
+
+        while (node != OSET_EOF) {
+            OrderedSetNode next = node->next;
+
+            oset_destroy_node(node, oset->destroy_key, oset->destroy_value);
+
+            node = next;
+        }
+
+        node = bottom;
+    }
+    free(oset);
+}
 
 DestroyFunc oset_set_destroy_key(OrderedSet oset, DestroyFunc destroy_key) {
     DestroyFunc old = oset->destroy_key;
