@@ -23,6 +23,9 @@ DoublyLinkedList_ADTBidirectionalList_test_OBJECTS = ADTBidirectionalList_test.o
 #     | ADTList   | LinkedList     |
 HashTable_ADTMap_test_OBJECTS = ADTMap_test.o $(MODULES)/HashTable/ADTMap.o $(MODULES)/LinkedList/ADTList.o
 
+# Interface:       ADTOrderedSet
+# Implementation:  SkipList
+SkipList_ADTOrderedSet_test_OBJECTS = ADTOrderedSet_test.o $(MODULES)/SkipList/ADTOrderedSet.o
 
 # All the tests share the following common makefile to keep this file as DRY (Don't Repeat Yourself)
 # as possible.
