@@ -71,7 +71,7 @@ DestroyFunc oset_set_destroy_key(OrderedSet oset, DestroyFunc destroy_key) { ret
 
 DestroyFunc oset_set_destroy_value(OrderedSet oset, DestroyFunc destroy_value) { return NULL; }
 
-int oset_size(OrderedSet oset) { return -1; }
+int oset_size(OrderedSet oset) { return oset->size; }
 
 void oset_insert(OrderedSet oset, void* key, void* value) {}
 
