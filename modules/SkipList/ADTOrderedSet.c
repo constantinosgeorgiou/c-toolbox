@@ -25,7 +25,45 @@ struct ordered_set_node {
     void* value;
 };
 
-OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value) { return OSET_ERROR; }
+/// @brief Creates and returns an Ordered Set node with given value.
+///
+static OrderedSetNode oset_create_node(void* value) {
+    OrderedSetNode node = malloc(sizeof(*node));
+    if (node == NULL) {
+        return NULL;
+    }
+
+    node->top = OSET_EOF;
+    node->bottom = OSET_EOF;
+    node->next = OSET_EOF;
+    node->previous = OSET_EOF;
+
+    node->value = value;
+
+    return node;
+}
+
+OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value) {
+    OrderedSet oset = malloc(sizeof(*oset));
+    if (oset == NULL) {
+        return OSET_ERROR;
+    }
+
+    oset->compare = compare;
+    oset->destroy_key = destroy_key;
+    oset->destroy_value = destroy_value;
+
+    oset->first = OSET_EOF;
+    oset->last = OSET_EOF;
+    oset->size = 0;
+
+    oset->header = oset_create_node(strdup("H"));
+    if (oset->header == NULL) {
+        return OSET_ERROR;
+    }
+
+    return oset;
+}
 
 void oset_destroy(OrderedSet oset) {}
 
