@@ -240,7 +240,15 @@ void oset_merge(OrderedSet a, OrderedSet b) {}
 
 void oset_concat(OrderedSet a, OrderedSet b) {}
 
-OrderedSetNode oset_find_node(OrderedSet oset, void* key) { return OSET_EOF; }
+OrderedSetNode oset_find_node(OrderedSet oset, void* key) {
+    OrderedSetNode node = node_find_previous(oset, key);
+
+    if (node->next != OSET_EOF && oset->compare(node->next->key, key) == 0) {
+        return node->next;
+    }
+
+    return OSET_EOF;
+}
 
 OrderedSetNode oset_get_at_node(OrderedSet oset, int pos) { return OSET_EOF; }
 
