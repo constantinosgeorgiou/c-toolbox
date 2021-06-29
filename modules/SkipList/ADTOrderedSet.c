@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define OSET_TOF (OrderedSetNode)0  // Defines the virtual topmost level of the Ordered Set.
+#define OSET_LOF (OrderedSetNode)0  // Defines the virtual lowermost level of the Ordered Set.
+
+// TODO: Rename internal function regarding nodes to node_xxx for consistency.
+// TODO: Replace rand()
+
 struct ordered_set {
     CompareFunc compare;
     DestroyFunc destroy_key;
@@ -28,6 +34,15 @@ struct ordered_set_node {
     void* key;
     void* value;
 };
+
+enum coin {
+    TAILS,
+    HEADS
+};
+
+static enum coin coinflip() {
+    return rand() % 2 ? HEADS : TAILS;
+}
 
 /// @brief Creates and returns an Ordered Set node.
 ///
@@ -69,6 +84,67 @@ static void oset_destroy_node(OrderedSetNode node, DestroyFunc destroy_key, Dest
     }
 
     free(node);
+}
+
+static OrderedSetNode find_previous_node(OrderedSet oset, void* key) {
+    OrderedSetNode target = OSET_EOF;  // Points to previous node of node with node->key < key.
+
+    // Traverse from top to botom level.
+    OrderedSetNode node = oset->header;
+    while (node != OSET_LOF) {
+        // Traverse nodes in level with node->key < key.
+        while (node->next != OSET_EOF && oset->compare(node->next->key, key) < 0) {
+            node = node->next;
+        }
+
+        target = node;
+
+        node = node->bottom;
+    }
+
+    return target;
+}
+
+static void level_create(OrderedSet oset) {
+    OrderedSetNode new_header = oset_create_node(
+        OSET_BOF, OSET_BOF, 1 + oset->header->level, true);
+
+    OrderedSetNode old_header = oset->header;
+
+    // Connect new_header with old_header verticaly.
+    new_header->bottom = old_header;
+    old_header->top = new_header;
+
+    // Update Ordered Set header.
+    oset->header = new_header;
+}
+
+static void node_promote(OrderedSet oset, OrderedSetNode node) {
+    OrderedSetNode target = node->previous;
+    while (target != OSET_BOF && target->top == OSET_TOF) {
+        target = target->previous;
+    }
+    if (target == OSET_BOF) {
+        level_create(oset);
+        target = oset->header;
+    } else {
+        target = target->top;
+    }
+
+    OrderedSetNode new_node = oset_create_node(
+        node->key, node->value, 1 + node->level, node->is_header);
+
+    // Insert new_node after target.
+    new_node->next = target->next;
+    new_node->previous = target;
+    target->next = new_node;
+    if (new_node->next != OSET_EOF) {
+        new_node->next->previous = new_node;
+    }
+
+    // Connect new_node and node verticaly.
+    node->top = new_node;
+    new_node->bottom = node;
 }
 
 OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value) {
@@ -126,7 +202,30 @@ DestroyFunc oset_set_destroy_value(OrderedSet oset, DestroyFunc destroy_value) {
 
 int oset_size(OrderedSet oset) { return oset->size; }
 
-void oset_insert(OrderedSet oset, void* key, void* value) {}
+void oset_insert(OrderedSet oset, void* key, void* value) {
+    OrderedSetNode node = find_previous_node(oset, key);
+
+    OrderedSetNode new_node = oset_create_node(key, value, 0, false);
+
+    // Insert new_node after node.
+    new_node->next = node->next;
+    new_node->previous = node;
+    node->next = new_node;
+    if (new_node->next != OSET_EOF) {
+        new_node->next->previous = new_node;
+    }
+
+    // Promote new_node into top levels.
+    OrderedSetNode promotion = new_node;
+    while (coinflip() == HEADS) {
+        node_promote(oset, promotion);
+        promotion = promotion->top;
+    }
+
+    // Update first pointer.
+    // Update last pointer.
+    // Update size.
+}
 
 bool oset_remove(OrderedSet oset, void* key) { return false; }
 
