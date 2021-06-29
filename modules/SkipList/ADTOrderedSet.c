@@ -1,5 +1,6 @@
 #include "ADTOrderedSet.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -74,11 +75,13 @@ static OrderedSetNode node_create(void* key, void* value, int level, bool is_hea
 ///
 static void node_destroy(OrderedSetNode node, DestroyFunc destroy_key, DestroyFunc destroy_value) {
     if (!node->is_header) {
-        if (destroy_key != NULL) {
-            destroy_key(node->key);
-        }
-        if (destroy_value != NULL) {
-            destroy_value(node->value);
+        if (node->level == 0) {
+            if (destroy_key != NULL) {
+                destroy_key(node->key);
+            }
+            if (destroy_value != NULL) {
+                destroy_value(node->value);
+            }
         }
     }
 
@@ -202,6 +205,8 @@ DestroyFunc oset_set_destroy_value(OrderedSet oset, DestroyFunc destroy_value) {
 int oset_size(OrderedSet oset) { return oset->size; }
 
 void oset_insert(OrderedSet oset, void* key, void* value) {
+    assert(key != NULL);
+
     OrderedSetNode node = node_find_previous(oset, key);
 
     OrderedSetNode new_node = node_create(key, value, 0, false);
@@ -222,8 +227,17 @@ void oset_insert(OrderedSet oset, void* key, void* value) {
     }
 
     // Update first pointer.
+    if (oset->first == OSET_EOF || oset->compare(new_node->key, oset->first->key) < 0) {
+        oset->first = new_node;
+    }
+
     // Update last pointer.
+    if (oset->last == OSET_EOF || oset->compare(new_node->key, oset->last->key) > 0) {
+        oset->last = new_node;
+    }
+
     // Update size.
+    oset->size++;
 }
 
 bool oset_remove(OrderedSet oset, void* key) { return false; }
@@ -255,14 +269,26 @@ OrderedSetNode oset_find_node(OrderedSet oset, void* key) {
 
 OrderedSetNode oset_get_at_node(OrderedSet oset, int pos) { return OSET_EOF; }
 
-void* oset_node_key(OrderedSet oset, OrderedSetNode node) { return NULL; }
+void* oset_node_key(OrderedSet oset, OrderedSetNode node) {
+    assert(node != NULL);
+    return node->key;
+}
 
-void* oset_node_value(OrderedSet oset, OrderedSetNode node) { return NULL; }
+void* oset_node_value(OrderedSet oset, OrderedSetNode node) {
+    assert(node != NULL);
+    return node->value;
+}
 
-OrderedSetNode oset_first(OrderedSet oset) { return OSET_EOF; }
+OrderedSetNode oset_first(OrderedSet oset) { return oset->first; }
 
-OrderedSetNode oset_last(OrderedSet oset) { return OSET_EOF; }
+OrderedSetNode oset_last(OrderedSet oset) { return oset->last; }
 
-OrderedSetNode oset_next(OrderedSet oset, OrderedSetNode node) { return OSET_EOF; }
+OrderedSetNode oset_next(OrderedSet oset, OrderedSetNode node) {
+    assert(node != NULL);
+    return node->next;
+}
 
-OrderedSetNode oset_previous(OrderedSet oset, OrderedSetNode node) { return OSET_EOF; }
+OrderedSetNode oset_previous(OrderedSet oset, OrderedSetNode node) {
+    assert(node != NULL);
+    return node->previous;
+}
