@@ -228,7 +228,10 @@ void oset_insert(OrderedSet oset, void* key, void* value) {
 
 bool oset_remove(OrderedSet oset, void* key) { return false; }
 
-void* oset_find(OrderedSet oset, void* key) { return NULL; }
+void* oset_find(OrderedSet oset, void* key) {
+    OrderedSetNode node = oset_find_node(oset, key);
+    return node != NULL ? node->value : NULL;
+}
 
 void* oset_get_at(OrderedSet oset, int pos) { return NULL; }
 
