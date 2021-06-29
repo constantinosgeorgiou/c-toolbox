@@ -61,6 +61,9 @@ static int* create_int(int value) {
 ///
 int** create_array(int size, int multiplier) {
     int** array = malloc(size * sizeof(*array));
+    if (array == NULL) {
+        return NULL;
+    }
 
     for (int i = 0; i < size; i++) {
         array[i] = create_int(multiplier * i);
@@ -82,8 +85,8 @@ void test_insert(void) {
     int N = 1000;
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     for (int i = 0; i < N; i++) {
@@ -94,8 +97,9 @@ void test_insert(void) {
 
     // Insert key equivalent to the first key, and check if the (key, value) pair was inserted
     // correctly.
-    int* duplicate_key = create_int(*key_array[0]);
-    int* value = create_int(N + 1);  // N + 1, to create a number definitely not in the Ordered Set.
+    int* duplicate_key = create_int(N / 2);  // N/2, duplicate middle key.
+    int* value = create_int(N + N);          // N+N, guarantees big value to check stack-like
+                                             // behaviour for duplicates.
     int size = oset_size(oset);
     insert_and_test(oset, duplicate_key, value);
     TEST_CHECK(oset_size(oset) == (size + 1));
@@ -104,16 +108,22 @@ void test_insert(void) {
     OrderedSetNode dup = oset_find_node(oset, duplicate_key);
     int* next_key = oset_node_key(oset, oset_next(oset, dup));
     int* next_value = oset_node_value(oset, oset_next(oset, dup));
-    TEST_CHECK(*next_key == *duplicate_key);  // Check if keys are the same.
-    TEST_CHECK(next_key != duplicate_key);    // Check if addresses are different.
-    TEST_CHECK(*next_value != *value);        // Check if values are different.
+    TEST_CHECK(*next_key == *duplicate_key);
+    TEST_CHECK(next_key != duplicate_key);
+    TEST_CHECK(*next_value != *value);
+    TEST_CHECK(*next_value < *value);
 
     // Check if keys are sorted.
     OrderedSetNode node = oset_first(oset);
     for (int i = 0; i < N; i++) {
         int* key = oset_node_key(oset, node);
 
-        TEST_CHECK(*key == i);
+        if (*key != (N / 2)) {  // key not a duplicate.
+            TEST_CHECK(*key == i);
+        } else {
+            TEST_CHECK(*key == (N / 2));  // N/2, where duplicates are positioned.
+            i = N / 2;                    // Resets i to continue traversing after the duplicates.
+        }
 
         node = oset_next(oset, node);
     }
