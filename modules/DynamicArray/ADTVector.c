@@ -65,7 +65,17 @@ void vector_remove_last(Vector vec) {}
 
 void* vector_find(Vector vec, void* value, CompareFunc compare) { return NULL; }
 
-void* vector_get_at(Vector vec, int pos) { return NULL; }
+void* vector_get_at(Vector vec, int pos) {
+    if (pos < 0) {
+        return vec->array[0].value;
+    }
+
+    if (pos > vec->size) {
+        return vec->array[vec->size].value;
+    }
+
+    return vec->array[pos].value;
+}
 
 void vector_set_at(Vector vec, int pos, void* value) {}
 
