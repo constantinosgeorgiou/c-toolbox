@@ -64,7 +64,7 @@ void* vector_find(Vector vec, void* value, CompareFunc compare);
 
 /// @brief Gets the value at specified position.
 ///
-/// If pos < 0 gets first value. If pos >= size gets last value.
+/// If pos < 0 gets value of first element. If pos > size gets value of last element.
 ///
 /// @return Value at specified position.
 ///
@@ -72,7 +72,7 @@ void* vector_get_at(Vector vec, int pos);
 
 /// @brief Sets the value at specified position.
 ///
-/// If pos < 0 sets first value. If pos >= size gets last value.
+/// If pos < 0 sets value of first element. If pos > size sets value of last element.
 ///
 void vector_set_at(Vector vec, int pos, void* value);
 
