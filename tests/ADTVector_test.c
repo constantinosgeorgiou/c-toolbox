@@ -80,11 +80,37 @@ void test_get_set_at(void) {
     free(array);
 }
 
+void test_iterate(void) {
+    Vector vec = vector_create(0, NULL);
+    int N = 1000;
+    int* array = malloc(N * sizeof(*array));
+
+    TEST_CHECK(vector_first(vec) == VECTOR_BOF);
+    TEST_CHECK(vector_last(vec) == VECTOR_EOF);
+
+    // Insert elements.
+    for (int i = 0; i < 1000; i++)
+        vector_insert_last(vec, &array[i]);
+
+    int i = 0;
+    for (VectorNode node = vector_first(vec); node != VECTOR_EOF; node = vector_next(vec, node))
+        TEST_CHECK(vector_node_value(vec, node) == &array[i++]);
+    TEST_CHECK(i == N);
+
+    for (VectorNode node = vector_last(vec); node != VECTOR_BOF; node = vector_previous(vec, node))
+        TEST_CHECK(vector_node_value(vec, node) == &array[--i]);
+    TEST_CHECK(i == 0);
+
+    vector_destroy(vec);
+    free(array);
+}
+
 TEST_LIST = {
     {"vector_create", test_create},
     {"vector_insert", test_insert},
     {"vector_remove", test_remove},
     {"vector_get_set_at", test_get_set_at},
+    {"vector_iterate", test_iterate},
 
     {NULL, NULL}  // End of tests.
 };
