@@ -271,8 +271,8 @@ void test_find(void) {
     int N = 1000;
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Insert (key, value) pairs.
@@ -283,23 +283,22 @@ void test_find(void) {
         int* found_key = oset_node_key(oset, found_node);
         int* found_value = oset_node_value(oset, found_node);
 
-        TEST_ASSERT(found_node != OSET_EOF);
-        TEST_ASSERT(found_key == key_array[i]);
-        TEST_ASSERT(found_value == value_array[i]);
+        TEST_CHECK(found_node != OSET_EOF);
+        TEST_CHECK(found_key == key_array[i]);
+        TEST_CHECK(found_value == value_array[i]);
     }
 
     // Search non-existent key.
-    int* key = create_int(N * 2);  // N*2, guarantees non existent value.
-    TEST_CHECK(oset_find_node(oset, key) == OSET_EOF);
-    TEST_CHECK(oset_find(oset, key) == NULL);
+    int key = N * 2;  // N*2, guarantees non existent value.
+    TEST_CHECK(oset_find_node(oset, &key) == OSET_EOF);
+    TEST_CHECK(oset_find(oset, &key) == NULL);
 
-    // Find key in the middle.
-    *key = N / 2;
-    TEST_CHECK(*((int*)oset_find(oset, key)) == (N / 2));
+    // Find in the middle:
+    key = N / 2;
+    TEST_CHECK(*((int*)oset_node_key(oset, oset_find_node(oset, &key))) == (N / 2));
 
     oset_destroy(oset);
 
-    free(key);
     free(key_array);
     free(value_array);
 }
