@@ -60,10 +60,31 @@ void test_remove(void) {
     free(array);
 }
 
+void test_get_set_at(void) {
+    int N = 1000;
+    Vector vec = vector_create(N / 2, NULL);  // N/2, to test the size.
+    TEST_ASSERT(vector_size(vec) == N / 2);
+
+    // Insert additional N/2 NULLs.
+    for (int i = 0; i < N / 2; i++)
+        vector_insert_last(vec, NULL);
+
+    int* array = malloc(N * sizeof(*array));
+    for (int i = 0; i < N; i++) {
+        TEST_ASSERT(vector_get_at(vec, i) == NULL);
+        vector_set_at(vec, i, &array[i]);
+        TEST_ASSERT(vector_get_at(vec, i) == &array[i]);
+    }
+
+    vector_destroy(vec);
+    free(array);
+}
+
 TEST_LIST = {
     {"vector_create", test_create},
     {"vector_insert", test_insert},
     {"vector_remove", test_remove},
+    {"vector_get_set_at", test_get_set_at},
 
     {NULL, NULL}  // End of tests.
 };
