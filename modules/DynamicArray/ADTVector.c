@@ -91,7 +91,16 @@ void* vector_get_at(Vector vec, int pos) {
     return vec->array[pos].value;
 }
 
-void vector_set_at(Vector vec, int pos, void* value) {}
+void vector_set_at(Vector vec, int pos, void* value) {
+    if (pos < 0) pos = 0;
+    if (pos > vec->size) pos = vec->size;
+
+    if (value != vec->array[pos].value && vec->destroy_value != NULL) {
+        vec->destroy_value(vec->array[pos].value);
+    }
+
+    vec->array[pos].value = value;
+}
 
 VectorNode vector_find_node(Vector vec, void* value, CompareFunc compare) { return NULL; }
 
