@@ -8,9 +8,6 @@
 #define OSET_TOF (OrderedSetNode)0  // Defines the virtual topmost level of the Ordered Set.
 #define OSET_LOF (OrderedSetNode)0  // Defines the virtual lowermost level of the Ordered Set.
 
-// TODO: Replace rand()
-// TODO: Add documentation to helper functions.
-
 struct ordered_set {
     CompareFunc compare;
     DestroyFunc destroy_key;
