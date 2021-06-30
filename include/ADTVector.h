@@ -46,11 +46,13 @@ DestroyFunc vector_set_destroy_value(Vector vec, DestroyFunc destroy_value);
 ///
 int vector_size(Vector vec);
 
-/// @brief Inserts value at the end of Vector.
+/// @brief Inserts value at the end of Vector. Increases the size of Vector by 1.
 ///
 void vector_insert_last(Vector vec, void* value);
 
-/// @brief Removes the last element of Vector. If Vector is empty, nothing is done.
+/// @brief Removes the last element of Vector. Decreases the size of Vector by 1.
+///
+/// If Vector is empty, nothing is done.
 ///
 void vector_remove_last(Vector vec);
 
