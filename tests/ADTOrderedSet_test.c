@@ -226,10 +226,10 @@ void test_remove(void) {
 void test_traversal(void) {
     OrderedSet oset = oset_create(compare_ints, free, free);
 
-    int N = 1000;
+    int N = 10;
 
     // Create and suffle key array.
-    int** key_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
     int** value_array = create_array(N, 2);
 
     // Insert (key, value) pairs.
@@ -252,8 +252,10 @@ void test_traversal(void) {
     for (OrderedSetNode node = oset_last(oset); node != OSET_BOF; node = oset_previous(oset, node)) {
         int* key = oset_node_key(oset, node);
         int* value = oset_node_value(oset, node);
+
         TEST_CHECK(*key == i);
         TEST_CHECK(*value == (2 * i));
+
         i--;
     }
 
