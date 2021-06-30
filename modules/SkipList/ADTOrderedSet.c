@@ -5,9 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define OSET_TOF (OrderedSetNode)0  // Defines the virtual topmost level of the Ordered Set.
-#define OSET_LOF (OrderedSetNode)0  // Defines the virtual lowermost level of the Ordered Set.
-
 struct ordered_set {
     CompareFunc compare;
     DestroyFunc destroy_key;
@@ -93,7 +90,7 @@ static OrderedSetNode node_find_previous(OrderedSet oset, void* key) {
 
     // Traverse from top to botom level.
     OrderedSetNode node = oset->header;
-    while (node != OSET_LOF) {
+    while (node != OSET_EOF) {
         // Traverse nodes in level with node->key < key.
         while (node->next != OSET_EOF && oset->compare(node->next->key, key) < 0) {
             node = node->next;
@@ -123,7 +120,7 @@ static void level_create(OrderedSet oset) {
 
 static void node_promote(OrderedSet oset, OrderedSetNode node) {
     OrderedSetNode target = node->previous;
-    while (target != OSET_BOF && target->top == OSET_TOF) {
+    while (target != OSET_BOF && target->top == OSET_EOF) {
         target = target->previous;
     }
     if (target == OSET_BOF) {
