@@ -198,8 +198,13 @@ void test_remove(void) {
     oset_set_destroy_key(oset, free);
     oset_set_destroy_value(oset, free);
 
+    int removed[N];  // Holds duplicates of values of key_array, in order to avoid calling
+                     // oset_find() with a freed key.
+
+    // Re-insert (key, value) pairs.
     for (int i = 0; i < N; i++) {
         oset_insert(oset, key_array[i], value_array[i]);
+        removed[i] = *key_array[i];  // Copy key to call oset_find() later.
     }
 
     // Remove keys.
@@ -207,7 +212,7 @@ void test_remove(void) {
     for (int i = 0; i < N; i++) {
         TEST_CHECK(oset_remove(oset, key_array[i]));
         TEST_CHECK(oset_size(oset) == (--size));
-        TEST_CHECK(oset_find(oset, key_array[i]) == NULL);
+        TEST_CHECK(oset_find(oset, &(removed[i])) == NULL);
     }
 
     oset_destroy(oset);
