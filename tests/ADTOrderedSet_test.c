@@ -137,11 +137,11 @@ void test_insert(void) {
 void test_remove(void) {
     OrderedSet oset = oset_create(compare_ints, NULL, NULL);
 
-    int N = 1000;
+    int N = 6;
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Insert (key, value) pairs.
@@ -149,40 +149,50 @@ void test_remove(void) {
         oset_insert(oset, key_array[i], value_array[i]);
     }
 
+    int size = oset_size(oset);
+
     // Remove first key.
-    int* key = create_int(0);
-    TEST_CHECK(oset_remove(oset, key));
+    int key = 0;
+    TEST_CHECK(oset_remove(oset, &key));
+    TEST_CHECK(oset_size(oset) == (--size));
     TEST_CHECK(*((int*)oset_node_key(oset, oset_first(oset))) == 1);  // Check first key is 1.
 
     // Remove last key.
-    *key = N - 1;
-    TEST_CHECK(oset_remove(oset, key));
+    key = N - 1;
+    TEST_CHECK(oset_remove(oset, &key));
+    TEST_CHECK(oset_size(oset) == (--size));
     TEST_CHECK(*((int*)oset_node_key(oset, oset_last(oset))) == (N - 2));  // Check last key is N-2.
 
     // Remove already removed key.
-    TEST_CHECK(oset_remove(oset, key) == false);
+    TEST_CHECK(oset_remove(oset, &key) == false);
+    TEST_CHECK(oset_size(oset) == size);
 
     // Remove not existent key.
-    *key = N + N;  // N + N, guarantees a large key not in Ordered Set.
-    TEST_CHECK(oset_remove(oset, key) == false);
+    key = N + N;  // N + N, guarantees a large key not in Ordered Set.
+    TEST_CHECK(oset_remove(oset, &key) == false);
+    TEST_CHECK(oset_size(oset) == size);
 
     // Insert duplicate key.
-    *key = N / 2;                    // N / 2, guarantees already existent key.
-    int* value = create_int(N + N);  // Value can be whatever, doesn't matter.
-    oset_insert(oset, key, value);
+    int* dup_key = create_int(N / 2);  // N / 2, guarantees already existent key.
+    int* value = create_int(N + N);    // Value can be whatever, doesn't matter.
+    oset_insert(oset, dup_key, value);
 
     // Remove duplicate key and original key.
-    TEST_CHECK(oset_remove(oset, key));
-    TEST_CHECK(oset_remove(oset, key));
-    TEST_CHECK(oset_find(oset, key) == NULL);
+    key = N / 2;
+    TEST_CHECK(oset_remove(oset, dup_key));
+    TEST_CHECK(oset_remove(oset, &key));
+    TEST_CHECK(oset_find(oset, &key) == NULL);
 
     // Remove keys.
-    int size = oset_size(oset);
-    for (int i = 0; i < N; i++) {
-        TEST_CHECK(oset_remove(oset, key_array[i]));
-        TEST_CHECK(oset_size(oset) == (size--));
-        TEST_CHECK(oset_find(oset, key_array[i]) == NULL);
+    size = oset_size(oset);
+    for (key = 1; key < N - 1; key++) {
+        if (key != (N / 2)) {
+            TEST_CHECK(oset_remove(oset, &key));
+            TEST_CHECK(oset_size(oset) == (--size));
+            TEST_CHECK(oset_find(oset, &key) == NULL);
+        }
     }
+    TEST_CHECK(oset_size(oset) == 0);
 
     // Change DestroyFuncs to see if removal of (key, value) pairs frees the allocated memory.
     oset_set_destroy_key(oset, free);
@@ -196,13 +206,14 @@ void test_remove(void) {
     size = oset_size(oset);
     for (int i = 0; i < N; i++) {
         TEST_CHECK(oset_remove(oset, key_array[i]));
-        TEST_CHECK(oset_size(oset) == (size--));
+        TEST_CHECK(oset_size(oset) == (--size));
         TEST_CHECK(oset_find(oset, key_array[i]) == NULL);
     }
 
     oset_destroy(oset);
 
-    free(key);
+    free(dup_key);
+    free(value);
     free(key_array);
     free(value_array);
 }
