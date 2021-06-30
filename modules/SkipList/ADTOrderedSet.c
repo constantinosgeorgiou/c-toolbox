@@ -335,5 +335,5 @@ OrderedSetNode oset_next(OrderedSet oset, OrderedSetNode node) {
 
 OrderedSetNode oset_previous(OrderedSet oset, OrderedSetNode node) {
     assert(node != NULL);
-    return node->previous;
+    return node->previous->is_header ? OSET_BOF : node->previous;
 }
