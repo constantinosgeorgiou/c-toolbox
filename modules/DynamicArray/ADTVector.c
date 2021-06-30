@@ -61,7 +61,21 @@ void vector_insert_last(Vector vec, void* value) {
     vec->size++;
 }
 
-void vector_remove_last(Vector vec) {}
+void vector_remove_last(Vector vec) {
+    if (vec->size != 0) {
+        if (vec->destroy_value != NULL) {
+            vec->destroy_value(vec->array[vec->size - 1].value);
+        }
+
+        vec->size--;
+
+        // Reduce size if 75% of Vector is empty to free up memory.
+        if (vec->capacity > vec->size * 4 && vec->capacity > 2 * VECTOR_MIN_CAPACITY) {
+            vec->capacity /= 2;
+            vec->array = realloc(vec->array, vec->capacity * sizeof(*vec->array));
+        }
+    }
+}
 
 void* vector_find(Vector vec, void* value, CompareFunc compare) { return NULL; }
 
