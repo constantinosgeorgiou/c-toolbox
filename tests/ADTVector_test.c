@@ -105,12 +105,46 @@ void test_iterate(void) {
     free(array);
 }
 
+/// @brief Compares two int*.
+///
+/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
+///
+static int compare_ints(const void* a, const void* b) { return *(int*)a - *(int*)b; }
+
+void test_find(void) {
+    Vector vec = vector_create(1000, NULL);
+    int N = 1000;
+    int* array = malloc(N * sizeof(*array));
+
+    // Insert elements.
+    for (int i = 0; i < 1000; i++) {
+        array[i] = i;
+        vector_set_at(vec, i, &array[i]);
+    }
+
+    for (int i = 0; i < 1000; i++) {
+        int* p = vector_find(vec, &i, compare_ints);
+        TEST_ASSERT(*p == i);
+
+        VectorNode node = vector_find_node(vec, &i, compare_ints);
+        TEST_ASSERT(*(int*)vector_node_value(vec, node) == i);
+    }
+
+    int not_exists = -1;
+    TEST_ASSERT(vector_find(vec, &not_exists, compare_ints) == NULL);
+    TEST_ASSERT(vector_find_node(vec, &not_exists, compare_ints) == VECTOR_EOF);
+
+    vector_destroy(vec);
+    free(array);
+}
+
 TEST_LIST = {
     {"vector_create", test_create},
     {"vector_insert", test_insert},
     {"vector_remove", test_remove},
     {"vector_get_set_at", test_get_set_at},
     {"vector_iterate", test_iterate},
+    {"vector_find", test_find},
 
     {NULL, NULL}  // End of tests.
 };
