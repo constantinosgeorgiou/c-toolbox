@@ -31,17 +31,43 @@ Vector vector_create(int size, DestroyFunc destroy_value) {
     return vec;
 }
 
-void vector_destroy(Vector vec) {}
-DestroyFunc vector_set_destroy_value(Vector vec, DestroyFunc destroy_value) { return NULL; }
-int vector_size(Vector vec) { return 0; }
+void vector_destroy(Vector vec) {
+    if (vec->destroy_value != NULL) {
+        for (int i = 0; i < vec->size; i++) {
+            vec->destroy_value(vec->array[i].value);
+        }
+    }
+
+    free(vec->array);
+    free(vec);
+}
+
+DestroyFunc vector_set_destroy_value(Vector vec, DestroyFunc destroy_value) {
+    DestroyFunc old = vec->destroy_value;
+    vec->destroy_value = destroy_value;
+    return old;
+}
+
+int vector_size(Vector vec) { return vec->size; }
+
 void vector_insert_last(Vector vec, void* value) {}
+
 void vector_remove_last(Vector vec) {}
+
 void* vector_find(Vector vec, void* value, CompareFunc compare) { return NULL; }
+
 void* vector_get_at(Vector vec, int pos) { return NULL; }
+
 void vector_set_at(Vector vec, int pos, void* value) {}
+
 VectorNode vector_find_node(Vector vec, void* value, CompareFunc compare) { return NULL; }
+
 void* vector_node_value(Vector vec, VectorNode node) { return NULL; }
+
 VectorNode vector_first(Vector vec) { return NULL; }
+
 VectorNode vector_last(Vector vec) { return NULL; }
+
 VectorNode vector_next(Vector vec, VectorNode node) { return NULL; }
+
 VectorNode vector_previous(Vector vec, VectorNode node) { return NULL; }
