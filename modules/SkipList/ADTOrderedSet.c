@@ -90,6 +90,8 @@ static void node_destroy(OrderedSetNode node, DestroyFunc destroy_key, DestroyFu
 }
 
 static OrderedSetNode node_find_previous(OrderedSet oset, void* key) {
+    assert(key != NULL);
+
     OrderedSetNode target = OSET_EOF;  // Points to previous node of node with node->key < key.
 
     // Traverse from top to botom level.
@@ -289,6 +291,7 @@ bool oset_remove(OrderedSet oset, void* key) {
 }
 
 void* oset_find(OrderedSet oset, void* key) {
+    assert(key != NULL);
     OrderedSetNode node = oset_find_node(oset, key);
     return node != NULL ? node->value : NULL;
 }
@@ -304,6 +307,8 @@ void oset_merge(OrderedSet a, OrderedSet b) {}
 void oset_concat(OrderedSet a, OrderedSet b) {}
 
 OrderedSetNode oset_find_node(OrderedSet oset, void* key) {
+    assert(key != NULL);
+
     OrderedSetNode node = node_find_previous(oset, key);
 
     if (node->next != OSET_EOF && oset->compare(node->next->key, key) == 0) {
