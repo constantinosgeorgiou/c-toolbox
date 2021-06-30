@@ -9,6 +9,7 @@
 #define OSET_LOF (OrderedSetNode)0  // Defines the virtual lowermost level of the Ordered Set.
 
 // TODO: Replace rand()
+// TODO: Add documentation to helper functions.
 
 struct ordered_set {
     CompareFunc compare;
@@ -149,6 +150,26 @@ static void node_promote(OrderedSet oset, OrderedSetNode node) {
     new_node->bottom = node;
 }
 
+static void node_destroy_top(OrderedSetNode node, DestroyFunc destroy_key, DestroyFunc destroy_value) {
+    // Traverse nodes from bottom to top.
+    OrderedSetNode top = OSET_EOF;
+    while (node != OSET_EOF) {
+        top = node->top;
+
+        // Connect next and previous nodes of specified node directly.
+        if (node->next != OSET_EOF) {
+            node->next->previous = node->previous;
+        }
+        if (node->previous != OSET_BOF) {
+            node->previous->next = node->next;
+        }
+
+        node_destroy(node, destroy_key, destroy_value);
+
+        node = top;
+    }
+}
+
 OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value) {
     OrderedSet oset = malloc(sizeof(*oset));
     if (oset == NULL) {
@@ -240,7 +261,32 @@ void oset_insert(OrderedSet oset, void* key, void* value) {
     oset->size++;
 }
 
-bool oset_remove(OrderedSet oset, void* key) { return false; }
+bool oset_remove(OrderedSet oset, void* key) {
+    assert(key != NULL);
+
+    OrderedSetNode node = node_find_previous(oset, key);
+    if (node->next == OSET_EOF || oset->compare(node->next->key, key) != 0) {
+        return false;
+    }
+
+    // Update first pointer.
+    if (node->next == oset->first) {
+        oset->first = oset->first->next;
+    }
+
+    // Update last pointer.
+    if (node->next == oset->last) {
+        oset->last = node->is_header ? OSET_BOF : node;
+    }
+
+    // Destroy node including its top levels.
+    node_destroy_top(node->next, oset->destroy_key, oset->destroy_value);
+
+    // Update size.
+    oset->size--;
+
+    return true;
+}
 
 void* oset_find(OrderedSet oset, void* key) {
     OrderedSetNode node = oset_find_node(oset, key);
