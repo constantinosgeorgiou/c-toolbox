@@ -50,7 +50,16 @@ DestroyFunc vector_set_destroy_value(Vector vec, DestroyFunc destroy_value) {
 
 int vector_size(Vector vec) { return vec->size; }
 
-void vector_insert_last(Vector vec, void* value) {}
+void vector_insert_last(Vector vec, void* value) {
+    if (vec->capacity == vec->size) {
+        vec->capacity *= 2;
+        vec->array = realloc(vec->array, vec->capacity * sizeof(*vec->array));
+    }
+
+    // Increase array and insert element.
+    vec->array[vec->size].value = value;
+    vec->size++;
+}
 
 void vector_remove_last(Vector vec) {}
 
