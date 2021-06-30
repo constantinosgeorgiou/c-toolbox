@@ -40,9 +40,30 @@ void test_insert(void) {
     free(array);
 }
 
+void test_remove(void) {
+    Vector vec = vector_create(1000, NULL);
+    int N = 1000;
+    int* array = malloc(N * sizeof(*array));
+
+    // Replace elements in vector.
+    for (int i = 0; i < 1000; i++)
+        vector_set_at(vec, i, &array[i]);
+
+    // Remove elements to cause resizes.
+    for (int i = 999; i >= 0; i--) {
+        TEST_CHECK(vector_get_at(vec, i) == &array[i]);
+        vector_remove_last(vec);
+        TEST_CHECK(vector_size(vec) == i);
+    }
+
+    vector_destroy(vec);
+    free(array);
+}
+
 TEST_LIST = {
     {"vector_create", test_create},
     {"vector_insert", test_insert},
+    {"vector_remove", test_remove},
 
     {NULL, NULL}  // End of tests.
 };
