@@ -9,7 +9,6 @@
 # Interface:       ADTVector
 # Implementation:  DynamicArray
 DynamicArray_ADTVector_test_OBJECTS = ADTVector_test.o $(MODULES)/DynamicArray/ADTVector.o
-DynamicArray_ADTVector_test_ARGUMENTS = vector_create
 
 
 # Interface:       ADTList
