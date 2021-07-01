@@ -1,5 +1,6 @@
 #include "ADTVector.h"
 
+#include <assert.h>
 #include <stdlib.h>
 
 #define VECTOR_MIN_CAPACITY 10
@@ -80,21 +81,14 @@ void vector_remove_last(Vector vec) {
 void* vector_find(Vector vec, void* value, CompareFunc compare) { return NULL; }
 
 void* vector_get_at(Vector vec, int pos) {
-    if (pos < 0) {
-        return vec->array[0].value;
-    }
-
-    if (pos > vec->size) {
-        return vec->array[vec->size].value;
-    }
-
+    assert(pos >= 0 && pos < vec->size);
     return vec->array[pos].value;
 }
 
 void vector_set_at(Vector vec, int pos, void* value) {
-    if (pos < 0) pos = 0;
-    if (pos > vec->size) pos = vec->size;
+    assert(pos >= 0 && pos < vec->size);
 
+    // Call destroy_value on the value to be overwritten.
     if (value != vec->array[pos].value && vec->destroy_value != NULL) {
         vec->destroy_value(vec->array[pos].value);
     }
