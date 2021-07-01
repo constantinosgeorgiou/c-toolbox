@@ -76,6 +76,16 @@ void test_get_set_at(void) {
         TEST_CHECK(vector_get_at(vec, i) == &array[i]);
     }
 
+    int value = N + N;
+
+    // Set, Get at pos < 0.
+    vector_set_at(vec, -1, &value);
+    TEST_CHECK(vector_get_at(vec, -1) == &value);
+
+    // Set, Get at pos > size.
+    vector_set_at(vec, N + N, &value);
+    TEST_CHECK(vector_get_at(vec, N + N) == &value);
+
     vector_destroy(vec);
     free(array);
 }

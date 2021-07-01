@@ -84,12 +84,14 @@ void* vector_find(Vector vec, void* value, CompareFunc compare) {
 }
 
 void* vector_get_at(Vector vec, int pos) {
-    assert(pos >= 0 && pos < vec->size);
+    if (pos < 0) pos = 0;
+    if (pos > vec->size) pos = vec->size - 1;
     return vec->array[pos].value;
 }
 
 void vector_set_at(Vector vec, int pos, void* value) {
-    assert(pos >= 0 && pos < vec->size);
+    if (pos < 0) pos = 0;
+    if (pos > vec->size) pos = vec->size - 1;
 
     // Call destroy_value on the value to be overwritten.
     if (value != vec->array[pos].value && vec->destroy_value != NULL) {
