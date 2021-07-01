@@ -98,12 +98,23 @@ void vector_set_at(Vector vec, int pos, void* value) {
 
 VectorNode vector_find_node(Vector vec, void* value, CompareFunc compare) { return NULL; }
 
-void* vector_node_value(Vector vec, VectorNode node) { return NULL; }
+void* vector_node_value(Vector vec, VectorNode node) {
+    assert(node != NULL);
+    return node->value;
+}
 
-VectorNode vector_first(Vector vec) { return NULL; }
+VectorNode vector_first(Vector vec) {
+    return vec->size == 0 ? VECTOR_BOF : &vec->array[0];
+}
 
-VectorNode vector_last(Vector vec) { return NULL; }
+VectorNode vector_last(Vector vec) {
+    return vec->size == 0 ? VECTOR_EOF : &vec->array[vec->size - 1];
+}
 
-VectorNode vector_next(Vector vec, VectorNode node) { return NULL; }
+VectorNode vector_next(Vector vec, VectorNode node) {
+    return node == &vec->array[vec->size - 1] ? VECTOR_EOF : node + 1;
+}
 
-VectorNode vector_previous(Vector vec, VectorNode node) { return NULL; }
+VectorNode vector_previous(Vector vec, VectorNode node) {
+    return node == &vec->array[0] ? VECTOR_BOF : node - 1;
+}
