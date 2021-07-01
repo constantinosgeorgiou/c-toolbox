@@ -78,7 +78,10 @@ void vector_remove_last(Vector vec) {
     }
 }
 
-void* vector_find(Vector vec, void* value, CompareFunc compare) { return NULL; }
+void* vector_find(Vector vec, void* value, CompareFunc compare) {
+    VectorNode node = vector_find_node(vec, value, compare);
+    return node == VECTOR_EOF ? NULL : node->value;
+}
 
 void* vector_get_at(Vector vec, int pos) {
     assert(pos >= 0 && pos < vec->size);
@@ -96,7 +99,15 @@ void vector_set_at(Vector vec, int pos, void* value) {
     vec->array[pos].value = value;
 }
 
-VectorNode vector_find_node(Vector vec, void* value, CompareFunc compare) { return NULL; }
+VectorNode vector_find_node(Vector vec, void* value, CompareFunc compare) {
+    for (int i = 0; i < vec->size; i++) {
+        if (compare(vec->array[i].value, value) == 0) {
+            return &vec->array[i];
+        }
+    }
+
+    return VECTOR_EOF;
+}
 
 void* vector_node_value(Vector vec, VectorNode node) {
     assert(node != NULL);
