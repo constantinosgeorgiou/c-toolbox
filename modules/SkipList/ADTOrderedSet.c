@@ -137,9 +137,21 @@ static OrderedSetNode node_create(void* key, void* value, int levels, bool is_he
 ///
 /// Any operation on the Ordered Set node after its destruction, results in undefined behaviour.
 ///
-static void node_destroy(OrderedSetNode node, DestroyFunc destroy_key, DestroyFunc destroy_value) {
+/// @param update Contains nodes whose forward links need to be updated. If update == NULL,
+///               no link updates take place.
+///
+static void node_destroy(OrderedSetNode node, DestroyFunc destroy_key, DestroyFunc destroy_value, Vector update) {
+    // Link previous nodes to forward nodes.
+    if (update != NULL) {
+        for (int i = node->levels - 1; i >= 0; i--) {
+            OrderedSetNode prev_node = vector_get_at(update, i);
+            prev_node->forward[i] = node->forward[i];
+        }
+    }
+
     if (destroy_key != NULL) destroy_key(node->key);
     if (destroy_value != NULL) destroy_value(node->value);
+
     free(node->forward);
     free(node->width);
     free(node);
@@ -208,7 +220,7 @@ void oset_destroy(OrderedSet oset) {
     while (node != OSET_EOF) {
         OrderedSetNode next = node->forward[0];
 
-        node_destroy(node, oset->destroy_key, oset->destroy_value);
+        node_destroy(node, oset->destroy_key, oset->destroy_value, NULL);
 
         node = next;
     }
@@ -272,7 +284,37 @@ void oset_insert(OrderedSet oset, void* key, void* value) {
 bool oset_remove(OrderedSet oset, void* key) {
     assert(key != NULL);
 
-    return false;
+    Vector update = vector_create(oset->max_level, NULL);
+
+    OrderedSetNode target = node_find_previous(oset, key, update);
+    if (target->forward[0] == OSET_EOF || oset->compare(target->forward[0]->key, key) != 0) {
+        // Free memory allocated for the vector.
+        vector_destroy(update);
+
+        // Specified key was not found.
+        return false;
+    }
+
+    // Update first pointer.
+    if (target->forward[0] == oset->first) {
+        oset->first = oset->first->forward[0];
+    }
+
+    // Update last pointer.
+    if (target->forward[0] == oset->last) {
+        oset->last = target->is_header ? OSET_BOF : target;
+    }
+
+    // Destroy node including its top levels.
+    node_destroy(target->forward[0], oset->destroy_key, oset->destroy_value, update);
+
+    // Update size.
+    oset->size--;
+
+    // Free memory allocated for the vector.
+    vector_destroy(update);
+
+    return true;
 }
 
 void* oset_find(OrderedSet oset, void* key) {
