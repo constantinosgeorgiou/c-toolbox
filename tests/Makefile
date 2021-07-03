@@ -31,7 +31,7 @@ HashTable_ADTMap_test_OBJECTS = ADTMap_test.o $(MODULES)/HashTable/ADTMap.o $(MO
 # Implementation:  SkipList
 # Dependencies:    ADTVector pcg_basic
 SkipList_ADTOrderedSet_test_OBJECTS = ADTOrderedSet_test.o $(MODULES)/SkipList/ADTOrderedSet.o $(MODULES)/DynamicArray/ADTVector.o $(MODULES)/pcg-c-basic/pcg_basic.o
-SkipList_ADTOrderedSet_test_ARGUMENTS = oset_create oset_insert
+SkipList_ADTOrderedSet_test_ARGUMENTS = oset_create oset_insert oset_remove
 
 # All the tests share the following common makefile to keep this file as DRY (Don't Repeat Yourself)
 # as possible.
