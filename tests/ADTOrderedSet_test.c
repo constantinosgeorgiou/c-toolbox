@@ -4,7 +4,7 @@
                             // oset_get_at_node, oset_node_key, oset_node_value, oset_first,
                             // oset_last, oset_next, oset_previous
 
-#include <stdlib.h>  // malloc, free, sizeof, rand, RAND_MAX
+#include <stdlib.h>  // malloc, free, sizeof, rand, RAND_MAX, size_t
 
 #include "acutest.h"  // TEST_CHECK, TEST_LIST
 
@@ -33,7 +33,7 @@ void test_create(void) {
 
 /// @brief Shuffles the values of an array.
 ///
-void shuffle(int* array[], int size) {
+void shuffle(int* array[], size_t size) {
     for (int i = 0; i < size; i++) {
         int j = i + rand() / (RAND_MAX / (size - i) + 1);
         int* t = array[j];
@@ -59,7 +59,7 @@ static int* create_int(int value) {
 ///
 /// @param multiplier Multiplies the values of the array. (i * multiplier)
 ///
-int** create_array(int size, int multiplier) {
+int** create_array(size_t size, int multiplier) {
     int** array = malloc(size * sizeof(*array));
     if (array == NULL) {
         return NULL;
@@ -82,7 +82,7 @@ void insert_and_test(OrderedSet oset, void* key, void* value) {
 void test_insert(void) {
     OrderedSet oset = oset_create(compare_ints, free, free);
 
-    int N = 1000;
+    int N = 65537;
 
     // Create key and value arrays.
     int** key_array = create_array(N, 1);
@@ -100,7 +100,7 @@ void test_insert(void) {
     int* duplicate_key = create_int(N / 2);  // N/2, duplicate middle key.
     int* value = create_int(N + N);          // N+N, guarantees big value to check stack-like
                                              // behaviour for duplicates.
-    int size = oset_size(oset);
+    size_t size = oset_size(oset);
     insert_and_test(oset, duplicate_key, value);
     TEST_CHECK(oset_size(oset) == (size + 1));
 
@@ -149,7 +149,7 @@ void test_remove(void) {
         oset_insert(oset, key_array[i], value_array[i]);
     }
 
-    int size = oset_size(oset);
+    size_t size = oset_size(oset);
 
     // Remove first key.
     int key = 0;

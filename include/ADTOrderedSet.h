@@ -18,6 +18,7 @@ typedef void (*DestroyFunc)(void* value);
 #define OSET_ERROR (OrderedSet)0
 
 #include <stdbool.h>  // bool
+#include <stddef.h>   // size_t
 
 typedef struct ordered_set* OrderedSet;
 typedef struct ordered_set_node* OrderedSetNode;
@@ -55,7 +56,7 @@ DestroyFunc oset_set_destroy_value(OrderedSet oset, DestroyFunc destroy_value);
 ///
 /// @return The number of elements in the Ordered Set.
 ///
-int oset_size(OrderedSet oset);
+size_t oset_size(OrderedSet oset);
 
 /// @brief Associates a key with a value (inserting the key if not already present).
 ///        Duplicate keys are treated like a stack, Last In First Out.
