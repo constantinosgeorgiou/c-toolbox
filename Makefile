@@ -27,6 +27,9 @@ setup:
 	@# -p  Make parent directories
 	mkdir -p tests/bin
 
+	@# Initialize submodules
+	git submodule update --init --recursive
+
 
 # Compile tests:
 # --------------
