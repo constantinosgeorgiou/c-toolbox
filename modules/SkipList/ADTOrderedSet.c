@@ -21,9 +21,9 @@
 ///
 ///
 static size_t sizes[] = {
-    65536,                // 2^16
-    4294967296,           // 2^32
-    18446744073709551616  // 2^64
+    65536,       // 2^16
+    4294967296,  // 2^32
+    UINTMAX_MAX  // Can't fit 2^64 in size_t.
 };
 
 struct ordered_set {
