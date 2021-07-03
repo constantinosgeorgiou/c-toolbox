@@ -1,3 +1,3 @@
-[submodule "pcg-c-basic"]
+[submodule "modules/pcg-c-basic"]
 	path = modules/pcg-c-basic
 	url = https://github.com/imneme/pcg-c-basic.git
