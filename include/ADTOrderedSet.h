@@ -83,22 +83,6 @@ bool oset_remove(OrderedSet oset, void* key);
 ///
 void* oset_find(OrderedSet oset, void* key);
 
-/// @brief Gets the value at specified position.
-///
-/// pos >= size returns last value. pos < 0 returns first value.
-///
-/// @return Value at specified position.
-///
-void* oset_get_at(OrderedSet oset, int pos);
-
-/// @brief Removes element at specified position.
-///
-/// pos >= size removes last value. pos < 0 removes first value.
-///
-/// @return true, if removed successfully, otherwise false.
-///
-bool oset_remove_at(OrderedSet oset, int pos);
-
 /// @brief Removes all elements with keys >= split_key and returns them in a new
 ///        Ordered Set.
 ///
@@ -133,14 +117,6 @@ void oset_concat(OrderedSet a, OrderedSet b);
 /// @return Node of the value associated with specified key, or OSET_EOF, if key not found.
 ///
 OrderedSetNode oset_find_node(OrderedSet oset, void* key);
-
-/// @brief Gets the node at specified position.
-///
-/// pos >= size returns last value. pos < 0 returns first value.
-///
-/// @return Node at specified position.
-///
-OrderedSetNode oset_get_at_node(OrderedSet oset, int pos);
 
 /// @brief Returns key of specified node.
 ///
