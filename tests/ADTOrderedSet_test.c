@@ -303,87 +303,6 @@ void test_find(void) {
     free(value_array);
 }
 
-void test_get_at(void) {
-    OrderedSet oset = oset_create(compare_ints, free, free);
-
-    int N = 1000;
-
-    // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
-    shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
-
-    // Insert (key, value) pairs.
-    for (int i = 0; i < N; i++) {
-        oset_insert(oset, key_array[i], value_array[i]);
-    }
-
-    OrderedSetNode node = oset_first(oset);
-    for (int i = 0; i < N; i++) {
-        TEST_CHECK(oset_get_at(oset, i) == oset_node_value(oset, node));
-
-        OrderedSetNode got_node = oset_get_at_node(oset, i);
-        TEST_CHECK(oset_node_key(oset, got_node) == oset_node_key(oset, node));
-        TEST_CHECK(oset_node_value(oset, got_node) == oset_node_value(oset, node));
-
-        node = oset_next(oset, node);
-    }
-
-    // Get position < 0.
-    TEST_CHECK(oset_get_at(oset, -1) == oset_node_value(oset, oset_first(oset)));
-    node = oset_get_at_node(oset, -1);
-    TEST_CHECK(oset_node_key(oset, node) == oset_node_key(oset, oset_first(oset)));
-    TEST_CHECK(oset_node_value(oset, node) == oset_node_value(oset, oset_first(oset)));
-
-    // Get position > N.
-    TEST_CHECK(oset_get_at(oset, N + 1) == oset_node_value(oset, oset_last(oset)));
-    node = oset_get_at_node(oset, N + 1);
-    TEST_CHECK(oset_node_key(oset, node) == oset_node_key(oset, oset_last(oset)));
-    TEST_CHECK(oset_node_value(oset, node) == oset_node_value(oset, oset_last(oset)));
-
-    oset_destroy(oset);
-
-    free(key_array);
-    free(value_array);
-}
-
-void test_remove_at(void) {
-    OrderedSet oset = oset_create(compare_ints, free, free);
-
-    int N = 1000;
-
-    // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
-    shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
-
-    // Insert (key, value) pairs.
-    for (int i = 0; i < N; i++) {
-        oset_insert(oset, key_array[i], value_array[i]);
-    }
-
-    // Remove position < 0.
-    OrderedSetNode node = oset_get_at_node(oset, -1);
-    TEST_CHECK(oset_remove_at(oset, -1));
-    TEST_CHECK(oset_find(oset, oset_node_key(oset, node)) == NULL);
-
-    // Remove position > N.
-    node = oset_get_at_node(oset, N + 1);
-    TEST_CHECK(oset_remove_at(oset, N + 1));
-    TEST_CHECK(oset_find(oset, oset_node_key(oset, node)) == NULL);
-
-    for (int i = 0; i < N; i++) {
-        node = oset_get_at_node(oset, i);
-        TEST_CHECK(oset_remove_at(oset, i));
-        TEST_CHECK(oset_find(oset, oset_node_key(oset, node)) == NULL);
-    }
-
-    oset_destroy(oset);
-
-    free(key_array);
-    free(value_array);
-}
-
 void test_split(void) {
     OrderedSet alpha = oset_create(compare_ints, free, free);
 
@@ -535,8 +454,6 @@ TEST_LIST = {
     {"oset_remove", test_remove},
     {"oset_traversal", test_traversal},
     {"oset_find", test_find},
-    {"oset_get_at", test_get_at},
-    {"oset_remove_at", test_remove_at},
     {"oset_split", test_split},
     {"oset_merge", test_merge},
     {"oset_concat", test_concat},
