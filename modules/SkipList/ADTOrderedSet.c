@@ -142,8 +142,10 @@ static void node_destroy(OrderedSetNode node, DestroyFunc destroy_key, DestroyFu
         }
     }
 
-    if (destroy_key != NULL) destroy_key(node->key);
-    if (destroy_value != NULL) destroy_value(node->value);
+    if (node->is_header == false) {
+        if (destroy_key != NULL) destroy_key(node->key);
+        if (destroy_value != NULL) destroy_value(node->value);
+    }
 
     free(node->forward);
     free(node);
@@ -179,9 +181,7 @@ static OrderedSetNode node_find_previous(OrderedSet oset, void* key, Vector upda
 
 OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value) {
     OrderedSet oset = malloc(sizeof(*oset));
-    if (oset == NULL) {
-        return OSET_ERROR;
-    }
+    if (oset == NULL) return OSET_ERROR;
 
     oset->compare = compare;
     oset->destroy_key = destroy_key;
@@ -196,9 +196,8 @@ OrderedSet oset_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc
 
     // Header nodes don't need to have neither keys nor values.
     oset->header = node_create(OSET_BOF, OSET_BOF, oset->max_level, true);
-    if (oset->header == NULL) {
-        return OSET_ERROR;
-    }
+    if (oset->header == NULL) return OSET_ERROR;
+    oset->header->levels = 1;  // Allocate all levels up to max_level, but start at level 1.
 
     // Seed Pseudo Random Number Generator, if not yet seeded.
     if (seeded == false) random_seed(oset->max_level);
@@ -243,11 +242,14 @@ void oset_insert(OrderedSet oset, void* key, void* value) {
         oset->max_level *= 2;
     }
 
+    OrderedSetNode new_node = node_create(key, value, level_random(oset->max_level), false);
+
+    // Increase header levels if needed.
+    if (oset->header->levels < new_node->levels) oset->header->levels = new_node->levels;
+
     Vector update = vector_create(oset->max_level, NULL);
 
     OrderedSetNode target = node_find_previous(oset, key, update);
-
-    OrderedSetNode new_node = node_create(key, value, level_random(oset->max_level), false);
 
     // Insert new_node after node.
     for (int i = new_node->levels - 1; i >= 0; i--) {
@@ -317,7 +319,62 @@ void* oset_find(OrderedSet oset, void* key) {
     return node != NULL ? node->value : NULL;
 }
 
-OrderedSet oset_split(OrderedSet oset, void* split_key) { return OSET_ERROR; }
+OrderedSet oset_split(OrderedSet oset, void* split_key) {
+    if (oset->size == 0) return OSET_ERROR;
+
+    OrderedSet split = oset_create(oset->compare, oset->destroy_key, oset->destroy_value);
+    if (split == OSET_ERROR) return OSET_ERROR;
+
+    // Initialize split Ordered Set from oset metadata.
+    if (split->max_level < oset->max_level) {
+        // Allocate all levels of spllit Ordered Set, up to the new max_level.
+        split->max_level = oset->max_level;  // Update max_level of split.
+        split->header = realloc(split->header, split->max_level);
+    }
+    split->header->levels = oset->header->levels;
+    split->first = oset->first;
+    split->last = oset->last;
+
+    OrderedSetNode node = oset->header;
+
+    // Traverse levels from top to bottom.
+    for (int i = node->levels - 1; i >= 0; i--) {
+        // Traverse forward links in level.
+        while (node->forward[i] != OSET_EOF && oset->compare(node->forward[i]->key, split_key) <= 0) {
+            node = node->forward[i];
+        }
+        split->header->forward[i] = node->forward[i];
+        node->forward[i] = OSET_EOF;
+
+        if (i == 0) {
+            split->first = split->header->forward[i];
+
+            // Update first and last pointers of original Ordered Set.
+            if (oset->first == split->first) oset->first = OSET_EOF;
+            oset->last = node;
+        }
+    }
+
+    // Decrease excess levels of original Ordered Set.
+    node = oset->header;
+    while (node->forward[node->levels] == OSET_EOF && node->levels > 0) {
+        node->levels--;
+    }
+
+    // Decrease excess levels of split Ordered Set.
+    node = split->header;
+    while (node->forward[node->levels] == OSET_EOF && node->levels > 0) {
+        node->levels--;
+    }
+
+    // Update sizes.
+    size_t size = 0;
+    for (node = split->header->forward[0]; node != OSET_EOF; node = node->forward[0]) size++;
+    split->size = size;
+    oset->size -= split->size;
+
+    return split;
+}
 
 void oset_merge(OrderedSet a, OrderedSet b) {}
 
