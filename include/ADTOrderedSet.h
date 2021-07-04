@@ -86,8 +86,9 @@ void* oset_find(OrderedSet oset, void* key);
 /// @brief Removes all elements with keys >= split_key and returns them in a new
 ///        Ordered Set.
 ///
-/// split_key can not be NULL. split_key < smallest_key and split_key > largest_key returns an
-/// empty Ordered Set. Splitting an empty Ordered Set results in an error.
+/// split_key can not be NULL. split_key < smallest_key transfers all elements to newly created
+/// Ordered Set. split_key > largest_key returns an empty Ordered Set. Splitting an empty Ordered
+/// Set results in an error.
 ///
 /// @return Newly created Ordered Set with keys >= split_key, or OSET_ERROR, if an error occurred.
 ///
