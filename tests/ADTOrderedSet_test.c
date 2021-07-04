@@ -137,7 +137,7 @@ void test_insert(void) {
 void test_remove(void) {
     OrderedSet oset = oset_create(compare_ints, NULL, NULL);
 
-    int N = 6;
+    int N = 65537;  // To force capacity to double.
 
     // Create key and value arrays.
     int** key_array = create_array(N, 1);
@@ -226,7 +226,7 @@ void test_remove(void) {
 void test_traversal(void) {
     OrderedSet oset = oset_create(compare_ints, free, free);
 
-    int N = 10;
+    int N = 65537;  // To force capacity to double.
 
     // Create and suffle key array.
     int** key_array = create_array(N, 1);
@@ -306,11 +306,11 @@ void test_find(void) {
 void test_split(void) {
     OrderedSet alpha = oset_create(compare_ints, free, free);
 
-    int N = 1000;
+    int N = 65537;  // To force capacity to double.
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Insert (key, value) pairs.
@@ -324,36 +324,42 @@ void test_split(void) {
 
     // Check values of Ordered Sets.
     OrderedSetNode node = oset_first(alpha);
-    for (int i = 0; i < N / 2; i++) {
+
+    for (int i = 0; i <= N / 2; i++) {
         int* key = oset_node_key(alpha, node);
         TEST_CHECK(*key == i);
         node = oset_next(alpha, node);
     }
     node = oset_first(beta);
-    for (int i = N / 2; i < N; i++) {
+    for (int i = (N / 2) + 1; i < N; i++) {
         int* key = oset_node_key(beta, node);
         TEST_CHECK(*key == i);
         node = oset_next(beta, node);
     }
     oset_destroy(beta);
 
+    size_t size = 0;
+
     // Split with split_key < 0 (first key)
     split_key = -1;
-    OrderedSet empty = oset_split(alpha, &split_key);
-    TEST_CHECK(oset_size(empty) == 0);
-    oset_destroy(empty);
+    size = oset_size(alpha);
+    OrderedSet gamma = oset_split(alpha, &split_key);
+    TEST_CHECK(oset_size(alpha) == 0);
+    TEST_CHECK(oset_size(gamma) == size);
+    oset_destroy(alpha);
 
     // Split with split_key > N (last key)
     split_key = N + 1;
-    empty = oset_split(alpha, &split_key);
+    OrderedSet empty = oset_split(gamma, &split_key);
     TEST_CHECK(oset_size(empty) == 0);
+    TEST_CHECK(oset_size(gamma) == size);
 
     // Split empty Ordered Set.
     OrderedSet error = oset_split(empty, &split_key);
     TEST_CHECK(error == OSET_ERROR);
     oset_destroy(empty);
 
-    oset_destroy(alpha);
+    oset_destroy(gamma);
 
     free(key_array);
     free(value_array);
