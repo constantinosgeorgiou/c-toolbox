@@ -48,7 +48,6 @@ struct ordered_set_node {
     OrderedSetNode* forward;
     OrderedSetNode previous;
 
-    int* width;      // Number of bottom layer links being traversed by each of the forward links.
     int levels;      // Number of forward links.
     bool is_header;  // true, if node is header, otherwise false.
 
@@ -117,12 +116,6 @@ static OrderedSetNode node_create(void* key, void* value, int levels, bool is_he
         return NULL;
     }
 
-    // Allocate width array.
-    node->width = malloc(levels * sizeof(*node->width));
-    if (node->width == NULL) {
-        return NULL;
-    }
-
     node->levels = levels;
     node->previous = OSET_BOF;
     node->is_header = is_header;
@@ -153,7 +146,6 @@ static void node_destroy(OrderedSetNode node, DestroyFunc destroy_key, DestroyFu
     if (destroy_value != NULL) destroy_value(node->value);
 
     free(node->forward);
-    free(node->width);
     free(node);
 }
 
@@ -245,8 +237,10 @@ size_t oset_size(OrderedSet oset) { return oset->size; }
 void oset_insert(OrderedSet oset, void* key, void* value) {
     assert(key != NULL);
 
+    // Increase capacity if needed.
     if (oset->size == oset->capacity) {
         capacity_increase(oset);
+        oset->max_level *= 2;
     }
 
     Vector update = vector_create(oset->max_level, NULL);
@@ -323,10 +317,6 @@ void* oset_find(OrderedSet oset, void* key) {
     return node != NULL ? node->value : NULL;
 }
 
-void* oset_get_at(OrderedSet oset, int pos) { return NULL; }
-
-bool oset_remove_at(OrderedSet oset, int pos) { return false; }
-
 OrderedSet oset_split(OrderedSet oset, void* split_key) { return OSET_ERROR; }
 
 void oset_merge(OrderedSet a, OrderedSet b) {}
@@ -344,8 +334,6 @@ OrderedSetNode oset_find_node(OrderedSet oset, void* key) {
 
     return OSET_EOF;
 }
-
-OrderedSetNode oset_get_at_node(OrderedSet oset, int pos) { return OSET_EOF; }
 
 void* oset_node_key(OrderedSet oset, OrderedSetNode node) {
     assert(node != NULL);
