@@ -423,11 +423,11 @@ void test_merge(void) {
 void test_concat(void) {
     OrderedSet alpha = oset_create(compare_ints, free, free);
 
-    int N = 1000;
+    int N = 65537;  // To force capacity to double.
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Insert (key, value) pairs.
@@ -439,7 +439,15 @@ void test_concat(void) {
     int split_key = N / 2;
     OrderedSet beta = oset_split(alpha, &split_key);
 
+    size_t beta_size = oset_size(beta);
+    size_t alpha_size = oset_size(alpha);
+
+    OrderedSetNode last = oset_last(beta);
+
     oset_concat(alpha, beta);
+
+    TEST_CHECK(oset_last(alpha) == last);
+    TEST_CHECK(oset_size(alpha) == (alpha_size + beta_size));
 
     OrderedSetNode node = oset_first(alpha);
     for (int i = 0; i < N; i++) {
