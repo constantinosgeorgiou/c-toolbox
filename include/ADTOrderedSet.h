@@ -101,9 +101,10 @@ OrderedSet oset_split(OrderedSet oset, void* split_key);
 ///
 void oset_merge(OrderedSet a, OrderedSet b);
 
-/// @brief Concatenates two Ordered Sets.
+/// @brief Appends B to the end of A.
 ///
-/// last_key in a > first_key in b, results in undefined behaviour.
+/// last_key in a > first_key in b, results in undefined behaviour. a == b, results in undefined
+/// behaviour. Any operation on  b  after it is merged with  a  results in undefined behaviour.
 ///
 void oset_concat(OrderedSet a, OrderedSet b);
 
