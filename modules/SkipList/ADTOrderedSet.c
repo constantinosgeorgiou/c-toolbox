@@ -327,9 +327,11 @@ OrderedSet oset_split(OrderedSet oset, void* split_key) {
 
     // Initialize split Ordered Set from oset metadata.
     if (split->max_level < oset->max_level) {
-        // Allocate all levels of spllit Ordered Set, up to the new max_level.
         split->max_level = oset->max_level;  // Update max_level of split.
-        split->header = realloc(split->header, split->max_level);
+        // Reallocate and initialize to NULL the forward array of split header node.
+        free(split->header->forward);
+        split->header->forward = calloc(split->max_level * sizeof(*split->header->forward), split->max_level);
+        if (split->header->forward == NULL) return OSET_ERROR;
     }
     split->header->levels = oset->header->levels;
     split->first = oset->first;
