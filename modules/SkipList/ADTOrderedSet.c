@@ -378,7 +378,41 @@ OrderedSet oset_split(OrderedSet oset, void* split_key) {
 
 void oset_merge(OrderedSet a, OrderedSet b) {}
 
-void oset_concat(OrderedSet a, OrderedSet b) {}
+void oset_concat(OrderedSet a, OrderedSet b) {
+    assert(a != b);
+
+    // Increase levels of  a  Ordered Set if needed.
+    if (a->header->levels < b->header->levels) {
+        for (int i = a->header->levels; i < b->header->levels; i++) {
+            a->header->forward[i] = OSET_EOF;
+        }
+
+        a->header->levels = b->header->levels;
+    }
+
+    OrderedSetNode node = a->header;
+    // Traverse levels from top to bottom.
+    for (int i = node->levels - 1; i >= 0; i--) {
+        // Traverse forward links in level.
+        while (node->forward[i] != OSET_EOF) node = node->forward[i];
+
+        if (i <= b->header->levels) {
+            node->forward[i] = b->header->forward[i];
+        }
+    }
+
+    // Update last pointer.
+    a->last = b->last;
+
+    // Update size.
+    a->size += b->size;
+
+    // Destroy  b  Ordered Set.
+    for (int i = b->header->levels; i >= 0; i--) b->header->forward[i] = OSET_EOF;
+    oset_set_destroy_key(b, NULL);
+    oset_set_destroy_value(b, NULL);
+    oset_destroy(b);
+}
 
 OrderedSetNode oset_find_node(OrderedSet oset, void* key) {
     assert(key != NULL);
