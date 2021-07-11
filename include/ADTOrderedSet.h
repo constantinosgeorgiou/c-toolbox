@@ -94,12 +94,14 @@ void* oset_find(OrderedSet oset, void* key);
 ///
 OrderedSet oset_split(OrderedSet oset, void* split_key);
 
-/// @brief Merges two Ordered Sets.
+/// @brief Creates and returns a new Ordered Set containing the elements of Ordered Set a and
+///        Ordered Set b.
 ///
-/// Any operation on  b  after it is merged with  a  results in undefined behaviour.
-/// a == b, results in undefined behaviour.
+/// If an element appears in both Ordered Sets, use the value field from Ordered Set  b  .
+/// Any operation on the Ordered Sets  a  and  b  after they are merged results in undefined
+/// behaviour. a == b, results in undefined behaviour.
 ///
-void oset_merge(OrderedSet a, OrderedSet b);
+OrderedSet oset_merge(OrderedSet a, OrderedSet b);
 
 /// @brief Appends B to the end of A.
 ///

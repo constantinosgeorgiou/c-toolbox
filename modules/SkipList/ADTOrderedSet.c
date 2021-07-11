@@ -378,7 +378,7 @@ OrderedSet oset_split(OrderedSet oset, void* split_key) {
     return split;
 }
 
-void oset_merge(OrderedSet a, OrderedSet b) {}
+OrderedSet oset_merge(OrderedSet a, OrderedSet b) {}
 
 void oset_concat(OrderedSet a, OrderedSet b) {
     assert(a != b);
