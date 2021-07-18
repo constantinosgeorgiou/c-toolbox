@@ -322,9 +322,10 @@ void test_split(void) {
     int split_key = N / 2;
     OrderedSet beta = oset_split(alpha, &split_key);
 
-    // Check values of Ordered Sets.
-    OrderedSetNode node = oset_first(alpha);
+    OrderedSetNode node = OSET_EOF;
 
+    // Check keys of Ordered Sets in ascending order.
+    node = oset_first(alpha);
     for (int i = 0; i <= N / 2; i++) {
         int* key = oset_node_key(alpha, node);
         TEST_CHECK(*key == i);
@@ -336,6 +337,21 @@ void test_split(void) {
         TEST_CHECK(*key == i);
         node = oset_next(beta, node);
     }
+
+    // Check keys of Ordered Sets in descending order.
+    node = oset_last(beta);
+    for (int i = N - 1; i >= (N / 2) + 1; i--) {
+        int* key = oset_node_key(beta, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(beta, node);
+    }
+    node = oset_last(alpha);
+    for (int i = N / 2; i >= 0; i--) {
+        int* key = oset_node_key(alpha, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(alpha, node);
+    }
+
     oset_destroy(beta);
 
     size_t size = 0;
@@ -366,12 +382,16 @@ void test_split(void) {
 }
 
 void test_merge(void) {
-    OrderedSet alpha = oset_create(compare_ints, free, free);
-    OrderedSet beta = oset_create(compare_ints, free, free);
+    int N = 65537;  // To force capacity to double.
 
-    int N = 1000;
+    // -------------------------------------------------
+    // Merge OrderedSets containing odd and even numbers
+    // -------------------------------------------------
 
-    // Create key and value arrays with odd numbers for Ordered Set alpha.
+    OrderedSet odds = oset_create(compare_ints, free, free);
+    OrderedSet evens = oset_create(compare_ints, free, free);
+
+    // Create key and value arrays containing odd numbers for odds Ordered Set.
     int** odd_key_array = malloc(N * sizeof(*odd_key_array));
     int** odd_value_array = malloc(N * sizeof(*odd_value_array));
     int number = 1;
@@ -382,7 +402,7 @@ void test_merge(void) {
     }
     shuffle(odd_key_array, N);  // Shuffle key array for uniform value insertion.
 
-    // Create key and value arrays with even numbers for Ordered Set beta.
+    // Create key and value arrays containing even numbers for evens Ordered Set.
     int** even_key_array = malloc(N * sizeof(*even_key_array));
     int** even_value_array = malloc(N * sizeof(*even_value_array));
     number = 0;
@@ -395,29 +415,100 @@ void test_merge(void) {
 
     // Insert (key, value) pairs into Ordered Sets.
     for (int i = 0; i < N; i++) {
-        oset_insert(alpha, odd_key_array[i], odd_value_array[i]);
-        oset_insert(beta, even_key_array[i], even_value_array[i]);
+        oset_insert(odds, odd_key_array[i], odd_value_array[i]);
+        oset_insert(evens, even_key_array[i], even_value_array[i]);
     }
 
-    oset_merge(alpha, beta);
+    OrderedSet merged = oset_merge(odds, evens);
 
-    OrderedSetNode node = oset_first(alpha);
+    OrderedSetNode node = OSET_EOF;
+
+    // Traverse in ascending order.
+    node = oset_first(merged);
     for (int i = 0; i < (2 * N); i++) {
-        int* key = oset_node_key(alpha, node);
-        int* value = oset_node_value(alpha, node);
-
+        int* key = oset_node_key(merged, node);
         TEST_CHECK(*key == i);
-        TEST_CHECK(*value == i);
-
-        node = oset_next(alpha, node);
+        node = oset_next(merged, node);
     }
 
-    oset_destroy(alpha);
+    // Traverse in descending order.
+    node = oset_last(merged);
+    for (int i = (2 * N) - 1; i >= 0; i--) {
+        int* key = oset_node_key(merged, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(merged, node);
+    }
+
+    // ---------------------------
+    // Concatenate two OrderedSets
+    // ---------------------------
+
+    OrderedSet alpha = merged;
+    OrderedSet beta = oset_split(alpha, &N);
+
+    OrderedSet concated = oset_merge(alpha, beta);
+
+    // Traverse in ascending order.
+    node = oset_first(concated);
+    for (int i = 0; i < (2 * N); i++) {
+        int* key = oset_node_key(concated, node);
+        TEST_CHECK(*key == i);
+        node = oset_next(concated, node);
+    }
+
+    // Traverse in descending order.
+    node = oset_last(concated);
+    for (int i = (2 * N) - 1; i >= 0; i--) {
+        int* key = oset_node_key(concated, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(concated, node);
+    }
+
+    oset_destroy(concated);
+
+    // -----------------------------
+    // Merge with duplicate elements
+    // -----------------------------
+
+    int** zeros_array = malloc(N * sizeof(*zeros_array));
+    for (int i = 0; i < N; i++) zeros_array[i] = create_int(0);
+    int** ones_array = malloc(N * sizeof(*ones_array));
+    for (int i = 0; i < N; i++) ones_array[i] = create_int(1);
+
+    OrderedSet zeros = oset_create(compare_ints, free, NULL);
+    OrderedSet ones = oset_create(compare_ints, free, NULL);
+
+    for (int i = 0; i < N; i++) {
+        oset_insert(zeros, zeros_array[i], NULL);
+        oset_insert(ones, ones_array[i], NULL);
+    }
+
+    merged = oset_merge(zeros, ones);
+
+    // Traverse in ascending order.
+    node = oset_first(merged);
+    for (int i = 0; i < (2 * N); i++) {
+        int* key = oset_node_key(merged, node);
+        TEST_CHECK(*key == (i < N ? 0 : 1));
+        node = oset_next(merged, node);
+    }
+
+    // Traverse in descending order.
+    node = oset_last(merged);
+    for (int i = (2 * N) - 1; i >= 0; i--) {
+        int* key = oset_node_key(merged, node);
+        TEST_CHECK(*key == (i >= N ? 1 : 0));
+        node = oset_previous(merged, node);
+    }
+
+    oset_destroy(merged);
 
     free(odd_key_array);
     free(odd_value_array);
     free(even_key_array);
     free(even_value_array);
+    free(zeros_array);
+    free(ones_array);
 }
 
 void test_concat(void) {
@@ -449,11 +540,20 @@ void test_concat(void) {
     TEST_CHECK(oset_last(alpha) == last);
     TEST_CHECK(oset_size(alpha) == (alpha_size + beta_size));
 
+    // Traverse in ascending order.
     OrderedSetNode node = oset_first(alpha);
     for (int i = 0; i < N; i++) {
         int* key = oset_node_key(alpha, node);
         TEST_CHECK(*key == i);
         node = oset_next(alpha, node);
+    }
+
+    // Traverse in descending order.
+    node = oset_last(alpha);
+    for (int i = N - 1; i >= 0; i--) {
+        int* key = oset_node_key(alpha, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(alpha, node);
     }
 
     oset_destroy(alpha);
