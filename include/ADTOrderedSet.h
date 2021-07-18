@@ -18,6 +18,7 @@ typedef void (*DestroyFunc)(void* value);
 #define OSET_ERROR (OrderedSet)0
 
 #include <stdbool.h>  // bool
+#include <stddef.h>   // size_t
 
 typedef struct ordered_set* OrderedSet;
 typedef struct ordered_set_node* OrderedSetNode;
@@ -55,7 +56,7 @@ DestroyFunc oset_set_destroy_value(OrderedSet oset, DestroyFunc destroy_value);
 ///
 /// @return The number of elements in the Ordered Set.
 ///
-int oset_size(OrderedSet oset);
+size_t oset_size(OrderedSet oset);
 
 /// @brief Associates a key with a value (inserting the key if not already present).
 ///        Duplicate keys are treated like a stack, Last In First Out.
@@ -82,42 +83,30 @@ bool oset_remove(OrderedSet oset, void* key);
 ///
 void* oset_find(OrderedSet oset, void* key);
 
-/// @brief Gets the value at specified position.
-///
-/// pos >= size returns last value. pos < 0 returns first value.
-///
-/// @return Value at specified position.
-///
-void* oset_get_at(OrderedSet oset, int pos);
-
-/// @brief Removes element at specified position.
-///
-/// pos >= size removes last value. pos < 0 removes first value.
-///
-/// @return true, if removed successfully, otherwise false.
-///
-bool oset_remove_at(OrderedSet oset, int pos);
-
 /// @brief Removes all elements with keys >= split_key and returns them in a new
 ///        Ordered Set.
 ///
-/// split_key can not be NULL. split_key < smallest_key and split_key > largest_key returns an
-/// empty Ordered Set. Splitting an empty Ordered Set results in an error.
+/// split_key can not be NULL. split_key < smallest_key transfers all elements to newly created
+/// Ordered Set. split_key > largest_key returns an empty Ordered Set. Splitting an empty Ordered
+/// Set results in an error.
 ///
 /// @return Newly created Ordered Set with keys >= split_key, or OSET_ERROR, if an error occurred.
 ///
 OrderedSet oset_split(OrderedSet oset, void* split_key);
 
-/// @brief Merges two Ordered Sets.
+/// @brief Creates and returns a new Ordered Set containing the elements of Ordered Set a and
+///        Ordered Set b.
 ///
-/// Any operation on  b  after it is merged with  a  results in undefined behaviour.
-/// a == b, results in undefined behaviour.
+/// If an element appears in both Ordered Sets, use the value field from Ordered Set  b  .
+/// Any operation on the Ordered Sets  a  and  b  after they are merged results in undefined
+/// behaviour. a == b, results in undefined behaviour.
 ///
-void oset_merge(OrderedSet a, OrderedSet b);
+OrderedSet oset_merge(OrderedSet a, OrderedSet b);
 
-/// @brief Concatenates two Ordered Sets.
+/// @brief Appends B to the end of A.
 ///
-/// last_key in a > first_key in b, results in undefined behaviour.
+/// last_key in a > first_key in b, results in undefined behaviour. a == b, results in undefined
+/// behaviour. Any operation on  b  after it is merged with  a  results in undefined behaviour.
 ///
 void oset_concat(OrderedSet a, OrderedSet b);
 
@@ -132,14 +121,6 @@ void oset_concat(OrderedSet a, OrderedSet b);
 /// @return Node of the value associated with specified key, or OSET_EOF, if key not found.
 ///
 OrderedSetNode oset_find_node(OrderedSet oset, void* key);
-
-/// @brief Gets the node at specified position.
-///
-/// pos >= size returns last value. pos < 0 returns first value.
-///
-/// @return Node at specified position.
-///
-OrderedSetNode oset_get_at_node(OrderedSet oset, int pos);
 
 /// @brief Returns key of specified node.
 ///

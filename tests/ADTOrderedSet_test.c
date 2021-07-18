@@ -4,7 +4,7 @@
                             // oset_get_at_node, oset_node_key, oset_node_value, oset_first,
                             // oset_last, oset_next, oset_previous
 
-#include <stdlib.h>  // malloc, free, sizeof, rand, RAND_MAX
+#include <stdlib.h>  // malloc, free, sizeof, rand, RAND_MAX, size_t
 
 #include "acutest.h"  // TEST_CHECK, TEST_LIST
 
@@ -33,7 +33,7 @@ void test_create(void) {
 
 /// @brief Shuffles the values of an array.
 ///
-void shuffle(int* array[], int size) {
+void shuffle(int* array[], size_t size) {
     for (int i = 0; i < size; i++) {
         int j = i + rand() / (RAND_MAX / (size - i) + 1);
         int* t = array[j];
@@ -42,12 +42,28 @@ void shuffle(int* array[], int size) {
     }
 }
 
+/// @brief Allocates memory for an integer with given value.
+///
+/// @return Newly created pointer to integer.
+///
+static int* create_int(int value) {
+    int* pointer = malloc(sizeof(int));
+    if (pointer == NULL) {
+        return NULL;
+    }
+    *pointer = value;
+    return pointer;
+}
+
 /// @brief Creates and returns an array containing (int*)
 ///
 /// @param multiplier Multiplies the values of the array. (i * multiplier)
 ///
-int** create_array(int size, int multiplier) {
+int** create_array(size_t size, int multiplier) {
     int** array = malloc(size * sizeof(*array));
+    if (array == NULL) {
+        return NULL;
+    }
 
     for (int i = 0; i < size; i++) {
         array[i] = create_int(multiplier * i);
@@ -66,11 +82,11 @@ void insert_and_test(OrderedSet oset, void* key, void* value) {
 void test_insert(void) {
     OrderedSet oset = oset_create(compare_ints, free, free);
 
-    int N = 1000;
+    int N = 65537;
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     for (int i = 0; i < N; i++) {
@@ -81,9 +97,10 @@ void test_insert(void) {
 
     // Insert key equivalent to the first key, and check if the (key, value) pair was inserted
     // correctly.
-    int* duplicate_key = create_int(*key_array[0]);
-    int* value = create_int(N + 1);  // N + 1, to create a number definitely not in the Ordered Set.
-    int size = oset_size(oset);
+    int* duplicate_key = create_int(N / 2);  // N/2, duplicate middle key.
+    int* value = create_int(N + N);          // N+N, guarantees big value to check stack-like
+                                             // behaviour for duplicates.
+    size_t size = oset_size(oset);
     insert_and_test(oset, duplicate_key, value);
     TEST_CHECK(oset_size(oset) == (size + 1));
 
@@ -91,16 +108,22 @@ void test_insert(void) {
     OrderedSetNode dup = oset_find_node(oset, duplicate_key);
     int* next_key = oset_node_key(oset, oset_next(oset, dup));
     int* next_value = oset_node_value(oset, oset_next(oset, dup));
-    TEST_CHECK(*next_key == *duplicate_key);  // Check if keys are the same.
-    TEST_CHECK(next_key != duplicate_key);    // Check if addresses are different.
-    TEST_CHECK(*next_value != *value);        // Check if values are different.
+    TEST_CHECK(*next_key == *duplicate_key);
+    TEST_CHECK(next_key != duplicate_key);
+    TEST_CHECK(*next_value != *value);
+    TEST_CHECK(*next_value < *value);
 
     // Check if keys are sorted.
     OrderedSetNode node = oset_first(oset);
     for (int i = 0; i < N; i++) {
         int* key = oset_node_key(oset, node);
 
-        TEST_CHECK(*key == i);
+        if (*key != (N / 2)) {  // key not a duplicate.
+            TEST_CHECK(*key == i);
+        } else {
+            TEST_CHECK(*key == (N / 2));  // N/2, where duplicates are positioned.
+            i = N / 2;                    // Resets i to continue traversing after the duplicates.
+        }
 
         node = oset_next(oset, node);
     }
@@ -114,11 +137,11 @@ void test_insert(void) {
 void test_remove(void) {
     OrderedSet oset = oset_create(compare_ints, NULL, NULL);
 
-    int N = 1000;
+    int N = 65537;  // To force capacity to double.
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Insert (key, value) pairs.
@@ -126,60 +149,76 @@ void test_remove(void) {
         oset_insert(oset, key_array[i], value_array[i]);
     }
 
+    size_t size = oset_size(oset);
+
     // Remove first key.
-    int* key = create_int(0);
-    TEST_CHECK(oset_remove(oset, key));
+    int key = 0;
+    TEST_CHECK(oset_remove(oset, &key));
+    TEST_CHECK(oset_size(oset) == (--size));
     TEST_CHECK(*((int*)oset_node_key(oset, oset_first(oset))) == 1);  // Check first key is 1.
 
     // Remove last key.
-    *key = N - 1;
-    TEST_CHECK(oset_remove(oset, key));
+    key = N - 1;
+    TEST_CHECK(oset_remove(oset, &key));
+    TEST_CHECK(oset_size(oset) == (--size));
     TEST_CHECK(*((int*)oset_node_key(oset, oset_last(oset))) == (N - 2));  // Check last key is N-2.
 
     // Remove already removed key.
-    TEST_CHECK(oset_remove(oset, key) == false);
+    TEST_CHECK(oset_remove(oset, &key) == false);
+    TEST_CHECK(oset_size(oset) == size);
 
     // Remove not existent key.
-    *key = N + N;  // N + N, guarantees a large key not in Ordered Set.
-    TEST_CHECK(oset_remove(oset, key) == false);
+    key = N + N;  // N + N, guarantees a large key not in Ordered Set.
+    TEST_CHECK(oset_remove(oset, &key) == false);
+    TEST_CHECK(oset_size(oset) == size);
 
     // Insert duplicate key.
-    *key = N / 2;                    // N / 2, guarantees already existent key.
-    int* value = create_int(N + N);  // Value can be whatever, doesn't matter.
-    oset_insert(oset, key, value);
+    int* dup_key = create_int(N / 2);  // N / 2, guarantees already existent key.
+    int* value = create_int(N + N);    // Value can be whatever, doesn't matter.
+    oset_insert(oset, dup_key, value);
 
     // Remove duplicate key and original key.
-    TEST_CHECK(oset_remove(oset, key));
-    TEST_CHECK(oset_remove(oset, key));
-    TEST_CHECK(oset_find(oset, key) == NULL);
+    key = N / 2;
+    TEST_CHECK(oset_remove(oset, dup_key));
+    TEST_CHECK(oset_remove(oset, &key));
+    TEST_CHECK(oset_find(oset, &key) == NULL);
 
     // Remove keys.
-    int size = oset_size(oset);
-    for (int i = 0; i < N; i++) {
-        TEST_CHECK(oset_remove(oset, key_array[i]));
-        TEST_CHECK(oset_size(oset) == (size--));
-        TEST_CHECK(oset_find(oset, key_array[i]) == NULL);
+    size = oset_size(oset);
+    for (key = 1; key < N - 1; key++) {
+        if (key != (N / 2)) {
+            TEST_CHECK(oset_remove(oset, &key));
+            TEST_CHECK(oset_size(oset) == (--size));
+            TEST_CHECK(oset_find(oset, &key) == NULL);
+        }
     }
+    TEST_CHECK(oset_size(oset) == 0);
 
     // Change DestroyFuncs to see if removal of (key, value) pairs frees the allocated memory.
     oset_set_destroy_key(oset, free);
     oset_set_destroy_value(oset, free);
 
+    int removed[N];  // Holds duplicates of values of key_array, in order to avoid calling
+                     // oset_find() with a freed key.
+
+    // Re-insert (key, value) pairs.
     for (int i = 0; i < N; i++) {
         oset_insert(oset, key_array[i], value_array[i]);
+        removed[i] = *key_array[i];  // Copy key to call oset_find() later.
     }
 
     // Remove keys.
-    int size = oset_size(oset);
+    size = oset_size(oset);
     for (int i = 0; i < N; i++) {
         TEST_CHECK(oset_remove(oset, key_array[i]));
-        TEST_CHECK(oset_size(oset) == (size--));
-        TEST_CHECK(oset_find(oset, key_array[i]) == NULL);
+        TEST_CHECK(oset_size(oset) == (--size));
+        TEST_CHECK(oset_find(oset, &(removed[i])) == NULL);
     }
 
     oset_destroy(oset);
 
-    free(key);
+    free(dup_key);
+    free(value);
     free(key_array);
     free(value_array);
 }
@@ -187,10 +226,10 @@ void test_remove(void) {
 void test_traversal(void) {
     OrderedSet oset = oset_create(compare_ints, free, free);
 
-    int N = 1000;
+    int N = 65537;  // To force capacity to double.
 
     // Create and suffle key array.
-    int** key_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
     int** value_array = create_array(N, 2);
 
     // Insert (key, value) pairs.
@@ -209,12 +248,14 @@ void test_traversal(void) {
     }
 
     // Traverse in descending order.
-    int i = N - 1;
+    i = N - 1;
     for (OrderedSetNode node = oset_last(oset); node != OSET_BOF; node = oset_previous(oset, node)) {
         int* key = oset_node_key(oset, node);
         int* value = oset_node_value(oset, node);
+
         TEST_CHECK(*key == i);
         TEST_CHECK(*value == (2 * i));
+
         i--;
     }
 
@@ -230,8 +271,8 @@ void test_find(void) {
     int N = 1000;
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Insert (key, value) pairs.
@@ -242,101 +283,19 @@ void test_find(void) {
         int* found_key = oset_node_key(oset, found_node);
         int* found_value = oset_node_value(oset, found_node);
 
-        TEST_ASSERT(found_node != OSET_EOF);
-        TEST_ASSERT(found_key == key_array[i]);
-        TEST_ASSERT(found_value == value_array[i]);
+        TEST_CHECK(found_node != OSET_EOF);
+        TEST_CHECK(found_key == key_array[i]);
+        TEST_CHECK(found_value == value_array[i]);
     }
 
     // Search non-existent key.
-    int* key = create_int(N * 2);  // N*2, guarantees non existent value.
-    TEST_CHECK(oset_find_node(oset, key) == OSET_EOF);
-    TEST_CHECK(oset_find(oset, key) == NULL);
+    int key = N * 2;  // N*2, guarantees non existent value.
+    TEST_CHECK(oset_find_node(oset, &key) == OSET_EOF);
+    TEST_CHECK(oset_find(oset, &key) == NULL);
 
-    // Find key in the middle.
-    *key = N / 2;
-    TEST_CHECK(*((int*)oset_find(oset, key)) == (N / 2));
-
-    oset_destroy(oset);
-
-    free(key);
-    free(key_array);
-    free(value_array);
-}
-
-void test_get_at(void) {
-    OrderedSet oset = oset_create(compare_ints, free, free);
-
-    int N = 1000;
-
-    // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
-    shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
-
-    // Insert (key, value) pairs.
-    for (int i = 0; i < N; i++) {
-        oset_insert(oset, key_array[i], value_array[i]);
-    }
-
-    OrderedSetNode node = oset_first(oset);
-    for (int i = 0; i < N; i++) {
-        TEST_CHECK(oset_get_at(oset, i) == oset_node_value(oset, node));
-
-        OrderedSetNode got_node = oset_get_at_node(oset, i);
-        TEST_CHECK(oset_node_key(oset, got_node) == oset_node_key(oset, node));
-        TEST_CHECK(oset_node_value(oset, got_node) == oset_node_value(oset, node));
-
-        node = oset_next(oset, node);
-    }
-
-    // Get position < 0.
-    TEST_CHECK(oset_get_at(oset, -1) == oset_node_value(oset, oset_first(oset)));
-    node = oset_get_at_node(oset, -1);
-    TEST_CHECK(oset_node_key(oset, node) == oset_node_key(oset, oset_first(oset)));
-    TEST_CHECK(oset_node_value(oset, node) == oset_node_value(oset, oset_first(oset)));
-
-    // Get position > N.
-    TEST_CHECK(oset_get_at(oset, N + 1) == oset_node_value(oset, oset_last(oset)));
-    node = oset_get_at_node(oset, N + 1);
-    TEST_CHECK(oset_node_key(oset, node) == oset_node_key(oset, oset_last(oset)));
-    TEST_CHECK(oset_node_value(oset, node) == oset_node_value(oset, oset_last(oset)));
-
-    oset_destroy(oset);
-
-    free(key_array);
-    free(value_array);
-}
-
-void test_remove_at(void) {
-    OrderedSet oset = oset_create(compare_ints, free, free);
-
-    int N = 1000;
-
-    // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
-    shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
-
-    // Insert (key, value) pairs.
-    for (int i = 0; i < N; i++) {
-        oset_insert(oset, key_array[i], value_array[i]);
-    }
-
-    // Remove position < 0.
-    OrderedSetNode node = oset_get_at_node(oset, -1);
-    TEST_CHECK(oset_remove_at(oset, -1));
-    TEST_CHECK(oset_find(oset, oset_node_key(oset, node)) == NULL);
-
-    // Remove position > N.
-    node = oset_get_at_node(oset, N + 1);
-    TEST_CHECK(oset_remove_at(oset, N + 1));
-    TEST_CHECK(oset_find(oset, oset_node_key(oset, node)) == NULL);
-
-    for (int i = 0; i < N; i++) {
-        node = oset_get_at_node(oset, i);
-        TEST_CHECK(oset_remove_at(oset, i));
-        TEST_CHECK(oset_find(oset, oset_node_key(oset, node)) == NULL);
-    }
+    // Find in the middle:
+    key = N / 2;
+    TEST_CHECK(*((int*)oset_node_key(oset, oset_find_node(oset, &key))) == (N / 2));
 
     oset_destroy(oset);
 
@@ -347,11 +306,11 @@ void test_remove_at(void) {
 void test_split(void) {
     OrderedSet alpha = oset_create(compare_ints, free, free);
 
-    int N = 1000;
+    int N = 65537;  // To force capacity to double.
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Insert (key, value) pairs.
@@ -363,50 +322,76 @@ void test_split(void) {
     int split_key = N / 2;
     OrderedSet beta = oset_split(alpha, &split_key);
 
-    // Check values of Ordered Sets.
-    OrderedSetNode node = oset_first(alpha);
-    for (int i = 0; i < N / 2; i++) {
+    OrderedSetNode node = OSET_EOF;
+
+    // Check keys of Ordered Sets in ascending order.
+    node = oset_first(alpha);
+    for (int i = 0; i <= N / 2; i++) {
         int* key = oset_node_key(alpha, node);
         TEST_CHECK(*key == i);
         node = oset_next(alpha, node);
     }
     node = oset_first(beta);
-    for (int i = N / 2; i < N; i++) {
+    for (int i = (N / 2) + 1; i < N; i++) {
         int* key = oset_node_key(beta, node);
         TEST_CHECK(*key == i);
         node = oset_next(beta, node);
     }
+
+    // Check keys of Ordered Sets in descending order.
+    node = oset_last(beta);
+    for (int i = N - 1; i >= (N / 2) + 1; i--) {
+        int* key = oset_node_key(beta, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(beta, node);
+    }
+    node = oset_last(alpha);
+    for (int i = N / 2; i >= 0; i--) {
+        int* key = oset_node_key(alpha, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(alpha, node);
+    }
+
     oset_destroy(beta);
+
+    size_t size = 0;
 
     // Split with split_key < 0 (first key)
     split_key = -1;
-    OrderedSet empty = oset_split(alpha, &split_key);
-    TEST_CHECK(oset_size(empty) == 0);
-    oset_destroy(empty);
+    size = oset_size(alpha);
+    OrderedSet gamma = oset_split(alpha, &split_key);
+    TEST_CHECK(oset_size(alpha) == 0);
+    TEST_CHECK(oset_size(gamma) == size);
+    oset_destroy(alpha);
 
     // Split with split_key > N (last key)
     split_key = N + 1;
-    OrderedSet empty = oset_split(alpha, &split_key);
+    OrderedSet empty = oset_split(gamma, &split_key);
     TEST_CHECK(oset_size(empty) == 0);
+    TEST_CHECK(oset_size(gamma) == size);
 
     // Split empty Ordered Set.
     OrderedSet error = oset_split(empty, &split_key);
     TEST_CHECK(error == OSET_ERROR);
     oset_destroy(empty);
 
-    oset_destroy(alpha);
+    oset_destroy(gamma);
 
     free(key_array);
     free(value_array);
 }
 
 void test_merge(void) {
-    OrderedSet alpha = oset_create(compare_ints, free, free);
-    OrderedSet beta = oset_create(compare_ints, free, free);
+    int N = 65537;  // To force capacity to double.
 
-    int N = 1000;
+    // -------------------------------------------------
+    // Merge OrderedSets containing odd and even numbers
+    // -------------------------------------------------
 
-    // Create key and value arrays with odd numbers for Ordered Set alpha.
+    OrderedSet odds = oset_create(compare_ints, free, free);
+    OrderedSet evens = oset_create(compare_ints, free, free);
+
+    // Create key and value arrays containing odd numbers for odds Ordered Set.
     int** odd_key_array = malloc(N * sizeof(*odd_key_array));
     int** odd_value_array = malloc(N * sizeof(*odd_value_array));
     int number = 1;
@@ -417,7 +402,7 @@ void test_merge(void) {
     }
     shuffle(odd_key_array, N);  // Shuffle key array for uniform value insertion.
 
-    // Create key and value arrays with even numbers for Ordered Set beta.
+    // Create key and value arrays containing even numbers for evens Ordered Set.
     int** even_key_array = malloc(N * sizeof(*even_key_array));
     int** even_value_array = malloc(N * sizeof(*even_value_array));
     number = 0;
@@ -430,39 +415,110 @@ void test_merge(void) {
 
     // Insert (key, value) pairs into Ordered Sets.
     for (int i = 0; i < N; i++) {
-        oset_insert(alpha, odd_key_array[i], odd_value_array[i]);
-        oset_insert(beta, even_key_array[i], even_value_array[i]);
+        oset_insert(odds, odd_key_array[i], odd_value_array[i]);
+        oset_insert(evens, even_key_array[i], even_value_array[i]);
     }
 
-    oset_merge(alpha, beta);
+    OrderedSet merged = oset_merge(odds, evens);
 
-    OrderedSetNode node = oset_first(alpha);
+    OrderedSetNode node = OSET_EOF;
+
+    // Traverse in ascending order.
+    node = oset_first(merged);
     for (int i = 0; i < (2 * N); i++) {
-        int* key = oset_node_key(alpha, node);
-        int* value = oset_node_value(alpha, node);
-
+        int* key = oset_node_key(merged, node);
         TEST_CHECK(*key == i);
-        TEST_CHECK(*value == i);
-
-        node = oset_next(alpha, node);
+        node = oset_next(merged, node);
     }
 
-    oset_destroy(alpha);
+    // Traverse in descending order.
+    node = oset_last(merged);
+    for (int i = (2 * N) - 1; i >= 0; i--) {
+        int* key = oset_node_key(merged, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(merged, node);
+    }
+
+    // ---------------------------
+    // Concatenate two OrderedSets
+    // ---------------------------
+
+    OrderedSet alpha = merged;
+    OrderedSet beta = oset_split(alpha, &N);
+
+    OrderedSet concated = oset_merge(alpha, beta);
+
+    // Traverse in ascending order.
+    node = oset_first(concated);
+    for (int i = 0; i < (2 * N); i++) {
+        int* key = oset_node_key(concated, node);
+        TEST_CHECK(*key == i);
+        node = oset_next(concated, node);
+    }
+
+    // Traverse in descending order.
+    node = oset_last(concated);
+    for (int i = (2 * N) - 1; i >= 0; i--) {
+        int* key = oset_node_key(concated, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(concated, node);
+    }
+
+    oset_destroy(concated);
+
+    // -----------------------------
+    // Merge with duplicate elements
+    // -----------------------------
+
+    int** zeros_array = malloc(N * sizeof(*zeros_array));
+    for (int i = 0; i < N; i++) zeros_array[i] = create_int(0);
+    int** ones_array = malloc(N * sizeof(*ones_array));
+    for (int i = 0; i < N; i++) ones_array[i] = create_int(1);
+
+    OrderedSet zeros = oset_create(compare_ints, free, NULL);
+    OrderedSet ones = oset_create(compare_ints, free, NULL);
+
+    for (int i = 0; i < N; i++) {
+        oset_insert(zeros, zeros_array[i], NULL);
+        oset_insert(ones, ones_array[i], NULL);
+    }
+
+    merged = oset_merge(zeros, ones);
+
+    // Traverse in ascending order.
+    node = oset_first(merged);
+    for (int i = 0; i < (2 * N); i++) {
+        int* key = oset_node_key(merged, node);
+        TEST_CHECK(*key == (i < N ? 0 : 1));
+        node = oset_next(merged, node);
+    }
+
+    // Traverse in descending order.
+    node = oset_last(merged);
+    for (int i = (2 * N) - 1; i >= 0; i--) {
+        int* key = oset_node_key(merged, node);
+        TEST_CHECK(*key == (i >= N ? 1 : 0));
+        node = oset_previous(merged, node);
+    }
+
+    oset_destroy(merged);
 
     free(odd_key_array);
     free(odd_value_array);
     free(even_key_array);
     free(even_value_array);
+    free(zeros_array);
+    free(ones_array);
 }
 
 void test_concat(void) {
     OrderedSet alpha = oset_create(compare_ints, free, free);
 
-    int N = 1000;
+    int N = 65537;  // To force capacity to double.
 
     // Create key and value arrays.
-    int** key_array = create_array(N, 0);
-    int** value_array = create_array(N, 0);
+    int** key_array = create_array(N, 1);
+    int** value_array = create_array(N, 1);
     shuffle(key_array, N);  // Shuffle key array for uniform value insertion.
 
     // Insert (key, value) pairs.
@@ -474,13 +530,30 @@ void test_concat(void) {
     int split_key = N / 2;
     OrderedSet beta = oset_split(alpha, &split_key);
 
+    size_t beta_size = oset_size(beta);
+    size_t alpha_size = oset_size(alpha);
+
+    OrderedSetNode last = oset_last(beta);
+
     oset_concat(alpha, beta);
 
+    TEST_CHECK(oset_last(alpha) == last);
+    TEST_CHECK(oset_size(alpha) == (alpha_size + beta_size));
+
+    // Traverse in ascending order.
     OrderedSetNode node = oset_first(alpha);
     for (int i = 0; i < N; i++) {
         int* key = oset_node_key(alpha, node);
         TEST_CHECK(*key == i);
         node = oset_next(alpha, node);
+    }
+
+    // Traverse in descending order.
+    node = oset_last(alpha);
+    for (int i = N - 1; i >= 0; i--) {
+        int* key = oset_node_key(alpha, node);
+        TEST_CHECK(*key == i);
+        node = oset_previous(alpha, node);
     }
 
     oset_destroy(alpha);
@@ -495,11 +568,9 @@ TEST_LIST = {
     {"oset_remove", test_remove},
     {"oset_traversal", test_traversal},
     {"oset_find", test_find},
-    {"oset_get_at", test_get_at},
-    {"oset_remove_at", test_remove_at},
     {"oset_split", test_split},
     {"oset_merge", test_merge},
     {"oset_concat", test_concat},
 
     {NULL, NULL}  // End of tests
-}
+};

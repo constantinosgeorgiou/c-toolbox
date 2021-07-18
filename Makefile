@@ -27,6 +27,12 @@ setup:
 	@# -p  Make parent directories
 	mkdir -p tests/bin
 
+	@# Initialize submodules
+	git submodule update --init --recursive
+
+	@# Copy interface from dependency to use for compilation.
+	cp modules/pcg-c-basic/pcg_basic.h include
+
 
 # Compile tests:
 # --------------
