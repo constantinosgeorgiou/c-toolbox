@@ -12,6 +12,7 @@ Modules inspired by the document "[*Modular C: How to Write Reusable and Maintai
 ## What's included
 | Module            |     Available      |
 | ----------------- | :----------------: |
+| Vector            | :white_check_mark: |
 | List              | :white_check_mark: |
 | BidirectionalList | :white_check_mark: |
 | Map               | :white_check_mark: |
@@ -20,8 +21,6 @@ Modules inspired by the document "[*Modular C: How to Write Reusable and Maintai
 | PriorityQueue     |     (planned)      |
 | Queue             |     (planned)      |
 | Stack             |     (planned)      |
-| Vector            |     (planned)      |
-
 
 
 ## Getting started
