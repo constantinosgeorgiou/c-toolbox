@@ -54,3 +54,6 @@ dkms.conf
 
 # Dependencies
 include/pcg_basic.h
+
+# Documentation
+docs/generated/*
