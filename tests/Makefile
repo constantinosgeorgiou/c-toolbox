@@ -11,9 +11,9 @@
 DynamicArray_ADTVector_test_OBJECTS = ADTVector_test.o $(MODULES)/DynamicArray/ADTVector.o
 
 
-# Interface:       ADTList
+# Interface:       List
 # Implementation:  LinkedList
-LinkedList_ADTList_test_OBJECTS = ADTList_test.o $(MODULES)/LinkedList/ADTList.o
+LinkedList_List_test_OBJECTS = list_test.o $(MODULES)/LinkedList/list.o
 
 # Interface:       ADTBidirectionalList
 # Implementation:  DoublyLinkedList
@@ -24,8 +24,8 @@ DoublyLinkedList_ADTBidirectionalList_test_OBJECTS = ADTBidirectionalList_test.o
 # Dependencies:
 #     | Interface | Implementation |
 #     | --------- | -------------- |
-#     | ADTList   | LinkedList     |
-HashTable_ADTMap_test_OBJECTS = ADTMap_test.o $(MODULES)/HashTable/ADTMap.o $(MODULES)/LinkedList/ADTList.o
+#     | List      | LinkedList     |
+HashTable_ADTMap_test_OBJECTS = ADTMap_test.o $(MODULES)/HashTable/ADTMap.o $(MODULES)/LinkedList/list.o
 
 # Interface:       ADTOrderedSet
 # Implementation:  SkipList

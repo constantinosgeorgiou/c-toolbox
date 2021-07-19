@@ -1,31 +1,15 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/// @file List.h
 ///
-/// @file ADTList.h
-/// @author Constantinos Georgiou
+/// @interface List 
+///
 /// @brief Interface for List Abastract Data Type (ADT).
-///        Operations included:
-///          insertion, removal, look up, serial traversal, accessing at given index, appending.
-/// @version 1.0
 ///
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Operations included: insertion, removal, look up, serial traversal, accessing at given index, appending.
+///
 
 #pragma once
 
-/// @brief Shorthand for types of comparison and destroy functions.
-///
-#ifndef COMMON_FUNCTIONS
-#define COMMON_FUNCTIONS
-
-/// @brief Pointer to function that compares elements a and b.
-///
-/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
-///
-typedef int (*CompareFunc)(const void* a, const void* b);
-
-/// @brief Pointer to function that destroys a value.
-///
-typedef void (*DestroyFunc)(void* value);
-#endif
+#include "common_types.h"
 
 #define LIST_BOF (ListNode)0  // Defines the "virtual" beginning of the list.
 #define LIST_EOF (ListNode)0  // Defines the "virtual" end of the list.

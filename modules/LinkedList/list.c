@@ -1,22 +1,19 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/// @file list.c
 ///
-/// @file ADTList.c
-/// @author Constantinos Georgiou
-/// @brief Implementation of ADTList interface via Linked List.
-/// @version 1
+/// @brief Linked List implementation of List interface.
 ///
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "ADTList.h"
+#include "list.h"
 
 #include <assert.h>
 #include <stdlib.h>
 
 struct list {
-    ListNode sentinel;
-    ListNode last;
-    int size;
-    DestroyFunc destroy;
+    ListNode sentinel;    ///< Header ListNode of List.
+    ListNode last;        ///< Last ListNode of List.
+    int size;             ///< Number of elements in List.
+    DestroyFunc destroy;  ///< If destroy_value != NULL, destroy_value(value) is called each time
+                          ///< a value is removed.
 };
 
 struct list_node {
