@@ -60,7 +60,11 @@ valgrind-tests: setup
 
 clean: setup
 	$(MAKE) --directory=tests clean
+	$(RM) docs/generated/*
 
+
+docs:
+	doxygen docs/Doxyfile
 
 # Targets that generate no files:
-.PHONY: setup all tests run run-tests valgrind valgrind-tests clean
+.PHONY: setup all tests run run-tests valgrind valgrind-tests clean docs
