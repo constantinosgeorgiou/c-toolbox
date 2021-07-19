@@ -60,7 +60,7 @@ valgrind-tests: setup
 
 clean: setup
 	$(MAKE) --directory=tests clean
-	$(RM) docs/generated/*
+	$(RM) -r docs/generated/*
 
 
 docs:
