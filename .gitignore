@@ -57,3 +57,4 @@ include/pcg_basic.h
 
 # Documentation
 docs/generated/*
+docs/warnings.log
