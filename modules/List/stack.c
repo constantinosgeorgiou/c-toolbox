@@ -44,3 +44,7 @@ void* stack_peek(Stack stack) {
     else
         return list_node_value(stack->data, list_first(stack->data));
 }
+
+void stack_push(Stack stack, void* value) {
+    list_insert_next(stack->data, LIST_BOF, value);
+}
