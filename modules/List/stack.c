@@ -10,15 +10,20 @@
 #include "ADTList.h"  // List
 
 struct stack {
-  List data;  ///< Holds the data of the stack.
+    List data;  ///< Holds the data of the stack.
 };
 
 Stack stack_create(DestroyFunc destroy_value) {
-  Stack stack = malloc(sizeof(*stack));
-  if (stack == NULL) return NULL;
+    Stack stack = malloc(sizeof(*stack));
+    if (stack == NULL) return NULL;
 
-  stack->data = list_create(destroy_value);
-  if (stack->data == NULL) return NULL;
+    stack->data = list_create(destroy_value);
+    if (stack->data == NULL) return NULL;
 
-  return stack;
+    return stack;
+}
+
+void stack_destroy(Stack stack) {
+    list_destroy(stack->data);
+    free(stack);
 }
