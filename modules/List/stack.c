@@ -37,3 +37,10 @@ size_t stack_size(Stack stack) { return list_size(stack->data); }
 bool stack_is_empty(Stack stack) {
     return list_size(stack->data) != 0 ? false : true;
 }
+
+void* stack_peek(Stack stack) {
+    if (stack_is_empty(stack))
+        return NULL;
+    else
+        return list_node_value(stack->data, list_first(stack->data));
+}
