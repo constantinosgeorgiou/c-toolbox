@@ -31,3 +31,9 @@ void stack_destroy(Stack stack) {
 DestroyFunc stack_set_destroy_value(Stack stack, DestroyFunc destroy_value) {
     return list_set_destroy_value(stack->data, destroy_value);
 }
+
+size_t stack_size(Stack stack) { return list_size(stack->data); }
+
+bool stack_is_empty(Stack stack) {
+    return list_size(stack->data) != 0 ? false : true;
+}
