@@ -48,3 +48,5 @@ void* stack_peek(Stack stack) {
 void stack_push(Stack stack, void* value) {
     list_insert_next(stack->data, LIST_BOF, value);
 }
+
+void stack_pop(Stack stack) { list_remove_next(stack->data, LIST_BOF); }
