@@ -27,3 +27,7 @@ void stack_destroy(Stack stack) {
     list_destroy(stack->data);
     free(stack);
 }
+
+DestroyFunc stack_set_destroy_value(Stack stack, DestroyFunc destroy_value) {
+    return list_set_destroy_value(stack->data, destroy_value);
+}
