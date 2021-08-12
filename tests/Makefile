@@ -37,6 +37,11 @@ SkipList_ADTOrderedSet_test_OBJECTS = ADTOrderedSet_test.o $(MODULES)/SkipList/A
 # Dependencies:    List
 List_Stack_test_OBJECTS = stack_test.o $(MODULES)/List/stack.o $(MODULES)/LinkedList/ADTList.o
 
+# Interface:       queue
+# Implementation:  BidirectionalList
+# Dependencies:    BidirectionalList
+BidirectionalList_Queue_test_OBJECTS = queue_test.o $(MODULES)/BidirectionalList/queue.o $(MODULES)/DoublyLinkedList/ADTBidirectionalList.o
+
 # All the tests share the following common makefile to keep this file as DRY (Don't Repeat Yourself)
 # as possible.
 include ../common.mk
