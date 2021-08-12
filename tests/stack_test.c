@@ -17,14 +17,14 @@ void test_create(void) {
 }
 
 void test_push(void) {
-    Stack stack = stack_create(free);
+    Stack stack = stack_create(NULL);
 
     int N = 1000;
     int* array = malloc(N * sizeof(*array));
 
     for (int i = 0; i < N; i++) {
-        stack_insert_top(stack, &array[i]);
-        TEST_CHECK(stack_size(stack) == (i++));
+        stack_push(stack, &array[i]);
+        TEST_CHECK(stack_size(stack) == (i + 1));
         TEST_CHECK(stack_peek(stack) == &array[i]);
         TEST_CHECK(stack_is_empty(stack) == false);
     }
@@ -35,6 +35,7 @@ void test_push(void) {
 
 void test_pop(void) {
     Stack stack = stack_create(NULL);
+
     int N = 1000;
     int* array = malloc(N * sizeof(*array));
 
