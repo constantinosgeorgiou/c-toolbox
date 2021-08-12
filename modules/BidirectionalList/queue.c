@@ -20,3 +20,6 @@ void queue_destroy(Queue queue) {
     blist_destroy(queue->data);
     free(queue);
 }
+
+size_t queue_size(Queue queue) { return blist_size(queue->data); }
+
