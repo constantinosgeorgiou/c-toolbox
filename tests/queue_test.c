@@ -15,7 +15,23 @@ void test_create(void) {
     queue_destroy(queue);
 }
 
-void test_enqueue(void) {}
+void test_enqueue(void) {
+    Queue queue = queue_create(NULL);
+
+    int N = 1000;
+    int* array = malloc(N * sizeof(*array));
+
+    for (int i = 0; i < N; i++) {
+        queue_insert_back(queue, &array[i]);
+        TEST_CHECK(queue_size(queue) == (i + 1));
+        TEST_CHECK(queue_front(queue) == &array[0]);
+        TEST_CHECK(queue_back(queue) == &array[i]);
+    }
+
+    queue_destroy(queue);
+    free(array);
+}
+
 void test_dequeue(void) {}
 
 TEST_LIST = {
