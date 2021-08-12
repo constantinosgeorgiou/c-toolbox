@@ -23,3 +23,6 @@ void queue_destroy(Queue queue) {
 
 size_t queue_size(Queue queue) { return blist_size(queue->data); }
 
+bool queue_is_empty(Queue queue) {
+    return blist_size(queue->data) != 0 ? false : true;
+}
