@@ -15,3 +15,8 @@ Queue queue_create(DestroyFunc destroy_value) {
 
     return queue;
 }
+
+void queue_destroy(Queue queue) {
+    blist_destroy(queue->data);
+    free(queue);
+}
