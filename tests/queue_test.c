@@ -32,7 +32,22 @@ void test_enqueue(void) {
     free(array);
 }
 
-void test_dequeue(void) {}
+void test_dequeue(void) {
+    Queue queue = queue_create(NULL);
+    int N = 1000;
+    int* array = malloc(N * sizeof(*array));
+
+    for (int i = 0; i < N; i++) queue_insert_back(queue, &array[i]);
+
+    for (int i = 0; i < N; i++) {
+        TEST_CHECK(queue_front(queue) == &array[i]);
+        queue_remove_front(queue);
+        TEST_CHECK(queue_size(queue) == ((N - 1) - i));
+    }
+
+    queue_destroy(queue);
+    free(array);
+}
 
 TEST_LIST = {
     {"queue_create", test_create},
