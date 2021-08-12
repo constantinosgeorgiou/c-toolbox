@@ -32,6 +32,11 @@ HashTable_ADTMap_test_OBJECTS = ADTMap_test.o $(MODULES)/HashTable/ADTMap.o $(MO
 # Dependencies:    ADTVector pcg_basic
 SkipList_ADTOrderedSet_test_OBJECTS = ADTOrderedSet_test.o $(MODULES)/SkipList/ADTOrderedSet.o $(MODULES)/DynamicArray/ADTVector.o $(MODULES)/pcg-c-basic/pcg_basic.o
 
+# Interface:       stack
+# Implementation:  List
+# Dependencies:    List
+List_Stack_test_OBJECTS = stack_test.o $(MODULES)/List/stack.o $(MODULES)/LinkedList/ADTList.o
+
 # All the tests share the following common makefile to keep this file as DRY (Don't Repeat Yourself)
 # as possible.
 include ../common.mk
