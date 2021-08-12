@@ -26,3 +26,11 @@ size_t queue_size(Queue queue) { return blist_size(queue->data); }
 bool queue_is_empty(Queue queue) {
     return blist_size(queue->data) != 0 ? false : true;
 }
+
+void* queue_front(Queue queue) {
+    return blist_node_value(queue->data, blist_first(queue->data));
+}
+
+void* queue_back(Queue queue) {
+    return blist_node_value(queue->data, blist_last(queue->data));
+}
