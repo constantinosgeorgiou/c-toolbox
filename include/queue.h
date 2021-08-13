@@ -56,6 +56,8 @@ void queue_enqueue(Queue queue, void* value);
 
 /// Removes an element from the front of QUEUE.
 ///
+/// If QUEUE is empty, nothing happens.
+///
 void queue_dequeue(Queue queue);
 
 /// Returns the number of elements in QUEUE.
