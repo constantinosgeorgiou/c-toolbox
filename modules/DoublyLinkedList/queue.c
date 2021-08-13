@@ -21,6 +21,14 @@ void queue_destroy(Queue queue) {
     free(queue);
 }
 
+void queue_enqueue(Queue queue, void* value) {
+    blist_insert(queue->data, blist_last(queue->data), value);
+}
+
+void queue_dequeue(Queue queue) {
+    blist_remove(queue->data, blist_first(queue->data));
+}
+
 size_t queue_size(Queue queue) { return blist_size(queue->data); }
 
 bool queue_is_empty(Queue queue) {
@@ -33,4 +41,8 @@ void* queue_front(Queue queue) {
 
 void* queue_back(Queue queue) {
     return blist_node_value(queue->data, blist_last(queue->data));
+}
+
+DestroyFunc queue_set_destroy_value(Queue queue, DestroyFunc destroy_value) {
+    return blist_set_destroy_value(queue->data, destroy_value);
 }
