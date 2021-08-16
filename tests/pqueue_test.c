@@ -61,7 +61,21 @@ void test_create(void) {
     pqueue_destroy(pqueue);
 }
 
-void test_insert(void) {}
+void test_insert(void) {
+    PQueue pqueue = pqueue_create(compare_ints, NULL, NULL);
+    int N = 1000;
+    int* array = malloc(N * sizeof(*array));
+
+    for (int i = 0; i < N; i++) {
+        array[i] = i;
+        pqueue_insert(pqueue, &array[i]);
+        TEST_ASSERT(pqueue_size(pqueue) == i + 1);
+        TEST_ASSERT(pqueue_peek(pqueue) == &array[i]);
+    }
+
+    pqueue_destroy(pqueue);
+    free(array);
+}
 
 void test_pull(void) {}
 
