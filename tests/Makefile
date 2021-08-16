@@ -42,6 +42,11 @@ List_Stack_test_OBJECTS = stack_test.o $(MODULES)/List/stack.o $(MODULES)/Linked
 # Dependencies:    DoublyLinkedList
 DoublyLinkedList_Queue_test_OBJECTS = queue_test.o $(MODULES)/DoublyLinkedList/queue.o $(MODULES)/DoublyLinkedList/ADTBidirectionalList.o
 
+# Interface:       pqueue
+# Implementation:  Heap
+# Dependencies:    Vector
+Heap_PQueue_test_OJECTS = pqueue_test.o $(MODULES)/Heap/pqueue.o $(MODULES)/DynamicArray/ADTVector.o
+
 # All the tests share the following common makefile to keep this file as DRY (Don't Repeat Yourself)
 # as possible.
 include ../common.mk
