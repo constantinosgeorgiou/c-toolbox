@@ -69,15 +69,52 @@ void test_insert(void) {
     for (int i = 0; i < N; i++) {
         array[i] = i;
         pqueue_insert(pqueue, &array[i]);
-        TEST_ASSERT(pqueue_size(pqueue) == i + 1);
-        TEST_ASSERT(pqueue_peek(pqueue) == &array[i]);
+        TEST_CHECK(pqueue_size(pqueue) == i + 1);
+        TEST_CHECK(pqueue_peek(pqueue) == &array[i]);
     }
 
     pqueue_destroy(pqueue);
     free(array);
 }
 
-void test_pull(void) {}
+/// Shuffles the values of an array.
+///
+void shuffle(int* array[], size_t size) {
+    for (int i = 0; i < size; i++) {
+        int j = i + rand() / (RAND_MAX / (size - i) + 1);
+        int* t = array[j];
+        array[j] = array[i];
+        array[i] = t;
+    }
+}
+
+void test_pull(void) {
+    PQueue pqueue = pqueue_create(compare_ints, free, NULL);
+
+    int N = 10;
+    int** array = malloc(N * sizeof(*array));
+    for (int i = 0; i < N; i++) array[i] = create_int(i);
+    shuffle(array, N);
+
+    for (int i = 0; i < N; i++) pqueue_insert(pqueue, array[i]);
+
+    for (int i = N - 1; i >= 0; i--) {
+        int* value = pqueue_peek(pqueue);
+        TEST_CHECK(*value == i);
+        TEST_CHECK(pqueue_peek(pqueue) == value);
+        pqueue_pull(pqueue);
+        TEST_CHECK(pqueue_size(pqueue) == i);
+    }
+
+    pqueue_destroy(pqueue);
+
+    pqueue = pqueue_create(compare_ints, NULL, NULL);
+    pqueue_insert(pqueue, &N);
+    TEST_CHECK(pqueue_peek(pqueue) == &N);
+    pqueue_pull(pqueue);
+    pqueue_destroy(pqueue);
+    free(array);
+}
 
 TEST_LIST = {
     {"pqueue_create", test_create},
