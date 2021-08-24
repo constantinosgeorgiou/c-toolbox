@@ -45,7 +45,7 @@ DoublyLinkedList_Queue_test_OBJECTS = queue_test.o $(MODULES)/DoublyLinkedList/q
 # Interface:       pqueue
 # Implementation:  Heap
 # Dependencies:    Vector
-Heap_PQueue_test_OJECTS = pqueue_test.o $(MODULES)/Heap/pqueue.o $(MODULES)/DynamicArray/ADTVector.o
+Heap_PQueue_test_OBJECTS = pqueue_test.o $(MODULES)/Heap/pqueue.o $(MODULES)/DynamicArray/ADTVector.o
 
 # All the tests share the following common makefile to keep this file as DRY (Don't Repeat Yourself)
 # as possible.
