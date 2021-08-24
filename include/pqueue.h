@@ -15,18 +15,18 @@
 ///                  it.
 /// - pqueue_insert(): Adds an element to the priority queue.
 /// - pqueue_pull(): Removes the highest-priority element.
-/// - pqueue_size(): Returns the number of elements in a queue.
+/// - pqueue_size(): Returns the number of values in a queue.
 /// - pqueue_is_empty(): Returns true if queue is empty, or false if not.
 /// - pqueue_set_destroy_value(): Changes the function called on each element
 ///                               removal/overwrite, to given function.
 
 #pragma once
 
-#include <stdbool.h>  // bool
-#include <stdlib.h>   // size_t
+#include <stdbool.h> // bool
+#include <stdlib.h>  // size_t
 
-#include "ADTVector.h"     // Vector
-#include "common_types.h"  // DestroyFunc
+#include "ADTVector.h"    // Vector
+#include "common_types.h" // DestroyFunc
 
 /// Priority Queue type.
 ///
@@ -36,20 +36,20 @@
 /// the API functions provided `pqueue_<operation>` with the appropriate
 /// parameters.
 ///
-typedef struct priority_queue* PQueue;
+typedef struct priority_queue *PQueue;
 
 /// Creates and returns a priority queue.
 ///
-/// @param compare Compares two elements. Defines the priority of the elements.
-/// @param destroy_element If destroy_element != NULL, call
-///                        `destroy_element(element)` each time a value is
+/// @param compare Compares two values. Defines the priority of the values.
+/// @param destroy_value If destroy_value != NULL, call
+///                        `destroy_value(value)` each time a value is
 ///                        removed.
-/// @param elements If elements != NULL, initialize the priority queue using
-///                 ELEMENTS.
+/// @param values If values != NULL, initialize the priority queue using
+///                 VALUES.
 /// @return
 ///
-PQueue pqueue_create(CompareFunc compare, DestroyFunc destroy_element,
-                     Vector elements);
+PQueue pqueue_create(CompareFunc compare, DestroyFunc destroy_value,
+                     Vector values);
 
 /// Frees all the memory allocated for PQUEUE.
 ///
@@ -58,23 +58,23 @@ PQueue pqueue_create(CompareFunc compare, DestroyFunc destroy_element,
 ///
 void pqueue_destroy(PQueue pqueue);
 
-/// Returns the highest-priority element of PQUEUE without removing it.
+/// Returns the highest-priority value of PQUEUE without removing it.
 ///
 /// @return Highest-priority element of PQUEUE, or NULL, if PQUEUE is empty.
 ///
-void* pqueue_peek(PQueue pqueue);
+void *pqueue_peek(PQueue pqueue);
 
 /// Adds ELEMENT to the PQUEUE.
 ///
-void pqueue_insert(PQueue pqueue, void* element);
+void pqueue_insert(PQueue pqueue, void *element);
 
 /// Removes the highest-priority element.
 ///
 void pqueue_pull(PQueue pqueue);
 
-/// Returns the number of elements in PQUEUE.
+/// Returns the number of values in PQUEUE.
 ///
-/// @return The number of elements in PQUEUE.
+/// @return The number of values in PQUEUE.
 ///
 size_t pqueue_size(PQueue pqueue);
 
@@ -82,9 +82,8 @@ size_t pqueue_size(PQueue pqueue);
 ///
 bool pqueue_is_empty(PQueue pqueue);
 
-/// Changes function called each time a value is removed to DESTROY_ELEMENT.
+/// Changes function called each time a value is removed to DESTROY_VALUE.
 ///
 /// @return Previous destroy_value function.
 ///
-DestroyFunc pqueue_set_destroy_value(PQueue pqueue,
-                                     DestroyFunc destroy_element);
+DestroyFunc pqueue_set_destroy_value(PQueue pqueue, DestroyFunc destroy_value);
