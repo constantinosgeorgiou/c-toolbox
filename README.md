@@ -16,11 +16,11 @@ Modules inspired by the document "[*Modular C: How to Write Reusable and Maintai
 | List              | :white_check_mark: |
 | BidirectionalList | :white_check_mark: |
 | Map               | :white_check_mark: |
+| OrderedSet        | :white_check_mark: |
+| PriorityQueue     | :white_check_mark: |
+| Stack             | :white_check_mark: |
+| Queue             | :white_check_mark: |
 | Set               |     (planned)      |
-| OrderedSet        |     (planned)      |
-| PriorityQueue     |     (planned)      |
-| Queue             |     (planned)      |
-| Stack             |     (planned)      |
 
 
 ## Getting started
