@@ -25,8 +25,8 @@
 #include <stdbool.h> // bool
 #include <stdlib.h>  // size_t
 
-#include "ADTVector.h"    // Vector
 #include "common_types.h" // DestroyFunc
+#include "vector.h"       // Vector
 
 /// Priority Queue type.
 ///
