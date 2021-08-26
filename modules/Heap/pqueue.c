@@ -1,7 +1,8 @@
 /// @file pqueue.c
 ///
-/// Nodes are 1-based.
+/// Implementation of Priority Queue Abstract Data Type.
 ///
+/// @note Nodes are 1-based.
 
 #include "pqueue.h"
 
