@@ -14,9 +14,6 @@
 #include "common_types.h" // DestroyFunc
 #include <stdlib.h>       // size_t
 
-#define LIST_BOF (ListNode)0 ///< Defines the "virtual" beginning of a list.
-#define LIST_EOF (ListNode)0 ///< Defines the "virtual" end of a list.
-
 /// List type.
 ///
 /// Incomplete struct, to keep it implementation independent.
@@ -33,6 +30,9 @@ typedef struct list *List;
 /// API functions provided `list_<operation>_node` and `list_node_<operation>`
 /// with the appropriate parameters.
 typedef struct list_node *ListNode;
+
+#define LIST_BOF (ListNode)0 ///< Defines the "virtual" beginning of a list.
+#define LIST_EOF (ListNode)0 ///< Defines the "virtual" end of a list.
 
 /// Create and return a new list.
 ///
