@@ -1,146 +1,213 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \file list.h
 ///
-/// @file ADTList.h
-/// @author Constantinos Georgiou
-/// @brief Interface for Bidirectional List Abastract Data Type (ADT).
-///        Operations included:
-///          insertion, removal, look up, serial traversal, accessing at given index, appending.
-/// @version 1.0
+/// List Abstract Data Type.
 ///
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Implementation independent.
+///
+/// The user does not need to know how a List is implemented, they use
+/// the API functions provided `list_<operation>` with the appropriate
+/// parameters.
 
-#pragma once
+#ifndef LIST_H
+#define LIST_H
 
-/// @brief Shorthand for types of comparison and destroy functions.
-///
-#ifndef COMMON_FUNCTIONS
-#define COMMON_FUNCTIONS
+#include "common_types.h" // DestroyFunc
+#include <stdlib.h>       // size_t
 
-/// @brief Pointer to function that compares elements a and b.
-///
-/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
-///
-typedef int (*CompareFunc)(const void* a, const void* b);
+#define LIST_BOF (ListNode)0 ///< Defines the "virtual" beginning of a list.
+#define LIST_EOF (ListNode)0 ///< Defines the "virtual" end of a list.
 
-/// @brief Pointer to function that destroys a value.
+/// List type.
 ///
-typedef void (*DestroyFunc)(void* value);
-#endif
+/// Incomplete struct, to keep it implementation independent.
+///
+/// The user does not need to know how a List is implemented, they use the API
+/// functions provided `list_<operation>` with the appropriate parameters.
+typedef struct list *List;
 
-#define BLIST_BOF (BListNode)0  // Defines the "virtual" beginning of the bidirectional list.
-#define BLIST_EOF (BListNode)0  // Defines the "virtual" end of the bidirectional list.
+/// ListNode type.
+///
+/// Incomplete struct, to keep it implementation independent.
+///
+/// The user does not need to know how a ListNode is implemented, they use the
+/// API functions provided `list_<operation>_node` and `list_node_<operation>`
+/// with the appropriate parameters.
+typedef struct list_node *ListNode;
 
-typedef struct blist* BList;
-typedef struct blist_node* BListNode;
+/// Create and return a new list.
+///
+/// If \p destroy_value is not NULL, then when an element gets removed,
+/// `destroy_value(value)` is called to deallocate the space held by value.
+///
+/// Typical usage:
+/// \code {.c}
+///   List list1 = list_create(NULL);
+///   List list2 = list_create(free);
+/// \endcode
+///
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
+///
+/// \return Newly created list, or NULL if an error occured.
+List list_create(DestroyFunc destroy_value);
 
-/// @brief Creates and returns a new bidirectional list.
+/// Deallocate the space held by \p list .
 ///
-/// @param destroy If destroy != NULL, then each time an item is removed,
-///                      destroy(value) is called.
+/// Any operation on the \p list after its destruction, results in
+/// undefined behaviour.
 ///
-/// @return Newly created bidirectional list, or NULL if an error occured.
-///
-BList blist_create(DestroyFunc destroy);
+/// Typical usage:
+/// \code {.c}
+///   list_destroy(mylist);
+/// \endcode
+void list_destroy(List list);
 
-/// @brief Frees all the allocated memory of the given bidirectional list.
+/// Change the function called on each element's removal to
+/// \p destroy_value .
 ///
-/// Any operation on the bidirectional list after its destruction, results in undefined behaviour.
+/// Typical usage:
+/// \code {.c}
+///   List mylist = list_create(NULL);
+///   DestroyFunc old = list_set_destroy_value(mylist, new);
+///   // old == NULL
+/// \endcode
 ///
-void blist_destroy(BList);
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
+///
+/// \return Previous `destroy_value` function.
+DestroyFunc list_set_destroy_value(List list, DestroyFunc destroy_value);
 
-/// @brief Changes the function called on each element removal/overwrite to given destroy.
-///
-/// @param destroy Defines a destroy function.
-///
-/// @return Previous destroy function.
-///
-DestroyFunc blist_set_destroy_value(BList blist, DestroyFunc destroy);
+/// Return the number of elements in \p list .
+size_t list_size(List list);
 
-/// @brief Returns the number of elements in given bidirectional list.
+/// Insert a new node with \p value *after* \p node .
 ///
-int blist_size(BList);
+/// If \p node is `LIST_BOF`, insert new node at the beginning of \p list .
+///
+/// If \p node is `LIST_EOF`, it causes undefined behaviour.
+///
+/// Typical usage:
+/// \code {.c}
+///   List numbers = list_create(NULL);
+///   // numbers: []
+///
+///   int number1 = 1234;
+///   list_insert(numbers, LIST_BOF, &number1);
+///   // numbers: [ 1234 ]
+///
+///
+///   ListNode node = list_first(numbers);
+///   int number2 = 56;
+///   list_insert(numbers, node, &number2);
+///   // numbers: [ 1234, 56 ]
+///
+///   int number3 = 0;
+///   list_insert(numbers, LIST_BOF, &number3);
+///   // numbers: [ 0, 1234, 56 ]
+///
+///
+///   list_destroy(numbers);
+/// \endcode
+void list_insert(List list, ListNode node, void *value);
 
-/// @brief Inserts a new node with given value __after__ given node, or at the beginning
-///        if node equals BLIST_BOF. (node == BLIST_EOF) causes undefined behaviour.
+/// Remove \p node from \p list .
 ///
-/// @param blist Defines a bidirectional list.
-/// @param node Defines a bidirectional list node.
-/// @param value Defines a value to be inserted.
+/// If \p node is `LIST_EOF`, remove last node.
 ///
-/// @return Pointer to newly inserted node, or NULL if an error occurred.
+/// If \p node is `LIST_BOF`, it causes undefined behaviour.
 ///
-BListNode blist_insert(BList blist, BListNode node, void* value);
+/// \code {.c}
+///   List numbers = list_create(NULL);
+///
+///   ...
+///
+///   // numbers: [ 0, 5, 4, 10 ]
+///
+///   list_remove(numbers, LIST_EOF);
+///   // numbers: [ 0, 5, 4]
+///
+///   list_remove(numbers, list_first(numbers));
+///   // numbers: [ 5, 4]
+///
+/// \endcode
+void list_remove(List list, ListNode node);
 
-/// @brief Removes the given node, or last node if node equals BLIST_EOF. node must be part of the
-///        bidirectional list. (node == BLIST_BOF) causes undefined behaviour.
+/// Append \p b to the end of \p a .
 ///
-/// @param blist Defines a list.
-/// @param node Defines a list node.
+/// After operation any operation on \p b causes undefined behaviour.
 ///
-void blist_remove(BList blist, BListNode node);
+/// If \p a is \p b , it causes undefined behaviour.
+///
+/// \code {.c}
+///   List veggies;
+///   List fruits;
+///
+///   ...
+///
+///   // veggies: [ tomato, lettuce ]
+///   // fruits: [ apple, mango, banana ]
+///
+///   list_concat(fruits, veggies);
+///   // fruits: [ apple, mango, banana, tomato, lettuce ]
+///
+/// \endcode
+void list_concat(List a, List b);
 
-/// @brief Concatenates bidirectional list b, to bidirectional list a. After operation
-///        bidirectional list b can NOT be used. (a == b) causes undefined behaviour.
+/// Find and return the first node with value equivalent to \p value based on
+/// \p compare .
 ///
-/// @return Pointer to the beginning of the concatenated bidirectional list.
+/// \p compare , compares two elements \p a and \p b :
+/// - If \p a < \p b , return number < 0.
+/// - If \p a > \p b , return number > 0.
+/// - If \p a equivalent to \p b , return 0.
 ///
-BList blist_concatenate(BList a, BList b);
+/// \param compare Compares two elements. \sa CompareFunc.
+///
+/// \return Node with value equivalent to \p value , or `LIST_EOF` if value was
+/// not found.
+ListNode list_find_node(List list, void *value, CompareFunc compare);
 
-/// @brief Finds and returns the first bidirectional list node with value equivalent to value,
-///        (based on compare function).
+/// Find and return the first value equivalent to \p value based on
+/// \p compare .
 ///
-/// @param blist Defines a bidirectional list.
-/// @param value Defines desired value.
-/// @param compare Defines a compare function.
+/// \p compare , compares two elements \p a and \p b :
+/// - If \p a < \p b , return number < 0.
+/// - If \p a > \p b , return number > 0.
+/// - If \p a equivalent to \p b , return 0.
 ///
-/// @return The bidirectional list node of given value, or BLIST_EOF if value was not found.
+/// \param compare Compares two elements. \sa CompareFunc.
 ///
-BListNode blist_find_node(BList blist, void* value, CompareFunc compare);
+/// \return Value equivalent to \p value , or `NULL` if value was
+/// not found.
+void *list_find(List list, void *value, CompareFunc compare);
 
-// Επιστρέφει την πρώτη τιμή που είναι ισοδύναμη με value
-// (με βάση τη συνάρτηση compare), ή NULL αν δεν υπάρχει
+/// Return the value of \p node .
+///
+/// If \p node is `NULL`, it causes to undefined behaviour.
+void *list_node_value(List list, ListNode node);
 
-/// @brief Finds and returns the first value equivalent to given value, (based on compare function).
-///
-/// @param blist Defines a bidirectional list.
-/// @param value Defines a desired value.
-/// @param compare Defines a compare function.
-///
-/// @return The desired value, or NULL if value was not found.
-///
-void* blist_find(BList blist, void* value, CompareFunc compare);
+/// Return first node, or `LIST_BOF` if \p list is empty.
+ListNode list_first(List list);
 
-/// @brief Returns the value of given list node. If node == NULL, results to undefined behaviour.
-///
-/// @return Content of given node.
-///
-void* blist_node_value(BList blist, BListNode node);
+/// Return last node, or `LIST_EOF` if \p list is empty.
+ListNode list_last(List list);
 
-////////////    TRAVERSAL    ///////////////////////////////////////////////////////////////////////
+/// Return the next node of \p node , or `LIST_EOF` if \p node is the last node
+/// in \p list .
+ListNode list_next(List list, ListNode node);
 
-/// @brief Returns first bidirectional list node, or BLIST_BOF if bidirectional list is empty.
-///
-BListNode blist_first(BList blist);
+/// Return the previous node of \p node , or `LIST_BOF` if \p node is the first
+/// node in \p list .
+ListNode list_previous(List list, ListNode node);
 
-/// @brief Returns last bidirectional list node, or BLIST_EOF if bidirectional list is empty.
+/// Return the value at \p pos in \p list .
 ///
-BListNode blist_last(BList blist);
+/// If \p pos < 0, gets value of first element.
+///
+/// If \p pos > size of \p list , gets value of last element.
+///
+/// \return Value at \p pos , or NULL if error.
+void *list_get_at(List list, int pos);
 
-/// @brief Returns the next node of given node, or BLIST_EOF if given node is the last node.
-///
-BListNode blist_next(BList blist, BListNode node);
-
-/// @brief Returns the previous node of given node, or BLIST_BOF if given node is the first node.
-///
-BListNode blist_previous(BList blist, BListNode node);
-
-/// @brief Returns the value of given position in bidirectional list.
-///        (position < 0 or position >= size) results in error.
-///
-/// @param position Defines the position in the bidirectional list.
-///
-/// @return Value of given position, or NULL if error.
-///
-void* blist_get_at(BList, int position);
-
-////////////    END OF TRAVERSAL    ////////////////////////////////////////////////////////////////
+#endif // LIST_H
