@@ -2,7 +2,7 @@
 ///
 /// Stack Abstract Data Type.
 ///
-/// Implementation indepenent.
+/// Implementation independent.
 ///
 /// The user does not need to know how a Stack is implemented, they use the API
 /// functions provided `stack_<operation>` with the appropriate parameters.
