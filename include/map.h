@@ -1,155 +1,231 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \file map.h
 ///
-/// @file ADTMap.h
-/// @author Constantinos Georgiou
-/// @brief Interface for Map Abastract Data Type (ADT).
-///        Operations included:
-///          insertion, removal, look up, arbitrary traversal.
-/// @version 1.0
+/// Map Abstract Data Type.
 ///
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#pragma once
-
-/// @brief Shorthand for types of comparison and destroy functions.
+/// Implementation independent.
 ///
-#ifndef COMMON_FUNCTIONS
-#define COMMON_FUNCTIONS
+/// The user does not need to know how a Map is implemented, they use
+/// the API functions provided `map_<operation>` with the appropriate
+/// parameters.
 
-/// @brief Pointer to function that compares elements a and b.
+#ifndef MAP_H
+#define MAP_H
+
+#include "common_types.h" // CompareFunc, DestroyFunc
+#include <stdbool.h>      // bool
+#include <stdlib.h>       // size_t
+
+/// Map type.
 ///
-/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
+/// Incomplete struct, to keep it implementation independent.
 ///
-typedef int (*CompareFunc)(const void* a, const void* b);
+/// The user does not need to know how a Map is implemented, they use the API
+/// functions provided `map_<operation>` with the appropriate parameters.
+typedef struct map *Map;
 
-/// @brief Pointer to function that destroys a value.
+/// Creates and returns a new map, in which the elements are compared
+/// based on \p compare .
 ///
-typedef void (*DestroyFunc)(void* value);
-#endif
-
-#include <stdbool.h>
-
-typedef struct map* Map;
-
-/// @brief Creates and returns a new map, in which the elements are compared based on given
-///        compare function.
-///
-/// @param compare Used to compare the elements.
-/// @param destroy_key If destroy_key != NULL, then each time a key is removed,
+/// \param compare Used to compare the elements.
+/// \param destroy_key If destroy_key != NULL, then each time a key is removed,
 ///                    destroy_key(key) is called.
-/// @param destroy_value If destroy_value != NULL, then each time a value is removed,
+/// \param destroy_value If destroy_value != NULL, then each time a value is
+/// removed,
 ///                      destroy_value(value) is called.
 ///
-/// @return Newly created map, or NULL if error.
+/// \return Newly created map, or NULL if error.
 ///
-Map map_create(CompareFunc compare, DestroyFunc destroy_key, DestroyFunc destroy_value);
 
-/// @brief Frees all the memory allocated by given map.
+/// Allocate space for a new map.
 ///
-/// Any operation on the map after its destruction, results in undefined behaviour.
+/// Elements are compared based on \p compare .
+/// \p compare should work as follows when comparing two elements (a and b):
+/// - If \p a < \p b , return number < 0.
+/// - If \p a > \p b , return number > 0.
+/// - If \p a equivalent to \p b , return 0.
 ///
-void map_destroy(Map);
+/// If \p destroy_key is not NULL, then when an element gets removed,
+/// `destroy_key(key)` is called to deallocate the space held by key.
+///
+/// If \p destroy_value is not NULL, then when an element gets removed,
+/// `destroy_value(value)` is called to deallocate the space held by value.
+///
+/// Typical usage:
+/// \code {.c}
+///   int compare_ints(const void* a, const void* b){
+///     return *(int*)a - *(int*)b;
+///   }
+///
+///   Map map1 = map_create(compare_ints, NULL, NULL);
+///   Map map2 = map_create(compare_ints, free, free);
+/// \endcode
+///
+/// \param compare Compares two elements. \sa CompareFunc. Can NOT be NULL.
+/// \param destroy_key When an element gets removed, `destroy_key(key)` is
+/// called, if not NULL, to deallocate the space held by key.
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
+///
+/// \return Newly created map, or NULL if an error occured.
+Map map_create(CompareFunc compare, DestroyFunc destroy_key,
+               DestroyFunc destroy_value);
 
-/// @brief Changes the destroy function called on each key's removal/overwrite to given destroy
-///        function.
+/// Deallocate the space held by \p map .
 ///
-/// @return Previous destroy function.
+/// Any operation on \p map after its destruction, causes undefined behaviour.
 ///
+/// \param map
+void map_destroy(Map map);
+
+/// Changes the destroy function called on each key's removal/overwrite
+/// to \p destroy_key .
+///
+/// Typical usage:
+/// \code {.c}
+///   int compare_ints(const void* a, const void* b){
+///     return *(int*)a - *(int*)b;
+///   }
+///
+///   Map mymap = map_create(compare_ints, free, NULL);
+///   DestroyFunc old = map_set_destroy_key(mymap, NULL);
+///   // old == free
+/// \endcode
+///
+/// \param destroy_key When an element gets removed, `destroy_key(key)` is
+/// called, if not NULL, to deallocate the space held by key.
+///
+/// \return Previous `destroy_key` function.
 DestroyFunc map_set_destroy_key(Map map, DestroyFunc destroy_key);
 
-/// @brief Changes the destroy function called on each value's removal/overwrite to given destroy
-///        function.
+/// Changes the destroy function called on each value's removal/overwrite
+/// to \p destroy_value .
 ///
-/// @return Previous destroy function.
+/// Typical usage:
+/// \code {.c}
+///   int compare_ints(const void* a, const void* b){
+///     return *(int*)a - *(int*)b;
+///   }
 ///
+///   Map mymap = map_create(compare_ints, NULL, free);
+///   DestroyFunc old = map_set_destroy_value(mymap, NULL);
+///   // old == free
+/// \endcode
+///
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
+///
+/// \return Previous `destroy_value` function.
 DestroyFunc map_set_destroy_value(Map map, DestroyFunc destroy_value);
 
-/// @brief Returns the number of elements in given map.
-///
-int map_size(Map map);
+/// Returns the number of elements in \p map .
+size_t map_size(Map map);
 
-/// @brief Inserts key with value to map. If an equivalent key is already part of the map,
+/// Inserts key with value to map. If an equivalent key is already part
+/// of the map,
 ///        overwrite the old key and value with the new ones.
 ///
 /// NOTE:
-/// While the key is part of the map, any change to its content results in undefined behaviour.
+/// While the key is part of the map, any change to its content results in
+/// undefined behaviour.
 ///
-void map_insert(Map map, void* key, void* value);
 
-/// @brief Removes the key equivalent to given key from the map, if it exists.
+/// Associate \p key with \p value .
 ///
-/// @return true if key was found and removed, or false, if key was not found.
+/// Insert \p key if not already present.
 ///
-bool map_remove(Map map, void* key);
+/// Duplicate keys are overwritten.
+///
+/// \p key can not be `NULL`.
+///
+/// While a key is part of the \p map , any change to its content causes
+/// undefined behaviour.
+void map_insert(Map map, void *key, void *value);
 
-/// @brief Finds the value of given key.
+/// Remove \p key from \p map .
 ///
-/// NOTE:
-/// NULL is returned either when given key does not exist, or when given key exists and its value
-/// is NULL. If there's a need to differentiate the two circumstances use map_find_node.
+/// \p key can not be `NULL`.
 ///
-/// @return Value of given key, or NULL if key does not exist.
-///
-void* map_find(Map map, void* key);
+/// \return true, if key was removed successfully, otherwise false.
+bool map_remove(Map map, void *key);
 
-#define MAP_EOF (MapNode)0  // Defines the "virtual" end of the map.
-
-typedef struct map_node* MapNode;
-
-/// @brief Finds node with key equivalent to given key.
+/// Find and return the value associated with \p key .
 ///
-/// @return Node with key equivalent to given key, or MAP_EOF if key is not part of given map.
+/// \p key can not be `NULL`.
 ///
-MapNode map_find_node(Map map, void* key);
+/// \note
+/// `NULL` is returned:
+///  - if \p key is not part of \p map .
+///  - if \p key is associated with the value `NULL`.
+/// To differentiate the two circumstances use map_find_node().
+///
+/// \return Value associated with \p key , or NULL if \p key is not part of
+/// \p map .
+void *map_find(Map map, void *key);
 
-/// @brief Returns value of given node.
-///
-/// @return Value of given node.
-///
-void* map_node_value(Map map, MapNode node);
+#define MAP_EOF (MapNode)0 ///< Defines the "virtual" end of the map.
 
-/// @brief Returns key of given node.
+/// MapNode type.
 ///
-/// @return Key of given node.
+/// Incomplete struct, to keep it implementation independent.
 ///
-void* map_node_key(Map map, MapNode node);
+/// The user does not need to know how a MapNode is implemented, they use the
+/// API functions provided `map_<operation>_node()` and `map_node_<operation>()`
+/// with the appropriate parameters.
+typedef struct map_node *MapNode;
 
-////////////    TRAVERSAL    ///////////////////////////////////////////////////////////////////////
-
-/// NOTE: Map traversal is arbitrary.
-
-/// @brief Returns the first node, or MAP_EOF if map is empty.
+/// Find and return the first node with key equivalent to \p key .
 ///
+/// \p key can not be `NULL`.
+///
+/// \return Node with key equivalent to \p key , or `MAP_EOF` if \p key is not
+/// part of \p map .
+MapNode map_find_node(Map map, void *key);
+
+/// Return the value of \p node .
+///
+/// If \p node is `NULL`, it causes to undefined behaviour.
+void *map_node_value(Map map, MapNode node);
+
+/// Return the key of \p node .
+///
+/// If \p node is `NULL`, it causes to undefined behaviour.
+void *map_node_key(Map map, MapNode node);
+
+/// \defgroup traversal Traversal functions
+/// \note Map traversal is arbitrary.
+///@{
+
+/// Return the first node, or `MAP_EOF` if \p map is empty.
 MapNode map_first(Map);
 
-/// @brief Returns the next node of given node, or MAP_EOF if there is no succeeding node.
-///
+/// Return the next node of \p node , or `MAP_EOF` if if there is no succeeding
+/// node.
 MapNode map_next(Map, MapNode);
 
-////////////    END OF TRAVERSAL    ////////////////////////////////////////////////////////////////
+///@}  // End of traversal
 
-////////////    HASHING    /////////////////////////////////////////////////////////////////////////
+/// \defgroup hashing Hash functions
+///@{
 
-/// @brief Pointer to function that hashes an element…
+/// Hash an element.
 ///
-/// @return Hash of element.
-///
-typedef unsigned int (*HashFunc)(void*);
+/// \return Hash of element.
+typedef unsigned int (*HashFunc)(void *);
 
-/// @brief Hashes values of type char*.
+/// Set the hash function of \p map to \p hash_func .
 ///
-unsigned int hash_string(void* value);
-
-/// @brief Hashes values of type int.
-///
-unsigned int hash_int(void* value);
-
-/// @brief Sets the hash function of given map.
-///
-/// NOTE:
-/// Needs to be called right AFTER map_create and before any other map function. Failing to
-/// do so results in undefined behaviour.
+/// \warning Call map_set_hash_function() **right after** map_create() and
+/// before any other map_<operation> function. Failing to do so causes undefined
+/// behaviour.
 ///
 void map_set_hash_function(Map map, HashFunc hash_func);
 
-////////////    END OF HASHING    //////////////////////////////////////////////////////////////////
+/// Hash \p value of type char*.
+unsigned int hash_string(void *value);
+
+/// Hash \p value of type int.
+unsigned int hash_int(void *value);
+
+///@} // End of hashing
+
+#endif // MAP_H
