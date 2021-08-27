@@ -182,10 +182,22 @@ ListNode list_find_node(List list, void *value, CompareFunc compare);
 /// not found.
 void *list_find(List list, void *value, CompareFunc compare);
 
+/// Return the value at \p pos in \p list .
+///
+/// If \p pos < 0, get value of first element.
+///
+/// If \p pos > size of \p list , get value of last element.
+///
+/// \return Value at \p pos , or NULL if error.
+void *list_get_at(List list, int pos);
+
 /// Return the value of \p node .
 ///
 /// If \p node is `NULL`, it causes to undefined behaviour.
 void *list_node_value(List list, ListNode node);
+
+/// \defgroup traversal Traversal functions
+///@{
 
 /// Return first node, or `LIST_BOF` if \p list is empty.
 ListNode list_first(List list);
@@ -201,13 +213,6 @@ ListNode list_next(List list, ListNode node);
 /// node in \p list .
 ListNode list_previous(List list, ListNode node);
 
-/// Return the value at \p pos in \p list .
-///
-/// If \p pos < 0, gets value of first element.
-///
-/// If \p pos > size of \p list , gets value of last element.
-///
-/// \return Value at \p pos , or NULL if error.
-void *list_get_at(List list, int pos);
+///@} // End of traversal.
 
 #endif // LIST_H
