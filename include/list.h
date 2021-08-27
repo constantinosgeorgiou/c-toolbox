@@ -11,7 +11,7 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include "common_types.h" // DestroyFunc
+#include "common_types.h" // CompareFunc, DestroyFunc
 #include <stdlib.h>       // size_t
 
 /// List type.
@@ -34,7 +34,7 @@ typedef struct list_node *ListNode;
 #define LIST_BOF (ListNode)0 ///< Defines the "virtual" beginning of a list.
 #define LIST_EOF (ListNode)0 ///< Defines the "virtual" end of a list.
 
-/// Create and return a new list.
+/// Allocate space for a new list.
 ///
 /// If \p destroy_value is not NULL, then when an element gets removed,
 /// `destroy_value(value)` is called to deallocate the space held by value.
@@ -67,9 +67,9 @@ void list_destroy(List list);
 ///
 /// Typical usage:
 /// \code {.c}
-///   List mylist = list_create(NULL);
-///   DestroyFunc old = list_set_destroy_value(mylist, new);
-///   // old == NULL
+///   List mylist = list_create(free);
+///   DestroyFunc old = list_set_destroy_value(mylist, NULL);
+///   // old == free
 /// \endcode
 ///
 /// \param destroy_value When an element gets removed, `destroy_value(value)` is
