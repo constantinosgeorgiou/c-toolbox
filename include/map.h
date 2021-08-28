@@ -23,19 +23,6 @@
 /// functions provided `map_<operation>` with the appropriate parameters.
 typedef struct map *Map;
 
-/// Creates and returns a new map, in which the elements are compared
-/// based on \p compare .
-///
-/// \param compare Used to compare the elements.
-/// \param destroy_key If destroy_key != NULL, then each time a key is removed,
-///                    destroy_key(key) is called.
-/// \param destroy_value If destroy_value != NULL, then each time a value is
-/// removed,
-///                      destroy_value(value) is called.
-///
-/// \return Newly created map, or NULL if error.
-///
-
 /// Allocate space for a new map.
 ///
 /// Elements are compared based on \p compare .
@@ -73,8 +60,6 @@ Map map_create(CompareFunc compare, DestroyFunc destroy_key,
 /// Deallocate the space held by \p map .
 ///
 /// Any operation on \p map after its destruction, causes undefined behaviour.
-///
-/// \param map
 void map_destroy(Map map);
 
 /// Changes the destroy function called on each key's removal/overwrite
@@ -145,7 +130,7 @@ void map_insert(Map map, void *key, void *value);
 ///
 /// \p key can not be `NULL`.
 ///
-/// \return true, if key was removed successfully, otherwise false.
+/// \return true, if \p key was removed successfully, otherwise false.
 bool map_remove(Map map, void *key);
 
 /// Find and return the value associated with \p key .
