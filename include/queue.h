@@ -6,25 +6,14 @@
 ///
 /// The user does not need to know how a Queue is implemented, they use the API
 /// functions provided `queue_<operation>` with the appropriate parameters.
-///
-/// Operations supported:
-/// - queue_create(): Allocates memory for a queue.
-/// - queue_destroy(): Frees the allocated memory of a queue.
-/// - queue_enqueue(): Adds an element to the back of a queue.
-/// - queue_dequeue(): Removes an element from the front of a queue.
-/// - queue_size(): Returns the number of elements in a queue.
-/// - queue_is_empty(): Returns true if queue is empty, or false if not.
-/// - queue_front(): Returns the first element of a queue.
-/// - queue_back(): Returns the last element of a queue.
-/// - queue_set_destroy_value(): Changes the function called on each element
-///                              removal/overwrite, to given function.
 
-#pragma once
+#ifndef QUEUE_H
+#define QUEUE_H
 
-#include <stdbool.h>  // bool
-#include <stdlib.h>   // size_t
+#include <stdbool.h> // bool
+#include <stdlib.h>  // size_t
 
-#include "common_types.h"  // DestroyFunc
+#include "common_types.h" // DestroyFunc
 
 /// Queue type.
 ///
@@ -32,54 +21,52 @@
 ///
 /// The user does not need to know how a Queue is implemented, they use the API
 /// functions provided `queue_<operation>` with the appropriate parameters.
-///
-typedef struct queue* Queue;
+typedef struct queue *Queue;
 
-/// Creates and returns a queue.
+/// Allocate space for a new queue.
 ///
-/// @param destroy_value If destroy_value != NULL, call `destroy_value(value)`
-///                      each time a value is removed.
-/// @return Newly created queue.
+/// If \p destroy_value is not NULL, then when an element gets removed,
+/// `destroy_value(value)` is called to deallocate the space held by value.
 ///
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
+///
+/// @return Newly created queue, or NULL if an error occured.
 Queue queue_create(DestroyFunc destroy_value);
 
-/// Frees all the memory allocated for QUEUE.
+///  Deallocate the space held by \p queue.
 ///
-/// Any operation on QUEUE after its destruction, results in undefined
-/// behaviour.
-///
+/// Any operation on the \p queue after its destruction, results in
+/// undefined behaviour.
 void queue_destroy(Queue queue);
 
-/// Adds VALUE to the back of QUEUE.
-///
-void queue_enqueue(Queue queue, void* value);
+/// Add \p value to the back of \p queue.
+void queue_enqueue(Queue queue, void *value);
 
-/// Removes an element from the front of QUEUE.
+/// Remove an element from the front of \p queue.
 ///
-/// If QUEUE is empty, nothing happens.
-///
+/// If \p queue is empty, nothing happens.
 void queue_dequeue(Queue queue);
 
-/// Returns the number of elements in QUEUE.
-///
-/// @return The number of elements in QUEUE.
-///
+/// Return the number of elements in \p queue.
 size_t queue_size(Queue queue);
 
-/// Returns `true` if QUEUE is empty, else, `false`.
-///
+/// Return `true` if \p queue is empty, else, `false`.
 bool queue_is_empty(Queue queue);
 
-/// Returns the first element of QUEUE, or NULL, if QUEUE is empty.
-///
-void* queue_front(Queue queue);
+/// Return the first element of \p queue, or NULL, if \p queue is empty.
+void *queue_front(Queue queue);
 
-/// Returns the last element of QUEUE, or NULL, if QUEUE is empty.
-///
-void* queue_back(Queue queue);
+/// Return the last element of \p queue, or NULL, if \p queue is empty.
+void *queue_back(Queue queue);
 
-/// Changes function called each time a value is removed to DESTROY_VALUE.
+/// Change the function called on each element's removal to
+/// \p destroy_value .
 ///
-/// @return Previous destroy_value function.
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
 ///
+/// \return Previous `destroy_value` function.
 DestroyFunc queue_set_destroy_value(Queue queue, DestroyFunc destroy_value);
+
+#endif
