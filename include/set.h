@@ -1,87 +1,132 @@
-////////////////////////////////////////////////////////////////////////
-//
-// ADT Set
-//
-// Abstract διατεταγμένο σύνολο. Τα στοιχεία είναι διατεταγμένα με βάση
-// τη συνάρτηση compare, και καθένα εμφανίζεται το πολύ μία φορά.
-// Παρέχεται γρήγορη αναζήτηση με ισότητα αλλά και με ανισότητα.
-//
-////////////////////////////////////////////////////////////////////////
+/// \file set.h
+///
+/// Set Abstract Data Type.
+///
+/// Implementation independent.
+///
+/// The user does not need to know how a Set is implemented, they use the API
+/// functions provided `set_<operation>` with the appropriate parameters.
 
-#pragma once // #include το πολύ μία φορά
+#ifndef SET_H
+#define SET_H
 
-#include "common_types.h"
+#include "common_types.h" // CompareFunc, DestroyFunc
+#include <stdbool.h>      // bool
+#include <stddef.h>       // size_t
 
+/// Set type.
+///
+/// Incomplete struct, to keep it implementation independent.
+///
+/// The user does not need to know how a Set is implemented, they use the API
+/// functions provided `set_<operation>` with the appropriate parameters.
+typedef struct set *Set;
 
-// Ενα σύνολο αναπαριστάται από τον τύπο Set
-
-typedef struct set* Set;
-
-
-// Δημιουργεί και επιστρέφει ένα σύνολο, στο οποίο τα στοιχεία συγκρίνονται με βάση
-// τη συνάρτηση compare.
-// Αν destroy_value != NULL, τότε καλείται destroy_value(value) κάθε φορά που αφαιρείται ένα στοιχείο.
-
+/// Allocate space for a new set.
+///
+/// \p compare , compares two elements *a* and *b*:
+/// - If *a* < *b* , return number < 0.
+/// - If *a* > *b* , return number > 0.
+/// - If *a* equivalent to *b*, return 0.
+///
+/// If \p destroy_value is not NULL, then when an element gets removed,
+/// `destroy_value(value)` is called to deallocate the space held by value.
+///
+/// \param compare Compares two elements. \sa CompareFunc.
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
+///
+/// \return Newly created set, or NULL if an error occured.
 Set set_create(CompareFunc compare, DestroyFunc destroy_value);
 
-// Επιστρέφει τον αριθμό στοιχείων που περιέχει το σύνολο set.
-
-int set_size(Set set);
-
-// Προσθέτει την τιμή value στο σύνολο, αντικαθιστώντας τυχόν προηγούμενη τιμή ισοδύναμη της value.
-//
-// ΠΡΟΣΟΧΗ:
-// Όσο το value είναι μέλος του set, οποιαδήποτε μεταβολή στο περιεχόμενό του (στη μνήμη που δείχνει) δεν πρέπει
-// να αλλάζει τη σχέση διάταξης (compare) με οποιοδήποτε άλλο στοιχείο, διαφορετικά έχει μη ορισμένη συμπεριφορά.
-
-void set_insert(Set set, void* value);
-
-// Αφαιρεί τη μοναδική τιμή ισοδύναμη της value από το σύνολο, αν υπάρχει.
-// Επιστρέφει true αν βρέθηκε η τιμή αυτή, false διαφορετικά.
-
-bool set_remove(Set set, void* value);
-
-// Επιστρέφει την μοναδική τιμή του set που είναι ισοδύναμη με value, ή NULL αν δεν υπάρχει
-
-void* set_find(Set set, void* value);
-
-// Αλλάζει τη συνάρτηση που καλείται σε κάθε αφαίρεση/αντικατάσταση στοιχείου σε
-// destroy_value. Επιστρέφει την προηγούμενη τιμή της συνάρτησης.
-
-DestroyFunc set_set_destroy_value(Set set, DestroyFunc destroy_value);
-
-// Ελευθερώνει όλη τη μνήμη που δεσμεύει το σύνολο.
-// Οποιαδήποτε λειτουργία πάνω στο set μετά το destroy είναι μη ορισμένη.
-
+/// Deallocate the space held by \p set .
+///
+/// Any operation on \p set after its destruction, causes undefined behaviour.
 void set_destroy(Set set);
 
+/// Return the number of elements in the \p set.
+int set_size(Set set);
 
-// Διάσχιση του set ////////////////////////////////////////////////////////////
-//
-// Η διάσχιση γίνεται με τη σειρά διάταξης.
+/// Insert \p value to \p set.
+///
+/// If there is a value equivalent to \p value already present in \p set,
+/// overwrite it.
+///
+/// \warning While a value is part of \p set, any change to its content causes
+/// undefined behaviour.
+void set_insert(Set set, void *value);
 
-// Οι σταθερές αυτές συμβολίζουν εικονικούς κόμβους _πριν_ τον πρώτο και _μετά_ τον τελευταίο κόμβο του set
-#define SET_BOF (SetNode)0
-#define SET_EOF (SetNode)0
+/// Remove \p value from \p set.
+///
+/// \p value can not be `NULL`.
+///
+/// \return `true` if removed successfully, otherwise false.
+bool set_remove(Set set, void *value);
 
-typedef struct set_node* SetNode;
+/// Find and return value equivalent to \p value.
+///
+/// \p value can not be `NULL`.
+///
+/// \return Value equivalent to \p value, or NULL if \p value is not part of
+/// \p set.
+void *set_find(Set set, void *value);
 
-// Επιστρέφουν τον πρώτο και τον τελευταίο κομβο του set, ή SET_BOF / SET_EOF αντίστοιχα αν το set είναι κενό
+/// Changes the destroy function called on each value's removal/overwrite
+/// to \p destroy_value .
+///
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
+///
+/// \return Previous `destroy_value` function.
+DestroyFunc set_set_destroy_value(Set set, DestroyFunc destroy_value);
 
+/// SetNode type.
+///
+/// Incomplete struct, to keep it implementation independent.
+///
+/// The user does not need to know how a SetNode is implemented, they use the
+/// API functions provided `set_<operation>_node` and `set_node_<operation>`
+/// with the appropriate parameters.
+typedef struct set_node *SetNode;
+
+#define SET_BOF (SetNode)0 ///< Defines the virtual beginning of the Set.
+#define SET_EOF (SetNode)0 ///< Defines the virtual end of the Set.
+
+/// Return the value of \p node .
+///
+/// If \p node is `NULL`, it causes to undefined behaviour.
+void *set_node_value(Set set, SetNode node);
+
+/// Find and return the first node with value equivalent to \p value.
+///
+/// \p compare , compares two elements \p a and \p b :
+/// - If \p a < \p b , return number < 0.
+/// - If \p a > \p b , return number > 0.
+/// - If \p a equivalent to \p b , return 0.
+///
+/// \param compare Compares two elements. \sa CompareFunc.
+///
+/// \return Node with value equivalent to \p value , or `SET_EOF` if value was
+/// not found.
+SetNode set_find_node(Set set, void *value);
+
+/// \defgroup traversal Traversal functions
+///@{
+
+/// Return first node, or `SET_BOF` if \p set is empty.
 SetNode set_first(Set set);
+
+/// Return last node, or `SET_EOF` if \p set is empty.
 SetNode set_last(Set set);
 
-// Επιστρέφουν τον επόμενο και τον προηγούμενο κομβο του node, ή SET_EOF / SET_BOF
-// αντίστοιχα αν ο node δεν έχει επόμενο / προηγούμενο.
-
+/// Return the next node of \p node , or `SET_EOF` if \p node is the last node
+/// in \p set.
 SetNode set_next(Set set, SetNode node);
+
+/// Return the previous node of \p node , or `SET_BOF` if \p node is the first
+/// node in \p set.
 SetNode set_previous(Set set, SetNode node);
 
-// Επιστρέφει το περιεχόμενο του κόμβου node
+///@}  // End of traversal.
 
-void* set_node_value(Set set, SetNode node);
-
-// Βρίσκει το μοναδικό στοιχείο στο set που να είναι ίσο με value.
-// Επιστρέφει τον κόμβο του στοιχείου, ή SET_EOF αν δεν βρεθεί.
-
-SetNode set_find_node(Set set, void* value);
+#endif // SET_H
