@@ -1,4 +1,4 @@
-/// @file pqueue.h
+/// \file pqueue.h
 ///
 /// Priority Queue Abstract Data Type.
 ///
@@ -7,26 +7,14 @@
 /// The user does not need to know how a Priority Queue is implemented, they use
 /// the API functions provided `pqueue_<operation>` with the appropriate
 /// parameters.
-///
-/// Operations supported:
-/// - pqueue_create(): Allocates memory for a priority queue.
-/// - pqueue_destroy(): Frees the allocated memory of a queue.
-/// - pqueue_peek(): Returns the highest-priority element but does not remove
-///                  it.
-/// - pqueue_insert(): Adds an element to the priority queue.
-/// - pqueue_pull(): Removes the highest-priority element.
-/// - pqueue_size(): Returns the number of values in a queue.
-/// - pqueue_is_empty(): Returns true if queue is empty, or false if not.
-/// - pqueue_set_destroy_value(): Changes the function called on each element
-///                               removal/overwrite, to given function.
 
-#pragma once
+#ifndef PQUEUE_H
+#define PQUEUE_H
 
-#include <stdbool.h> // bool
-#include <stdlib.h>  // size_t
-
-#include "common_types.h" // DestroyFunc
+#include "common_types.h" // CompareFunc, DestroyFunc
 #include "vector.h"       // Vector
+#include <stdbool.h>      // bool
+#include <stdlib.h>       // size_t
 
 /// Priority Queue type.
 ///
@@ -35,55 +23,58 @@
 /// The user does not need to know how a Priority Queue is implemented, they use
 /// the API functions provided `pqueue_<operation>` with the appropriate
 /// parameters.
-///
 typedef struct priority_queue *PQueue;
 
-/// Creates and returns a priority queue.
+/// Allocate space for a new priority queue.
 ///
-/// @param compare Compares two values. Defines the priority of the values.
-/// @param destroy_value If destroy_value != NULL, call
-///                        `destroy_value(value)` each time a value is
-///                        removed.
-/// @param values If values != NULL, initialize the priority queue using
-///                 VALUES.
-/// @return
+/// \p compare , compares two elements \p a and \p b :
+/// - If \p a < \p b , return number < 0.
+/// - If \p a > \p b , return number > 0.
+/// - If \p a equivalent to \p b , return 0.
 ///
+/// If \p destroy_value is not NULL, then when an element gets removed,
+/// `destroy_value(value)` is called to deallocate the space held by value.
+///
+/// \param compare Compares two elements. \sa CompareFunc.
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
+/// \param values Initialize the priority queue using \p values, if not `NULL`.
+///
+/// \return Newly created priority queue, or NULL if an error occured.
 PQueue pqueue_create(CompareFunc compare, DestroyFunc destroy_value,
                      Vector values);
 
-/// Frees all the memory allocated for PQUEUE.
+/// Deallocate the space held by \p pqueue .
 ///
-/// Any operation on PQUEUE after its destruction, results in undefined
+/// Any operation on \p pqueue after its destruction, causes undefined
 /// behaviour.
-///
 void pqueue_destroy(PQueue pqueue);
 
-/// Returns the highest-priority value of PQUEUE without removing it.
+/// Return the highest-priority value of \p pqueue without removing it.
 ///
-/// @return Highest-priority element of PQUEUE, or NULL, if PQUEUE is empty.
-///
+/// \return Highest-priority element of \p pqueue, or NULL, if \p pqueue is
+/// empty.
 void *pqueue_peek(PQueue pqueue);
 
-/// Adds ELEMENT to the PQUEUE.
-///
-void pqueue_insert(PQueue pqueue, void *element);
+/// Add \p value to \p pqueue.
+void pqueue_insert(PQueue pqueue, void *value);
 
-/// Removes the highest-priority element.
-///
+/// Remove the highest-priority element from \p pqueue.
 void pqueue_pull(PQueue pqueue);
 
-/// Returns the number of values in PQUEUE.
-///
-/// @return The number of values in PQUEUE.
-///
+/// Return the number of elements in \p pqueue.
 size_t pqueue_size(PQueue pqueue);
 
-/// Returns `true` if PQUEUE is empty, else, `false`.
-///
+/// Returns `true` if \p pqueue is empty, else, `false`.
 bool pqueue_is_empty(PQueue pqueue);
 
-/// Changes function called each time a value is removed to DESTROY_VALUE.
+/// Change the function called on each element's removal to
+/// \p destroy_value .
 ///
-/// @return Previous destroy_value function.
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
 ///
+/// \return Previous `destroy_value` function.
 DestroyFunc pqueue_set_destroy_value(PQueue pqueue, DestroyFunc destroy_value);
+
+#endif // PQUEUE_H
