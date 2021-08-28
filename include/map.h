@@ -26,10 +26,10 @@ typedef struct map *Map;
 /// Allocate space for a new map.
 ///
 /// Elements are compared based on \p compare .
-/// \p compare should work as follows when comparing two elements (a and b):
-/// - If \p a < \p b , return number < 0.
-/// - If \p a > \p b , return number > 0.
-/// - If \p a equivalent to \p b , return 0.
+/// \p compare should work as follows when comparing two elements (*a* and *b*):
+/// - If *a* < *b*, return number < 0.
+/// - If *a* > *b*, return number > 0.
+/// - If *a* equivalent to *b*, return 0.
 ///
 /// If \p destroy_key is not NULL, then when an element gets removed,
 /// `destroy_key(key)` is called to deallocate the space held by key.

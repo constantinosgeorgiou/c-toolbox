@@ -77,10 +77,11 @@ void vector_remove_last(Vector vec);
 /// Find and return the first value equivalent to \p value based on \p
 /// compare.
 ///
-/// \p compare , compares two elements \p a and \p b :
-/// - If \p a < \p b , return number < 0.
-/// - If \p a > \p b , return number > 0.
-/// - If \p a equivalent to \p b , return 0.
+/// Elements are compared based on \p compare .
+/// \p compare should work as follows when comparing two elements (*a* and *b*):
+/// - If *a* < *b*, return number < 0.
+/// - If *a* > *b*, return number > 0.
+/// - If *a* equivalent to *b*, return 0.
 ///
 /// \param compare Compares two elements. \sa CompareFunc.
 ///
@@ -121,10 +122,11 @@ typedef struct vector_node *VectorNode;
 /// Find and return the first node with value equivalent to \p value based on
 /// \p compare .
 ///
-/// \p compare , compares two elements \p a and \p b :
-/// - If \p a < \p b , return number < 0.
-/// - If \p a > \p b , return number > 0.
-/// - If \p a equivalent to \p b , return 0.
+/// Elements are compared based on \p compare .
+/// \p compare should work as follows when comparing two elements (*a* and *b*):
+/// - If *a* < *b*, return number < 0.
+/// - If *a* > *b*, return number > 0.
+/// - If *a* equivalent to *b*, return 0.
 ///
 /// \param compare Compares two elements. \sa CompareFunc.
 ///

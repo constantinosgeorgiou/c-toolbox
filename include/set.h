@@ -24,9 +24,10 @@ typedef struct set *Set;
 
 /// Allocate space for a new set.
 ///
-/// \p compare , compares two elements *a* and *b*:
-/// - If *a* < *b* , return number < 0.
-/// - If *a* > *b* , return number > 0.
+/// Elements are compared based on \p compare .
+/// \p compare should work as follows when comparing two elements (*a* and *b*):
+/// - If *a* < *b*, return number < 0.
+/// - If *a* > *b*, return number > 0.
 /// - If *a* equivalent to *b*, return 0.
 ///
 /// If \p destroy_value is not NULL, then when an element gets removed,
@@ -98,13 +99,6 @@ typedef struct set_node *SetNode;
 void *set_node_value(Set set, SetNode node);
 
 /// Find and return the first node with value equivalent to \p value.
-///
-/// \p compare , compares two elements \p a and \p b :
-/// - If \p a < \p b , return number < 0.
-/// - If \p a > \p b , return number > 0.
-/// - If \p a equivalent to \p b , return 0.
-///
-/// \param compare Compares two elements. \sa CompareFunc.
 ///
 /// \return Node with value equivalent to \p value , or `SET_EOF` if value was
 /// not found.
