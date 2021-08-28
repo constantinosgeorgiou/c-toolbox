@@ -34,7 +34,7 @@ typedef struct queue *Queue;
 /// @return Newly created queue, or NULL if an error occured.
 Queue queue_create(DestroyFunc destroy_value);
 
-///  Deallocate the space held by \p queue.
+/// Deallocate the space held by \p queue.
 ///
 /// Any operation on the \p queue after its destruction, results in
 /// undefined behaviour.
