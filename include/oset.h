@@ -92,7 +92,7 @@ DestroyFunc oset_set_destroy_key(OrderedSet oset, DestroyFunc destroy_key);
 /// \return Previous `destroy_value` function.
 DestroyFunc oset_set_destroy_value(OrderedSet oset, DestroyFunc destroy_value);
 
-/// Returns the number of elements in the \p oset .
+/// Return the number of elements in the \p oset .
 size_t oset_size(OrderedSet oset);
 
 /// Associates a key with a value (inserting the key if not already
@@ -209,7 +209,7 @@ void *oset_node_value(OrderedSet oset, OrderedSetNode node);
 /// \defgroup traversal Traversal functions
 ///@{
 
-/// Return first node, or `SET_BOF` if \p oset is empty.
+/// Return first node, or `OSET_BOF` if \p oset is empty.
 OrderedSetNode oset_first(OrderedSet oset);
 
 /// Return last node, or `OSET_EOF` if \p oset is empty.
