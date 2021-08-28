@@ -1,4 +1,4 @@
-/// @file vector.h
+/// \file vector.h
 ///
 /// Vector Abstract Data Type.
 ///
@@ -6,125 +6,154 @@
 ///
 /// The user does not need to know how a Vector is implemented, they use the API
 /// functions provided `vector_<operation>` with the appropriate parameters.
-///
-/// Operations supported:
-/// - vector_create(): Creates and returns a new vector with specified size and
-///                    elements initialized to NULL.
-/// - vector_destroy(): Frees all the memory allocated by a vector.
-/// - vector_insert_last(): Inserts a value at the end of a vector.
-/// - vector_remove_last(): Removes the last element of a vector.
-/// - vector_get_at(): Gets the value at a specified position.
-/// - vector_set_at(): Sets the value at a specified position.
-/// - vector_find(): Finds and returns the first element equivalent to a value.
-/// - vector_find_node(): Finds and returns the first node with value equivalent to a value. 
-/// - vector_node_value(): Returns value of a node.
-/// - vector_first(): Returns the first node of a vector.
-/// - vector_last(): Returns the last node of a vector.
-/// - vector_next(): Returns the next node of a node.
-/// - vector_previous(): Returns the previous node of a node.
-/// - vector_size(): Returns the number of elements in a vector.
-/// - vector_set_destroy_value(): Changes function called each time a value is
-///                               removed/overwriten, to destroy_value.
 
-#pragma once
+#ifndef VECTOR_H
+#define VECTOR_H
 
-#include "common_types.h" // DestroyFunc
+#include "common_types.h" // CompareFunc, DestroyFunc
 #include <stdlib.h>       // size_t
 
-#define VECTOR_ERROR (Vector)0 ///< Defines a failed operation.
-
+/// Vector type.
+///
+/// Incomplete struct, to keep it implementation independent.
+///
+/// The user does not need to know how a Vector is implemented, they use the API
+/// functions provided `vector_<operation>` with the appropriate parameters.
 typedef struct vector *Vector;
 
 /// Creates and returns a new vector with specified size and elements
 /// initialized to NULL.
 ///
-/// @param destroy_value If destroy_value != NULL, call destroy_value(value)
+/// \param destroy_value If destroy_value != NULL, call destroy_value(value)
 /// each time a value is removed/overwritten.
 ///
-/// @return Newly created Vector, or VECTOR_ERROR, if failed to allocate enough
+/// \return Newly created Vector, or VECTOR_ERROR, if failed to allocate enough
 /// memory.
 ///
+
+/// Allocates space for a new vector with \p size elements initialized to
+/// `NULL`.
+///
+/// If \p destroy_value is not NULL, then when an element gets removed,
+/// `destroy_value(value)` is called to deallocate the space held by value.
+///
+/// \param size Number of elements in new vector.
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
+///
+/// \return Newly created Vector, or NULL, if an error occured.
 Vector vector_create(int size, DestroyFunc destroy_value);
 
-/// Frees all the memory allocated by VEC.
+/// Deallocate the space held by \p vec .
 ///
-/// Any operation on VEC after its destruction, results in undefined
-/// behaviour.
-///
+/// Any operation on the \p vec after its destruction, results in
+/// undefined behaviour.
 void vector_destroy(Vector vec);
 
-/// Changes function called each time a value is removed/overwriten, to
-/// destroy_value.
+/// Change the function called on each element's removal/overwrite to
+/// \p destroy_value .
 ///
-/// @return Previous destroy_value function.
+/// \param destroy_value When an element gets removed, `destroy_value(value)` is
+/// called, if not NULL, to deallocate the space held by value.
 ///
+/// \return Previous `destroy_value` function.
 DestroyFunc vector_set_destroy_value(Vector vec, DestroyFunc destroy_value);
 
-/// Returns the number of elements in VEC.
-///
+/// Return the number of elements in \p vec .
 size_t vector_size(Vector vec);
 
-/// Inserts VALUE at the end of VEC. Increases the size of VEC by 1.
+/// Insert \p value at the end of \p vec.
 ///
+/// Increases the size of VEC by 1.
 void vector_insert_last(Vector vec, void *value);
 
-/// Removes the last element of VEC. Decreases the size of VEC by 1.
+/// Remove the last element of \p vec.
 ///
-/// If VEC is empty, nothing is done.
+/// Decreases the size of VEC by 1.
 ///
+/// If \p vec is empty, nothing is done.
 void vector_remove_last(Vector vec);
 
-/// Finds and returns the first element equivalent to VALUE (based on COMPARE).
+/// Find and return the first value equivalent to \p value based on \p
+/// compare.
 ///
-/// @return First element equivalent to VALUE, or NULL, if element not found.
+/// \p compare , compares two elements \p a and \p b :
+/// - If \p a < \p b , return number < 0.
+/// - If \p a > \p b , return number > 0.
+/// - If \p a equivalent to \p b , return 0.
+///
+/// \param compare Compares two elements. \sa CompareFunc.
+///
+/// \return First element equivalent to \p value, or NULL, if element not found.
 ///
 void *vector_find(Vector vec, void *value, CompareFunc compare);
 
-/// Gets the value at specified position.
+/// Get the value at position \p pos of \p vec.
 ///
-/// If POS < 0 gets value of first element. If POS > size gets value of last
-/// element.
+/// If \p pos < 0, get value of first element.
 ///
-/// @return Value at specified position.
+/// If \p pos > size, get value of last element.
+///
+/// \return Value at position \p pos of \p vec.
 ///
 void *vector_get_at(Vector vec, int pos);
 
-/// Sets the value at specified position.
+/// Set the value at position \p pos of \p vec to \p value.
 ///
-/// If POS < 0 sets value of first element. If POS > size sets value of last
-/// element.
+/// If \p pos < 0, set value of first element.
+///
+/// If \p pos > size, set value of last element.
 ///
 void vector_set_at(Vector vec, int pos, void *value);
 
-#define VECTOR_BOF (VectorNode)0 ///< Defines the virtual beginning of Vector.
-#define VECTOR_EOF (VectorNode)0 ///< Defines the virtual end of Vector.
-
+/// VectorNode type.
+///
+/// Incomplete struct, to keep it implementation independent.
+///
+/// The user does not need to know how a VectorNode is implemented, they use the
+/// API functions provided `vector_<operation>_node` and
+/// `vector_node_<operation>` with the appropriate parameters.
 typedef struct vector_node *VectorNode;
 
-/// Finds and returns the first node with value equivalent to VALUE (based on
-/// COMPARE).
+#define VECTOR_BOF (VectorNode)0 ///< Defines the virtual beginning of a vector.
+#define VECTOR_EOF (VectorNode)0 ///< Defines the virtual end of a vector.
+
+/// Find and return the first node with value equivalent to \p value based on
+/// \p compare .
 ///
-/// @return First node with value equivalent to VALUE, or VECTOR_EOF, if node
-/// with value not found.
+/// \p compare , compares two elements \p a and \p b :
+/// - If \p a < \p b , return number < 0.
+/// - If \p a > \p b , return number > 0.
+/// - If \p a equivalent to \p b , return 0.
 ///
+/// \param compare Compares two elements. \sa CompareFunc.
+///
+/// \return Node with value equivalent to \p value , or `VECTOR_EOF` if value
+/// was not found.
 VectorNode vector_find_node(Vector vec, void *value, CompareFunc compare);
 
-/// Returns value of NODE.
+/// Return the value of \p node .
 ///
+/// If \p node is `NULL`, it causes to undefined behaviour.
 void *vector_node_value(Vector vec, VectorNode node);
 
-/// Returns the first node of VEC, or VECTOR_EOF, if VEC is empty.
-///
+/// \defgroup traversal Traversal functions
+///@{
+
+/// Return first node of \p vec, or `VECTOR_BOF` if \p vec is empty.
 VectorNode vector_first(Vector vec);
 
-/// Returns the last node of VEC, or VECTOR_EOF, if VEC is empty.
-///
+/// Return the last node of \p vec, or `VECTOR_EOF`, if \p vec is empty.
 VectorNode vector_last(Vector vec);
 
-/// Returns the next node of NODE, or VECTOR_EOF, if NODE is last.
-///
+/// Return the next node of \p node , or `VECTOR_EOF` if \p node is the last
+/// node in \p vec.
 VectorNode vector_next(Vector vec, VectorNode node);
 
-/// Returns the previous node of NODE, or VECTOR_BOF, if NODE is first.
-///
+/// Return the previous node of \p node , or `VECTOR_BOF` if \p node is the
+/// first node in \p vec.
 VectorNode vector_previous(Vector vec, VectorNode node);
+
+///@} // End of traversal.
+
+#endif // VECTOR_H
