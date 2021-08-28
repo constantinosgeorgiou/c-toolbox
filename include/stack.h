@@ -12,7 +12,7 @@
 
 #include "common_types.h" // DestroyFunc
 #include <stdbool.h>      // bool
-#include <stdlib.h>       // size_t
+#include <stddef.h>       // size_t
 
 /// Stack type.
 ///

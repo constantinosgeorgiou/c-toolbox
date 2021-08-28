@@ -13,7 +13,7 @@
 
 #include "common_types.h" // CompareFunc, DestroyFunc
 #include <stdbool.h>      // bool
-#include <stdlib.h>       // size_t
+#include <stddef.h>       // size_t
 
 /// Map type.
 ///

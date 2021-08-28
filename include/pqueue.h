@@ -14,7 +14,7 @@
 #include "common_types.h" // CompareFunc, DestroyFunc
 #include "vector.h"       // Vector
 #include <stdbool.h>      // bool
-#include <stdlib.h>       // size_t
+#include <stddef.h>       // size_t
 
 /// Priority Queue type.
 ///

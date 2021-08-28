@@ -12,7 +12,7 @@
 #define SLIST_H
 
 #include "common_types.h" // CompareFunc, DestroyFunc
-#include <stdlib.h>       // size_t
+#include <stddef.h>       // size_t
 
 /// SList type.
 ///
