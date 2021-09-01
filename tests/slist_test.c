@@ -1,230 +1,193 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////
-///
-/// @file ADTList_test.c
-/// @author Constantinos Georgiou
-/// @brief Unit tests for implementation of ADT List.
-/// @version 1.0
-///
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#include "ADTList.h"
+#include "slist.h"
 
 #include "acutest.h"
 
-/// @brief Compares two int*.
-///
-/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
-///
-static int compare_ints(const void* a, const void* b) { return *(int*)a - *(int*)b; }
-
-/// @brief Allocates memory for an integer with given value.
-///
-/// @return Newly created pointer to integer.
-///
-static int* create_int(int value) {
-    int* pointer = malloc(sizeof(int));
-    if (pointer == NULL) {
-        return NULL;
-    }
-    *pointer = value;
-    return pointer;
-}
+#include "test_companion.h"
 
 void test_create(void) {
-    List list = list_create(NULL);
-    DestroyFunc destroy = list_set_destroy_value(list, NULL);
+  SList slist = slist_create(free);
+  DestroyFunc destroy_value = slist_set_destroy_value(slist, NULL);
 
-    TEST_CHECK(list != NULL);
-    TEST_CHECK(list_size(list) == 0);
-    TEST_CHECK(destroy == NULL);
+  TEST_CHECK(slist != NULL);
+  TEST_CHECK(slist_size(slist) == 0);
+  TEST_CHECK(destroy_value == free);
 
-    list_destroy(list);
+  slist_destroy(slist);
 }
 
 void test_insert(void) {
-    int N = 10;
+  int N = 10;
 
+  SList slist = slist_create(free);
+
+  for (int i = 0; i < N; ++i) {
     // Insert at the beginning.
-    List list = list_create(free);
-    for (int i = 0; i < N; i++) {
-        ListNode inserted = list_insert_next(list, LIST_BOF, create_int(i));
+    slist_insert_next(slist, SLIST_BOF, create_int(i));
 
-        if (TEST_CHECK(inserted != NULL)) {
-            ListNode first = list_first(list);
-            int* value = list_node_value(list, inserted);
-            TEST_CHECK(inserted == first);
-            TEST_CHECK(*value == i);
-            TEST_CHECK(list_size(list) == (i + 1));
-        }
-    }
+    int *value = slist_node_value(slist, slist_first(slist));
 
-    // Check if elements were inserted in descending order:
-    ListNode node = list_first(list);
-    for (int i = N - 1; i >= 0; i--) {
-        int* value = list_node_value(list, node);
-        TEST_CHECK(*value == i);
-        node = list_next(list, node);
-    }
+    TEST_CHECK(*value == i);
+    TEST_CHECK(slist_size(slist) == (i + 1));
+  }
 
-    // Check last element:
-    TEST_CHECK(*(int*)list_node_value(list, list_last(list)) == 0);
+  // Check if elements were inserted in descending order:
+  SListNode node = slist_first(slist);
+  for (int i = N - 1; i >= 0; i--) {
+    int *value = slist_node_value(slist, node);
+    TEST_CHECK(*value == i);
+    node = slist_next(slist, node);
+  }
 
-    // Destroy to test insertion at the end:
-    list_destroy(list);
+  // Destroy to test insertion at the end:
+  slist_destroy(slist);
 
+  slist = slist_create(free);
+
+  for (int i = 0; i < N; i++) {
     // Insert at the end.
-    list = list_create(free);
-    for (int i = 0; i < N; i++) {
-        ListNode inserted = list_insert_next(list, list_last(list), create_int(i));
+    slist_insert_next(slist, slist_last(slist), create_int(i));
 
-        if (TEST_CHECK(inserted != NULL)) {
-            ListNode last = list_last(list);
-            int* value = list_node_value(list, inserted);
+    int *value = slist_node_value(slist, slist_last(slist));
 
-            TEST_CHECK(inserted == last);
-            TEST_CHECK(*value == i);
-            TEST_CHECK(list_size(list) == (i + 1));
-        }
-    }
+    TEST_CHECK(*value == i);
+    TEST_CHECK(slist_size(slist) == (i + 1));
+  }
 
-    // Check if elements were inserted in ascending order:
-    node = list_first(list);
-    for (int i = 0; i < N; i++) {
-        TEST_CHECK(*(int*)list_node_value(list, node) == i);
-        node = list_next(list, node);
-    }
+  // Check if elements were inserted in ascending order:
+  node = slist_first(slist);
+  for (int i = 0; i < N; i++) {
+    TEST_CHECK(*(int *)slist_node_value(slist, node) == i);
+    node = slist_next(slist, node);
+  }
 
-    // Check last element:
-    TEST_CHECK(*(int*)list_node_value(list, list_last(list)) == (N - 1));
+  // Check in-between insertion by inserting a NULL node after the first node.
+  SListNode first_node = slist_first(slist);
+  slist_insert_next(slist, first_node, NULL);
+  TEST_CHECK(slist_node_value(slist, slist_next(slist, first_node)) == NULL);
 
-    // Check in-between insertion by inserting a NULL node after the first node.
-    ListNode first_node = list_first(list);
-    list_insert_next(list, first_node, NULL);
-    TEST_CHECK(list_node_value(list, list_next(list, first_node)) == NULL);
-
-    list_destroy(list);
+  slist_destroy(slist);
 }
 
 void test_remove_next(void) {
-    List list = list_create(free);
+  int N = 10;
 
-    int N = 10;
+  SList slist = slist_create(free);
 
-    // Insert at the beginning. Remove from the beginning.
-    for (int i = 0; i < N; i++) {
-        list_insert_next(list, LIST_BOF, create_int(i));
-    }
-    for (int i = N - 1; i >= 0; i--) {
-        TEST_CHECK(*(int*)list_node_value(list, list_first(list)) == i);
-        list_remove_next(list, LIST_BOF);
-    }
-    TEST_CHECK(list_size(list) == 0);
+  // Insert at the beginning. Remove from the beginning.
+  for (int i = 0; i < N; i++) {
+    slist_insert_next(slist, SLIST_BOF, create_int(i));
+  }
+  for (int i = N - 1; i >= 0; i--) {
+    TEST_CHECK(*(int *)slist_node_value(slist, slist_first(slist)) == i);
+    slist_remove_next(slist, SLIST_BOF);
+  }
+  TEST_CHECK(slist_size(slist) == 0);
 
-    // Insert at the end. Remove from the beginning.
-    for (int i = 0; i < N; i++) {
-        list_insert_next(list, list_last(list), create_int(i));
-    }
-    for (int i = 0; i < N; i++) {
-        TEST_CHECK(*(int*)list_node_value(list, list_first(list)) == i);
-        list_remove_next(list, LIST_BOF);
-    }
-    TEST_CHECK(list_size(list) == 0);
+  // Insert at the end. Remove from the beginning.
+  for (int i = 0; i < N; i++) {
+    slist_insert_next(slist, slist_last(slist), create_int(i));
+  }
+  for (int i = 0; i < N; i++) {
+    TEST_CHECK(*(int *)slist_node_value(slist, slist_first(slist)) == i);
+    slist_remove_next(slist, SLIST_BOF);
+  }
+  TEST_CHECK(slist_size(slist) == 0);
 
-    // Remove from the middle.
-    for (int i = 0; i < N; i++) {
-        list_insert_next(list, list_last(list), create_int(i));
-    }
-    ListNode middle = list_first(list);
-    for (int i = 0; i < N / 2; i++) {
-        middle = list_next(list, middle);
-    }
-    list_remove_next(list, middle);
-    TEST_CHECK(list_size(list) == N - 1);
+  // Remove from the middle.
+  for (int i = 0; i < N; i++) {
+    slist_insert_next(slist, slist_last(slist), create_int(i));
+  }
+  SListNode middle = slist_first(slist);
+  for (int i = 0; i < N / 2; i++) {
+    middle = slist_next(slist, middle);
+  }
+  slist_remove_next(slist, middle);
+  TEST_CHECK(slist_size(slist) == N - 1);
 
-    list_destroy(list);
+  slist_destroy(slist);
 }
 
 void test_find() {
-    int N = 1000;
-    int array[N];
+  int N = 1000;
+  int array[N];
 
-    List list = list_create(NULL);
+  SList slist = slist_create(NULL);
 
-    for (int i = 0; i < N; i++) {
-        array[i] = i;
-        list_insert_next(list, LIST_BOF, &array[i]);
-    }
+  for (int i = 0; i < N; i++) {
+    array[i] = i;
+    slist_insert_next(slist, SLIST_BOF, &array[i]);
+  }
 
-    // Find all elements:
-    for (int i = 0; i < N; i++) {
-        int* value = list_find(list, &i, compare_ints);
-        TEST_CHECK(value == &array[i]);
-    }
+  // Find all elements:
+  for (int i = 0; i < N; i++) {
+    int *value = slist_find(slist, &i, compare_ints);
+    TEST_CHECK(value == &array[i]);
+  }
 
-    // Find a value that is not part of the list:
-    int not_exists = -1;
-    TEST_CHECK(list_find(list, &not_exists, compare_ints) == NULL);
+  // Find a value that is not part of the slist:
+  int not_exists = -1;
+  TEST_CHECK(slist_find(slist, &not_exists, compare_ints) == NULL);
 
-    list_destroy(list);
+  slist_destroy(slist);
 }
 
 void test_find_node() {
-    int N = 1000;
-    int array[N];
+  int N = 1000;
+  int array[N];
 
-    List list = list_create(NULL);
+  SList slist = slist_create(NULL);
 
-    for (int i = 0; i < N; i++) {
-        array[i] = i;
-        list_insert_next(list, LIST_BOF, &array[i]);
-    }
+  for (int i = 0; i < N; i++) {
+    array[i] = i;
+    slist_insert_next(slist, SLIST_BOF, &array[i]);
+  }
 
-    ListNode node = list_first(list);
+  SListNode node = slist_first(slist);
 
-    for (int i = N - 1; i >= 0; i--) {
-        ListNode found_node = list_find_node(list, &i, compare_ints);
+  for (int i = N - 1; i >= 0; i--) {
+    SListNode found_node = slist_find_node(slist, &i, compare_ints);
 
-        TEST_CHECK(found_node == node);
-        TEST_CHECK(list_node_value(list, found_node) == &array[i]);
+    TEST_CHECK(found_node == node);
+    TEST_CHECK(slist_node_value(slist, found_node) == &array[i]);
 
-        node = list_next(list, node);
-    }
+    node = slist_next(slist, node);
+  }
 
-    list_destroy(list);
+  slist_destroy(slist);
 }
 
 void test_concatenate(void) {
-    int N = 10;
-    int array[N];
+  int N = 10;
+  int array[N];
 
-    List a = list_create(NULL);
-    List b = list_create(NULL);
+  SList a = slist_create(NULL);
+  SList b = slist_create(NULL);
 
-    for (int i = 0; i < N / 2; i++) {
-        array[i] = i;
-        list_insert_next(a, list_last(a), &array[i]);
-    }
-    for (int i = N / 2; i < N; i++) {
-        array[i] = i;
-        list_insert_next(b, list_last(b), &array[i]);
-    }
+  for (int i = 0; i < N / 2; i++) {
+    array[i] = i;
+    slist_insert_next(a, slist_last(a), &array[i]);
+  }
+  for (int i = N / 2; i < N; i++) {
+    array[i] = i;
+    slist_insert_next(b, slist_last(b), &array[i]);
+  }
 
-    List concatenated = list_concatenate(a, b);
+  SList concatenated = slist_concat(a, b);
 
-    TEST_CHECK(concatenated != NULL);
+  TEST_CHECK(concatenated != NULL);
 
-    // Traverse list:
-    ListNode node = list_first(concatenated);
-    for (int i = 0; i < N; i++) {
-        int* value = list_node_value(concatenated, node);
+  // Traverse slist:
+  SListNode node = slist_first(concatenated);
+  for (int i = 0; i < N; i++) {
+    int *value = slist_node_value(concatenated, node);
 
-        TEST_CHECK(value == &array[i]);
-        TEST_CHECK(*value == array[i]);
+    TEST_CHECK(value == &array[i]);
+    TEST_CHECK(*value == array[i]);
 
-        node = list_next(concatenated, node);
-    }
+    node = slist_next(concatenated, node);
+  }
 
-    list_destroy(concatenated);
+  slist_destroy(concatenated);
 }
 
 void test_traverse(void) {}
@@ -239,5 +202,6 @@ TEST_LIST = {
     {"concatenate", test_concatenate},
     {"traverse", test_traverse},
     {"get_at", test_get_at},
-    {NULL, NULL}  // End of tests.
+
+    {NULL, NULL} // End of tests.
 };
