@@ -35,14 +35,6 @@ typedef struct slist_node *SListNode;
 #define SLIST_BOF (SListNode)0 ///< Defines the "virtual" beginning of a slist.
 #define SLIST_EOF (SListNode)0 ///< Defines the "virtual" end of a slist.
 
-/// Creates and returns a new slist.
-///
-/// @param destroy If destroy != NULL, then each time an item is removed,
-///                destroy(value) is called.
-///
-/// @return Newly created slist.
-///
-
 /// Allocate space for a new singly linked list.
 ///
 /// If \p destroy_value is not NULL, then when an element gets removed,
@@ -85,16 +77,16 @@ void slist_destroy(SList slist);
 /// called, if not NULL, to deallocate the space held by value.
 ///
 /// \return Previous `destroy_value` function.
-DestroyFunc slist_set_destroy_value(SList slist, DestroyFunc destroy);
+DestroyFunc slist_set_destroy_value(SList slist, DestroyFunc destroy_value);
 
-/// Return the number of elements in \p slist .
-size_t slist_size(SList);
+/// Return the number of elements in \p slist.
+size_t slist_size(SList slist);
 
 /// Insert a new node with \p value after \p node .
 ///
 /// If \p node is `SLIST_BOF`, insert new node at the beginning.
 ///
-/// If \p node is `SLIST_BOF`, it causes undefined behaviour.
+/// If \p node is `SLIST_EOF`, it causes undefined behaviour.
 ///
 ///
 /// Typical usage:
