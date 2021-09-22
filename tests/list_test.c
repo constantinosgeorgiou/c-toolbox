@@ -7,281 +7,262 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "ADTBidirectionalList.h"
+#include "list.h"
 
 #include "acutest.h"
 
-/// @brief Compares two int*.
-///
-/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
-///
-static int compare_ints(const void* a, const void* b) { return *(int*)a - *(int*)b; }
-
-/// @brief Allocates memory for an integer with given value.
-///
-/// @return Newly created pointer to integer.
-///
-static int* create_int(int value) {
-    int* pointer = malloc(sizeof(int));
-    if (pointer == NULL) {
-        return NULL;
-    }
-    *pointer = value;
-    return pointer;
-}
+#include "test_companion.h"
 
 void test_create(void) {
-    BList blist = blist_create(NULL);
-    DestroyFunc destroy = blist_set_destroy_value(blist, NULL);
+  List list = list_create(NULL);
+  DestroyFunc destroy = list_set_destroy_value(list, NULL);
 
-    TEST_CHECK(blist != NULL);
-    TEST_CHECK(blist_size(blist) == 0);
-    TEST_CHECK(destroy == NULL);
+  TEST_CHECK(list != NULL);
+  TEST_CHECK(list_size(list) == 0);
+  TEST_CHECK(destroy == NULL);
 
-    blist_destroy(blist);
+  list_destroy(list);
 }
 
 void test_insert(void) {
-    int N = 1000;
+  int N = 1000;
 
-    // Insert at the beginning.
-    BList blist = blist_create(free);
-    for (int i = 0; i < N; i++) {
-        BListNode inserted = blist_insert(blist, BLIST_BOF, create_int(i));
+  // Insert at the beginning.
+  List list = list_create(free);
+  for (int i = 0; i < N; i++) {
+    list_insert(list, LIST_BOF, create_int(i));
 
-        BListNode first = blist_first(blist);
-        int* value = blist_node_value(blist, first);
+    ListNode first = list_first(list);
+    int *value = list_node_value(list, first);
 
-        TEST_CHECK(inserted == first);
-        TEST_CHECK(*value == i);
+    TEST_CHECK(*value == i);
 
-        TEST_CHECK(blist_size(blist) == (i + 1));
-    }
-    blist_destroy(blist);
+    TEST_CHECK(list_size(list) == (i + 1));
+  }
+  list_destroy(list);
 
-    // Insert at the end.
-    blist = blist_create(free);
-    for (int i = 0; i < N; i++) {
-        BListNode inserted = blist_insert(blist, blist_last(blist), create_int(i));
+  // Insert at the end.
+  list = list_create(free);
+  for (int i = 0; i < N; i++) {
+    list_insert(list, list_last(list), create_int(i));
 
-        BListNode last = blist_last(blist);
-        int* value = blist_node_value(blist, last);
+    ListNode last = list_last(list);
+    int *value = list_node_value(list, last);
 
-        TEST_CHECK(inserted == last);
-        TEST_CHECK(*value == i);
+    TEST_CHECK(*value == i);
 
-        TEST_CHECK(blist_size(blist) == (i + 1));
-    }
-    blist_destroy(blist);
+    TEST_CHECK(list_size(list) == (i + 1));
+  }
+  list_destroy(list);
 }
 
 void test_remove(void) {
-    BList blist = blist_create(free);
+  List list = list_create(free);
 
-    int N = 10;
+  int N = 10;
 
-    // Insert at the beginning. Remove from the beginning.
-    for (int i = 0; i < N; i++) {
-        blist_insert(blist, BLIST_BOF, create_int(i));
-    }
-    for (int i = N - 1; i >= 0; i--) {
-        TEST_CHECK(*(int*)blist_node_value(blist, blist_first(blist)) == i);
-        blist_remove(blist, blist_first(blist));
-    }
-    TEST_CHECK(blist_size(blist) == 0);
+  // Insert at the beginning. Remove from the beginning.
+  for (int i = 0; i < N; i++) {
+    list_insert(list, LIST_BOF, create_int(i));
+  }
+  for (int i = N - 1; i >= 0; i--) {
+    TEST_CHECK(*(int *)list_node_value(list, list_first(list)) == i);
+    list_remove(list, list_first(list));
+  }
+  TEST_CHECK(list_size(list) == 0);
 
-    // Insert at the beginning. Remove from the end.
-    for (int i = 0; i < N; i++) {
-        blist_insert(blist, BLIST_BOF, create_int(i));
-    }
-    for (int i = 0; i < N; i++) {
-        TEST_CHECK(*(int*)blist_node_value(blist, blist_last(blist)) == i);
-        blist_remove(blist, blist_last(blist));
-    }
-    TEST_CHECK(blist_size(blist) == 0);
+  // Insert at the beginning. Remove from the end.
+  for (int i = 0; i < N; i++) {
+    list_insert(list, LIST_BOF, create_int(i));
+  }
+  for (int i = 0; i < N; i++) {
+    TEST_CHECK(*(int *)list_node_value(list, list_last(list)) == i);
+    list_remove(list, list_last(list));
+  }
+  TEST_CHECK(list_size(list) == 0);
 
-    // Insert at the end. Remove from the beginning.
-    for (int i = 0; i < N; i++) {
-        blist_insert(blist, blist_last(blist), create_int(i));
-    }
-    for (int i = 0; i < N; i++) {
-        TEST_CHECK(*(int*)blist_node_value(blist, blist_first(blist)) == i);
-        blist_remove(blist, blist_first(blist));
-    }
-    TEST_CHECK(blist_size(blist) == 0);
+  // Insert at the end. Remove from the beginning.
+  for (int i = 0; i < N; i++) {
+    list_insert(list, list_last(list), create_int(i));
+  }
+  for (int i = 0; i < N; i++) {
+    TEST_CHECK(*(int *)list_node_value(list, list_first(list)) == i);
+    list_remove(list, list_first(list));
+  }
+  TEST_CHECK(list_size(list) == 0);
 
-    // Insert at the end. Remove from the end.
-    for (int i = 0; i < N; i++) {
-        blist_insert(blist, blist_last(blist), create_int(i));
-    }
-    for (int i = N - 1; i >= 0; i--) {
-        TEST_CHECK(*(int*)blist_node_value(blist, blist_last(blist)) == i);
-        blist_remove(blist, blist_last(blist));
-    }
-    TEST_CHECK(blist_size(blist) == 0);
+  // Insert at the end. Remove from the end.
+  for (int i = 0; i < N; i++) {
+    list_insert(list, list_last(list), create_int(i));
+  }
+  for (int i = N - 1; i >= 0; i--) {
+    TEST_CHECK(*(int *)list_node_value(list, list_last(list)) == i);
+    list_remove(list, list_last(list));
+  }
+  TEST_CHECK(list_size(list) == 0);
 
-    // Remove from the middle.
-    for (int i = 0; i < N; i++) {
-        blist_insert(blist, blist_last(blist), create_int(i));
-    }
-    BListNode middle = blist_first(blist);
-    for (int i = 0; i < N / 2; i++) {
-        middle = blist_next(blist, middle);
-    }
-    blist_remove(blist, middle);
-    TEST_CHECK(blist_size(blist) == N - 1);
+  // Remove from the middle.
+  for (int i = 0; i < N; i++) {
+    list_insert(list, list_last(list), create_int(i));
+  }
+  ListNode middle = list_first(list);
+  for (int i = 0; i < N / 2; i++) {
+    middle = list_next(list, middle);
+  }
+  list_remove(list, middle);
+  TEST_CHECK(list_size(list) == N - 1);
 
-    blist_destroy(blist);
+  list_destroy(list);
 }
 
 void test_find() {
-    BList blist = blist_create(NULL);
-    int N = 1000;
-    int array[N];
+  List list = list_create(NULL);
+  int N = 1000;
+  int array[N];
 
-    for (int i = 0; i < N; i++) {
-        array[i] = i;
-        blist_insert(blist, BLIST_BOF, &array[i]);
-    }
+  for (int i = 0; i < N; i++) {
+    array[i] = i;
+    list_insert(list, LIST_BOF, &array[i]);
+  }
 
-    // Find all elements:
-    for (int i = 0; i < N; i++) {
-        int* value = blist_find(blist, &i, compare_ints);
-        TEST_CHECK(value == &array[i]);
-    }
+  // Find all elements:
+  for (int i = 0; i < N; i++) {
+    int *value = list_find(list, &i, compare_ints);
+    TEST_CHECK(value == &array[i]);
+  }
 
-    // Find a value that is not part of the bidirectional list:
-    int not_exists = -1;
-    TEST_CHECK(blist_find(blist, &not_exists, compare_ints) == NULL);
+  // Find a value that is not part of the bidirectional list:
+  int not_exists = -1;
+  TEST_CHECK(list_find(list, &not_exists, compare_ints) == NULL);
 
-    blist_destroy(blist);
+  list_destroy(list);
 }
 
 void test_find_node() {
-    BList blist = blist_create(NULL);
+  List list = list_create(NULL);
 
-    int N = 1000;
-    int array[N];
+  int N = 1000;
+  int array[N];
 
-    for (int i = 0; i < N; i++) {
-        array[i] = i;
-        blist_insert(blist, BLIST_BOF, &array[i]);
-    }
+  for (int i = 0; i < N; i++) {
+    array[i] = i;
+    list_insert(list, LIST_BOF, &array[i]);
+  }
 
-    BListNode node = blist_first(blist);
+  ListNode node = list_first(list);
 
-    for (int i = N - 1; i >= 0; i--) {
-        BListNode found_node = blist_find_node(blist, &i, compare_ints);
+  for (int i = N - 1; i >= 0; i--) {
+    ListNode found_node = list_find_node(list, &i, compare_ints);
 
-        TEST_CHECK(found_node == node);
-        TEST_CHECK(blist_node_value(blist, found_node) == &array[i]);
+    TEST_CHECK(found_node == node);
+    TEST_CHECK(list_node_value(list, found_node) == &array[i]);
 
-        node = blist_next(blist, node);
-    }
+    node = list_next(list, node);
+  }
 
-    blist_destroy(blist);
+  list_destroy(list);
 }
 
 void test_concatenate(void) {
-    int N = 10;
-    int array[N];
+  int N = 10;
+  int array[N];
 
-    BList a = blist_create(NULL);
-    BList b = blist_create(NULL);
+  List a = list_create(NULL);
+  List b = list_create(NULL);
 
-    for (int i = 0; i < N / 2; i++) {
-        array[i] = i;
-        blist_insert(a, blist_last(a), &array[i]);
-    }
-    for (int i = N / 2; i < N; i++) {
-        array[i] = i;
-        blist_insert(b, blist_last(b), &array[i]);
-    }
+  for (int i = 0; i < N / 2; i++) {
+    array[i] = i;
+    list_insert(a, list_last(a), &array[i]);
+  }
+  for (int i = N / 2; i < N; i++) {
+    array[i] = i;
+    list_insert(b, list_last(b), &array[i]);
+  }
 
-    BList concatenated = blist_concatenate(a, b);
+  list_concat(a, b);
 
-    TEST_CHECK(concatenated != NULL);
+  TEST_CHECK(a != NULL);
 
-    // Traverse bidirectional list:
-    BListNode node = blist_first(concatenated);
-    for (int i = 0; i < N; i++) {
-        int* value = blist_node_value(concatenated, node);
+  // Traverse bidirectional list:
+  ListNode node = list_first(a);
+  for (int i = 0; i < N; i++) {
+    int *value = list_node_value(a, node);
 
-        TEST_CHECK(value == &array[i]);
-        TEST_CHECK(*value == array[i]);
+    TEST_CHECK(value == &array[i]);
+    TEST_CHECK(*value == array[i]);
 
-        node = blist_next(concatenated, node);
-    }
+    node = list_next(a, node);
+  }
 
-    // Traverse bidirectional list in REVERSE:
-    node = blist_last(concatenated);
-    for (int i = N - 1; i >= 0; i--) {
-        int* value = blist_node_value(concatenated, node);
+  // Traverse bidirectional list in REVERSE:
+  node = list_last(a);
+  for (int i = N - 1; i >= 0; i--) {
+    int *value = list_node_value(a, node);
 
-        TEST_CHECK(value == &array[i]);
-        TEST_CHECK(*value == array[i]);
+    TEST_CHECK(value == &array[i]);
+    TEST_CHECK(*value == array[i]);
 
-        node = blist_previous(concatenated, node);
-    }
+    node = list_previous(a, node);
+  }
 
-    blist_destroy(concatenated);
+  list_destroy(a);
 }
 
 void test_traverse(void) {
-    int N = 10;
-    int array[N];
+  int N = 10;
+  int array[N];
 
-    BList blist = blist_create(NULL);
+  List list = list_create(NULL);
 
-    for (int i = 0; i < N; i++) {
-        array[i] = i;
-        blist_insert(blist, blist_last(blist), &array[i]);
-    }
+  for (int i = 0; i < N; i++) {
+    array[i] = i;
+    list_insert(list, list_last(list), &array[i]);
+  }
 
-    // Traverse bidirectional list:
-    BListNode node = blist_first(blist);
-    for (int i = 0; i < N; i++) {
-        int* value = blist_node_value(blist, node);
+  // Traverse bidirectional list:
+  ListNode node = list_first(list);
+  for (int i = 0; i < N; i++) {
+    int *value = list_node_value(list, node);
 
-        TEST_CHECK(value == &array[i]);
-        TEST_CHECK(*value == array[i]);
+    TEST_CHECK(value == &array[i]);
+    TEST_CHECK(*value == array[i]);
 
-        node = blist_next(blist, node);
-    }
+    node = list_next(list, node);
+  }
 
-    // Traverse bidirectional list in REVERSE:
-    node = blist_last(blist);
-    for (int i = N - 1; i >= 0; i--) {
-        int* value = blist_node_value(blist, node);
+  // Traverse bidirectional list in REVERSE:
+  node = list_last(list);
+  for (int i = N - 1; i >= 0; i--) {
+    int *value = list_node_value(list, node);
 
-        TEST_CHECK(value == &array[i]);
-        TEST_CHECK(*value == array[i]);
+    TEST_CHECK(value == &array[i]);
+    TEST_CHECK(*value == array[i]);
 
-        node = blist_previous(blist, node);
-    }
+    node = list_previous(list, node);
+  }
 
-    blist_destroy(blist);
+  list_destroy(list);
 }
 
 void test_get_at(void) {
-    int N = 10;
-    int array[N];
+  int N = 10;
+  int array[N];
 
-    BList blist = blist_create(NULL);
+  List list = list_create(NULL);
 
-    for (int i = 0; i < N; i++) {
-        array[i] = i;
-        blist_insert(blist, blist_last(blist), &array[i]);
-    }
+  for (int i = 0; i < N; i++) {
+    array[i] = i;
+    list_insert(list, list_last(list), &array[i]);
+  }
 
-    for (int i = 0; i < N; i++) {
-        int* value = blist_get_at(blist, i);
+  for (int i = 0; i < N; i++) {
+    int *value = list_get_at(list, i);
 
-        TEST_CHECK(value == &array[i]);
-        TEST_CHECK(*value == array[i]);
-    }
+    TEST_CHECK(value == &array[i]);
+    TEST_CHECK(*value == array[i]);
+  }
 
-    blist_destroy(blist);
+  list_destroy(list);
 }
 
 TEST_LIST = {
@@ -293,5 +274,5 @@ TEST_LIST = {
     {"concatenate", test_concatenate},
     {"traverse", test_traverse},
     {"get_at", test_get_at},
-    {NULL, NULL}  // End of tests.
+    {NULL, NULL} // End of tests.
 };
