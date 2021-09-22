@@ -6,7 +6,7 @@
 
 #include "pqueue.h"
 
-#include "ADTVector.h"    // Vector, vector_create
+#include "vector.h"    // Vector, vector_create
 #include "common_types.h" // DestroyFunc
 #include <assert.h>       // assert
 
