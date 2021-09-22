@@ -1,4 +1,4 @@
-#include "ADTOrderedSet.h"
+#include "oset.h"
 
 #include <assert.h>   // assert
 #include <stdbool.h>  // true, false
@@ -7,7 +7,7 @@
 #include <string.h>
 #include <time.h>  // time
 
-#include "ADTVector.h"
+#include "vector.h"
 #include "pcg_basic.h"  // pcg32_srandom, pcg32_boundedrand
 
 /// @brief Levels of forward pointers a node can have.
