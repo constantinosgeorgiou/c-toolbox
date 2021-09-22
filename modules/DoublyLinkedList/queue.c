@@ -1,48 +1,51 @@
 #include "queue.h"
 
-#include "ADTBidirectionalList.h"
+#include "list.h"
+#include <stdlib.h>
 
 struct queue {
-    BList data;
+  List data;
 };
 
 Queue queue_create(DestroyFunc destroy_value) {
-    Queue queue = malloc(sizeof(*queue));
-    if (queue == NULL) return NULL;
+  Queue queue = malloc(sizeof(*queue));
+  if (queue == NULL)
+    return NULL;
 
-    queue->data = blist_create(destroy_value);
-    if (queue->data == NULL) return NULL;
+  queue->data = list_create(destroy_value);
+  if (queue->data == NULL)
+    return NULL;
 
-    return queue;
+  return queue;
 }
 
 void queue_destroy(Queue queue) {
-    blist_destroy(queue->data);
-    free(queue);
+  list_destroy(queue->data);
+  free(queue);
 }
 
-void queue_enqueue(Queue queue, void* value) {
-    blist_insert(queue->data, blist_last(queue->data), value);
+void queue_enqueue(Queue queue, void *value) {
+  list_insert(queue->data, list_last(queue->data), value);
 }
 
 void queue_dequeue(Queue queue) {
-    blist_remove(queue->data, blist_first(queue->data));
+  list_remove(queue->data, list_first(queue->data));
 }
 
-size_t queue_size(Queue queue) { return blist_size(queue->data); }
+size_t queue_size(Queue queue) { return list_size(queue->data); }
 
 bool queue_is_empty(Queue queue) {
-    return blist_size(queue->data) != 0 ? false : true;
+  return list_size(queue->data) != 0 ? false : true;
 }
 
-void* queue_front(Queue queue) {
-    return blist_node_value(queue->data, blist_first(queue->data));
+void *queue_front(Queue queue) {
+  return list_node_value(queue->data, list_first(queue->data));
 }
 
-void* queue_back(Queue queue) {
-    return blist_node_value(queue->data, blist_last(queue->data));
+void *queue_back(Queue queue) {
+  return list_node_value(queue->data, list_last(queue->data));
 }
 
 DestroyFunc queue_set_destroy_value(Queue queue, DestroyFunc destroy_value) {
-    return blist_set_destroy_value(queue->data, destroy_value);
+  return list_set_destroy_value(queue->data, destroy_value);
 }
