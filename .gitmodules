@@ -1,4 +1,0 @@
-[submodule "dependencies/pcg-c-basic"]
-	path = dependencies/pcg-c-basic
-	url = https://github.com/imneme/pcg-c-basic.git
-	ignore = dirty
