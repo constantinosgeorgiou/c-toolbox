@@ -1,8 +1,4 @@
-#include "oset.h" // oset_create, oset_destroy, oset_size, oset_insert, oset_remove,
-// oset_set_destroy_key,oset_set_destroy_value, oset_find, oset_get_at,
-// oset_remove_at, oset_split, oset_merge, oset_concat, oset_find_node,
-// oset_get_at_node, oset_node_key, oset_node_value, oset_first,
-// oset_last, oset_next, oset_previous
+#include "oset.h"
 
 #include <stdlib.h> // malloc, free, sizeof, rand, RAND_MAX, size_t
 
