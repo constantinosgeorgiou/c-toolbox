@@ -149,7 +149,7 @@ SListNode slist_next(SList slist, SListNode node) {
   return node->next;
 }
 
-void *list_get_at(SList slist, int pos) {
+void *slist_get_at(SList slist, int pos) {
   if (pos < 0)
     pos = 0;
   if (pos > slist->size)
@@ -160,7 +160,7 @@ void *list_get_at(SList slist, int pos) {
   // Traverse slist:
   for (int index = 0; index < slist->size; index++) {
     if (index == pos)
-      return node->value;
+      return node == NULL ? NULL : node->value;
 
     node = node->next;
   }

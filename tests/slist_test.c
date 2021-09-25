@@ -190,8 +190,55 @@ void test_concatenate(void) {
   slist_destroy(concatenated);
 }
 
-void test_traverse(void) {}
-void test_get_at(void) {}
+void test_traverse(void) {
+  int N = 10;
+  int array[N];
+
+  SList slist = slist_create(NULL);
+
+  for (int i = 0; i < N; i++) {
+    array[i] = i;
+    slist_insert_next(slist, slist_last(slist), &array[i]);
+  }
+
+  // Traverse bidirectional slist:
+  SListNode node = slist_first(slist);
+  for (int i = 0; i < N; i++) {
+    int *value = slist_node_value(slist, node);
+
+    TEST_CHECK(value == &array[i]);
+    TEST_CHECK(*value == array[i]);
+
+    node = slist_next(slist, node);
+  }
+
+  slist_destroy(slist);
+}
+
+void test_get_at(void) {
+  int N = 10;
+  int array[N];
+
+  SList slist = slist_create(NULL);
+
+  for (int i = 0; i < N; i++) {
+    array[i] = i;
+    slist_insert_next(slist, slist_last(slist), &array[i]);
+  }
+
+  SListNode node = slist_first(slist);
+  for (int i = 0; i < N; i++) {
+    int *node_value = slist_node_value(slist, node);
+
+    int *value = slist_get_at(slist, i);
+
+    TEST_CHECK(*node_value == *value);
+
+    node = slist_next(slist, node);
+  }
+
+  slist_destroy(slist);
+}
 
 TEST_LIST = {
     {"create", test_create},
