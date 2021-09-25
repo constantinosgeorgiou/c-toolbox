@@ -31,11 +31,16 @@ valgrind-tests: setup
 
 clean: setup
 	$(MAKE) --directory=tests clean
+	$(RM) -r docs/generated/*
 
 setup:
 	@# Flags:
 	@#   -p  Make parent directories
 	mkdir -p tests/bin
+	mkdir -p docs/generated
+
+docs:
+	doxygen docs/Doxyfile
 
 # Targets that generate no files:
-.PHONY: all run run-tests test valgrind-tests clean setup
+.PHONY: all run run-tests test valgrind-tests clean setup docs
