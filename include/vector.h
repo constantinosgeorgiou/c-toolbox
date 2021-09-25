@@ -21,16 +21,6 @@
 /// functions provided `vector_<operation>` with the appropriate parameters.
 typedef struct vector *Vector;
 
-/// Creates and returns a new vector with specified size and elements
-/// initialized to NULL.
-///
-/// \param destroy_value If destroy_value != NULL, call destroy_value(value)
-/// each time a value is removed/overwritten.
-///
-/// \return Newly created Vector, or VECTOR_ERROR, if failed to allocate enough
-/// memory.
-///
-
 /// Allocates space for a new vector with \p size elements initialized to
 /// `NULL`.
 ///
