@@ -1,13 +1,16 @@
 #pragma once
 
-/// @brief Pointer to function that compares elements a and b.
+/// Compare elements \p a and \p b .
 ///
-/// @return < 0, if a < b, or, > 0, if b < a, or, 0, if a and b are equivalent
+/// If \p a < \p b , return number < 0.
 ///
+/// If \p a > \p b , return number > 0.
+///
+/// If \p a equivalent to \p b , return 0.
+///
+/// @return Number < 0, if a < b. Number > 0, if a > b. 0, if a and b are equivalent.
 typedef int (*CompareFunc)(const void* a, const void* b);
 
 
-/// @brief Pointer to function that destroys a value.
-///
-///
+/// Destroys a value.
 typedef void (*DestroyFunc)(void* value);

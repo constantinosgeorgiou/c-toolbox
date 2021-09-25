@@ -10,26 +10,26 @@ Modules inspired by the document "[*Modular C: How to Write Reusable and Maintai
 
 
 ## What's included
-| Module            |     Available      |
-| ----------------- | :----------------: |
-| Vector            | :white_check_mark: |
-| List              | :white_check_mark: |
-| BidirectionalList | :white_check_mark: |
-| Map               | :white_check_mark: |
-| OrderedSet        | :white_check_mark: |
-| PriorityQueue     | :white_check_mark: |
-| Stack             | :white_check_mark: |
-| Queue             | :white_check_mark: |
-| Set               |     (planned)      |
+| Module | Abstract Data Type | Implementation                       |
+| ------ | ------------------ | ------------------------------------ |
+| vec    | Vector             | Dynamic Array                        |
+| list   | List               | Doubly Linked List                   |
+| slist  | Singly Linked List | Singly Linked List                   |
+| map    | Map                | Hash Table                           |
+| oset   | Ordered Set        | Skip List                            |
+| pqueue | Priority Queue     | Heap                                 |
+| stack  | Stack              | Singly Linked List                   |
+| queue  | Queue              | Doubly Linked List                   |
+| set    | Set                | :triangular_ruler: planned :pencil2: |
 
 
 ## Getting started
 
 ### Prerequisites
 In order for everything to function smoothly you need the following software installed:
-- valgrind (at least version: 3.17.0)
-- gcc (at least version: 10.2.0)
-- GNU Make (at least version: 4.3)
+- valgrind 
+- gcc 
+- GNU Make 
 
 ### Installing
 Clone the directory, `cd` into it, and run:

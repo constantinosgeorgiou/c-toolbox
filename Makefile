@@ -16,51 +16,26 @@ SHELL := bash
 MAKE += --silent
 ####################################################################################################
 
-# +-----------+
-# |  Targets  |
-# +-----------+
+all: run
 
-# Setup repository:
-# -----------------
+run: run-tests
 
-setup:
-	@# -p  Make parent directories
-	mkdir -p tests/bin
-
-	@# Initialize submodules
-	git submodule update --init --recursive
-
-	@# Copy interface from dependency to use for compilation.
-	cp modules/pcg-c-basic/pcg_basic.h include
-
-
-# Compile tests:
-# --------------
-
-tests: setup
+test: setup
 	$(MAKE) --directory=tests all
-
-
-# Execute tests:
-# --------------
 
 run-tests: setup
 	$(MAKE) --directory=tests run
 
-
-# Memory leaks checks:
-# --------------------
-
 valgrind-tests: setup
 	$(MAKE) --directory=tests valgrind
-
-
-# Clean up generated files:
-# -------------------------
 
 clean: setup
 	$(MAKE) --directory=tests clean
 
+setup:
+	@# Flags:
+	@#   -p  Make parent directories
+	mkdir -p tests/bin
 
 # Targets that generate no files:
-.PHONY: setup all tests run run-tests valgrind valgrind-tests clean
+.PHONY: all run run-tests test valgrind-tests clean setup
