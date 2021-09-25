@@ -1,9 +1,6 @@
 /// \file test_companion.h
 ///
 /// Various functions used when testing the modules.
-///
-///
-///
 
 #include <stdlib.h> // malloc, sizeof
 
