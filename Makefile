@@ -31,7 +31,7 @@ valgrind-tests: setup
 
 clean: setup
 	$(MAKE) --directory=tests clean
-	$(RM) -r docs/generated/*
+	$(RM) -r docs/generated/* docs/warnings.log
 
 setup:
 	@# Flags:
